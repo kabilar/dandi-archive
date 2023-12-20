@@ -54,10 +54,9 @@ router.register('zarr', ZarrViewSet, basename='zarr')
 
 schema_view = get_schema_view(
     openapi.Info(
-        title='DANDI Archive',
+        title='LINC',
         default_version='v1',
-        description='The BRAIN Initiative archive for publishing and sharing '
-        'cellular neurophysiology data',
+        description='The NIH BRAIN Initiative Center for Large-scale Imaging of Neural Circuits',
     ),
     public=True,
     permission_classes=(permissions.AllowAny,),

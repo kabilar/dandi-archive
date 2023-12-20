@@ -34,7 +34,7 @@ export default defineComponent({
       switch (user?.status) {
         case 'PENDING':
           return {
-            text: 'Your DANDI account is currently pending approval. Please allow up to 2 business days for approval and contact the DANDI admins at help@dandiarchive.org if you have any questions.',
+            text: 'Your  account is currently pending approval. Please allow up to 2 business days for approval and contact the DANDI admins at help@dandiarchive.org if you have any questions.',
             icon: 'mdi-timer-sand-empty',
             color: 'warning',
           };

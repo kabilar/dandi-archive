@@ -15,7 +15,7 @@
       </cookie-law>
       <v-row>
         <v-col offset="2">
-          &copy; 2019 - 2023 The DANDI Team<br>
+          &copy; 2023 LINC Team<br>
           version
           <a
             class="version-link"
@@ -25,28 +25,12 @@
           >{{ version }}</a>
         </v-col>
         <v-col>
-          Funding / In-Kind Support:<br>
+          Funding:<br>
           - <a
             target="_blank"
             rel="noopener"
             href="https://braininitiative.nih.gov/"
           >BRAIN Initiative</a>
-          <v-icon x-small>
-            mdi-open-in-new
-          </v-icon> / <a
-            target="_blank"
-            rel="noopener"
-            href="https://www.nimh.nih.gov/index.shtml"
-          >NIMH</a>
-          <v-icon x-small>
-            mdi-open-in-new
-          </v-icon>
-          <br>
-          - <a
-            target="_blank"
-            rel="noopener"
-            href="https://registry.opendata.aws/dandiarchive/"
-          >AWS Open Dataset</a>
           <v-icon x-small>
             mdi-open-in-new
           </v-icon>
@@ -58,7 +42,7 @@
             target="_blank"
             rel="noopener"
             :href="dandiAboutUrl"
-          >DANDI Project Homepage</a>
+          >LINC Project Homepage</a>
           <v-icon x-small>
             mdi-open-in-new
           </v-icon>
@@ -66,15 +50,8 @@
           - <a
             target="_blank"
             rel="noopener"
-            href="https://github.com/dandi/dandi-archive"
-          >Project GitHub</a>
-          <v-icon x-small>
-            mdi-open-in-new
-          </v-icon> / <a
-            target="_blank"
-            rel="noopener"
-            href="https://github.com/dandi/dandi-archive/issues"
-          >Issues</a>
+            href="https://github.com/lincbrain/linc-archive"
+          >GitHub Repository</a>
           <v-icon x-small>
             mdi-open-in-new
           </v-icon>
@@ -92,7 +69,7 @@ import { dandiAboutUrl } from '@/utils/constants';
 import { cookiesEnabled } from '@/rest';
 
 const version = process.env.VUE_APP_VERSION;
-const githubLink = process.env.VUE_APP_GIT_REVISION ? `https://github.com/dandi/dandi-archive/commit/${process.env.VUE_APP_GIT_REVISION}` : 'https://github.com/dandi/dandi-archive';
+const githubLink = process.env.VUE_APP_GIT_REVISION ? `https://github.com/lincbrain/linc-archive/commit/${process.env.VUE_APP_GIT_REVISION}` : 'https://github.com/lincbrain/linc-archive';
 
 export default defineComponent({
   name: 'DandiFooter',

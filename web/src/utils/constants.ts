@@ -1,5 +1,5 @@
-const dandiUrl = 'https://dandiarchive.org';
-const dandiAboutUrl = 'https://www.dandiarchive.org/';
+const dandiUrl = 'https://lincbrain.org';
+const dandiAboutUrl = 'https://connects.mgh.harvard.edu/';
 const dandiDocumentationUrl = 'https://www.dandiarchive.org/handbook/10_using_dandi/';
 const dandiHelpUrl = 'https://github.com/dandi/helpdesk/issues/new/choose';
 const dandihubUrl = 'https://hub.dandiarchive.org/';

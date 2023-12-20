@@ -23,23 +23,16 @@
           >
             <v-col class="splash-text my-12">
               <div class="text-h2 font-weight-thin text-center light-blue--text text--darken-1">
-                The DANDI Archive
+                Center for Large-scale Imaging of Neural Circuits (LINC)
               </div>
               <div class="text-h6 font-weight-light text-center">
-                The BRAIN Initiative archive for publishing and sharing
-                neurophysiology data including electrophysiology,
-                optophysiology, and behavioral time-series, and images from
-                immunostaining experiments.
+                The BRAIN Initiative UM1 center for mapping cortical to subthalamic nucleus projections.
+                This platform allows for internally sharing imaging data amongst the LINC team.
               </div>
             </v-col>
           </v-row>
         </v-container>
       </v-img>
-    </v-row>
-    <v-row no-gutters>
-      <v-col class="grey darken-2 pa-12">
-        <DandisetSearchField :dense="false" />
-      </v-col>
     </v-row>
     <StatsBar />
   </v-container>
