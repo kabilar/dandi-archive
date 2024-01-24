@@ -202,6 +202,7 @@ class HerokuProductionConfiguration(DandiMixin, HerokuProductionBaseConfiguratio
         'linc-staging-terraform-83d11b79c499.herokuapp.com',
         'api.lincbrain.com',
         'api.lincbrain.org',
+        'staging-api.lincbrain.org'
     ]
 
 
