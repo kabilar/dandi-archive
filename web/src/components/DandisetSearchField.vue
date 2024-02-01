@@ -5,7 +5,7 @@
   >
     <v-text-field
       :value="$route.query.search"
-      label="Search Dandisets by name, description, identifier, or contributor name"
+      label="Search datasets by name, description, identifier, or contributor name"
       outlined
       solo
       hide-details

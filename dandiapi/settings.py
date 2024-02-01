@@ -199,9 +199,8 @@ class HerokuProductionConfiguration(DandiMixin, HerokuProductionBaseConfiguratio
         ALLOWED_HOSTS = []
 
     ALLOWED_HOSTS += [
-        'linc-brain-staging-7c7293e5e9f8.herokuapp.com',
-        "api.lincbrain.org",
-        'staging-api.lincbrain.org'
+        'linc-staging-terraform-0b817cb1246b.herokuapp.com/',
+        'api.lincbrain.org'
     ]
 
 
@@ -218,5 +217,6 @@ class HerokuStagingConfiguration(HerokuProductionConfiguration):
         ALLOWED_HOSTS = []
 
     ALLOWED_HOSTS += [
-        'linc-brain-staging-7c7293e5e9f8.herokuapp.com'
+        'linc-brain-staging-7c7293e5e9f8.herokuapp.com/',
+        'staging-api.lincbrain.org'
     ]
