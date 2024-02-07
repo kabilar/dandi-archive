@@ -1,0 +1,61 @@
+name: Backup Production Heroku Database to S3
+
+# This workflow invokes a Heroku "logical" backup: https://devcenter.heroku.com/articles/heroku-postgres-logical-backups
+#
+# Backups are already done via Heroku continuous protection services: https://devcenter.heroku.com/articles/heroku-postgres-data-safety-and-continuous-protection
+#
+# The reason behind this workflow is 1. a further safeguard for backing up our data, 2. the ability to use Postgres anywhere potentially, not just Heroku in the long-term if desired
+
+on:
+  workflow_dispatch:  # Allows for manual trigger if ad-hoc is desired
+  schedule:
+    - cron: '0 5 * * *'  # Runs at 5AM UTC every day -- which is also 12AM EST at MIT
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Heroku CLI
+        run: |
+          curl https://cli-assets.heroku.com/install.sh | sh
+
+      - name: Install AWS CLI
+        run: |
+          sudo apt-get update
+          sudo apt-get install awscli -y
+
+      - name: Install Specific Version of PostgreSQL Client
+        run: |
+          sudo apt-get -y install wget ca-certificates
+          wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+          sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+          sudo apt-get update
+          sudo apt-get -y install postgresql-client-15
+
+      - name: Capture Backup
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+        run: |
+          DATABASE_URL=$(heroku config:get DATABASE_URL -a ${{ secrets.HEROKU_APP_NAME }})
+
+          # Parsing the DATABASE_URL to extract components
+          DB_USER=$(echo $DATABASE_URL | cut -d':' -f2 | sed 's|//||g')
+          DB_PASS=$(echo $DATABASE_URL | cut -d':' -f3 | cut -d'@' -f1)
+          DB_HOST=$(echo $DATABASE_URL | cut -d'@' -f2 | cut -d':' -f1)
+          DB_PORT=$(echo $DATABASE_URL | cut -d':' -f4 | cut -d'/' -f1)
+          DB_NAME=$(echo $DATABASE_URL | cut -d'/' -f4)
+
+          export PGPASSWORD=$DB_PASS
+
+          pg_dump -Fc --no-acl --no-owner -h $DB_HOST -U $DB_USER -d $DB_NAME -p $DB_PORT > db.dump
+
+      - name: Upload Backup to S3
+        run: |
+          aws s3 cp db.dump s3://${{ secrets.S3_BUCKET_NAME }}/$(date +%Y-%m-%d_%H-%M-%S)_db.dump
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: us-east-1

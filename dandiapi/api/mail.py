@@ -16,9 +16,8 @@ BASE_RENDER_CONTEXT = {
     'dandi_web_app_url': settings.DANDI_WEB_APP_URL,
 }
 
-# TODO: turn this into a Django setting
-# TODO: Aaron update
-ADMIN_EMAIL = 'admin@api.lincbrain.org'
+
+ADMIN_EMAIL = 'admin@lincbrain.org'
 
 
 def user_greeting_name(user: User, socialaccount: SocialAccount = None) -> str:
@@ -105,7 +104,7 @@ def build_new_user_messsage(user: User, socialaccount: SocialAccount = None):
     }
     # Email sent to the DANDI list when a new user logs in for the first time
     return build_message(
-        subject=f'DANDI: Review new user: {user.username}',
+        subject=f'LINC Brain: Review new user: {user.username}',
         message=render_to_string('api/mail/new_user_message.txt', render_context),
         to=[ADMIN_EMAIL],
     )
@@ -120,7 +119,7 @@ def send_new_user_message_email(user: User, socialaccount: SocialAccount):
 
 def build_approved_user_message(user: User, socialaccount: SocialAccount = None):
     return build_message(
-        subject='Your DANDI Account',
+        subject='Your LINC Brain Account',
         message=render_to_string(
             'api/mail/approved_user_message.txt',
             {
@@ -141,7 +140,7 @@ def send_approved_user_message(user: User, socialaccount: SocialAccount):
 
 def build_rejected_user_message(user: User, socialaccount: SocialAccount = None):
     return build_message(
-        subject='Your DANDI Account',
+        subject='Your LINC Brain Account',
         message=render_to_string(
             'api/mail/rejected_user_message.txt',
             {
@@ -163,7 +162,7 @@ def send_rejected_user_message(user: User, socialaccount: SocialAccount):
 def build_pending_users_message(users: Iterable[User]):
     render_context = {**BASE_RENDER_CONTEXT, 'users': users}
     return build_message(
-        subject='DANDI: new user registrations to review',
+        subject='LINC Brain: new user registrations to review',
         message=render_to_string('api/mail/pending_users_message.txt', render_context),
         to=[ADMIN_EMAIL],
     )

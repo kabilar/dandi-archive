@@ -12,7 +12,7 @@
         but this is where they will appear once they're added.
       </div>
       <div class="my-7">
-        <span class="text-subtitle-1">Use the DANDI CLI on the command line:</span>
+        <span class="text-subtitle-1">Use the LINC Brain CLI on the command line:</span>
         <div
           class="d-flex justify-center"
           style="font-family: monospace;"
@@ -22,11 +22,11 @@
             width="60%"
             class="white--text pl-2 py-1 text-left"
           >
-            <div>> lincbrain download https://lincbrain.org/dandiset/{{ dandisetIdentifier }}/draft</div>
+            <div>{{ downloadCommand }}</div>
             <div>> cd {{ dandisetIdentifier }}</div>
-            <div>> dandi organize &lt;source_folder&gt; -f dry</div>
-            <div>> dandi organize &lt;source_folder&gt;</div>
-            <div>> dandi upload</div>
+            <div>> lincbrain organize &lt;source_folder&gt; -f dry</div>
+            <div>> lincbrain organize &lt;source_folder&gt;</div>
+            <div>> lincbrain upload</div>
           </v-sheet>
         </div>
       </div>
@@ -53,4 +53,15 @@ import { useDandisetStore } from '@/stores/dandiset';
 
 const store = useDandisetStore();
 const dandisetIdentifier = computed(() => store.dandiset?.dandiset.identifier);
+
+const downloadCommand = computed(() => {
+  const baseUrl = import.meta.env.VITE_APP_DANDI_API_ROOT === 'https://staging-api.lincbrain.org/api/'
+    ? 'https://staging--gui-staging-lincbrain-org.netlify.app/dandiset/'
+    : 'https://lincbrain.org/dandiset/';
+
+  return dandisetIdentifier.value
+    ? `> lincbrain download ${baseUrl}${dandisetIdentifier.value}/draft`
+    : ''; // Empty string just as a fallback in case store.dandiset? is undefined
+});
 </script>
+

@@ -39,7 +39,7 @@
       </v-card-title>
       <v-list class="pa-0">
         <v-list-item dense>
-          Use this command in your Lincbrain CLI
+          Use this command in your LINC Brain CLI
         </v-list-item>
         <v-list-item dense>
           <CopyText
@@ -122,13 +122,19 @@ import CopyText from '@/components/CopyText.vue';
 
 function formatDownloadCommand(identifier: string, version: string): string {
   if (version === 'draft') {
-    return `lincbrain download https://lincbrain.org/dandiset/${identifier}/draft`;
+    const baseUrl = import.meta.env.VITE_APP_DANDI_API_ROOT === 'https://staging-api.lincbrain.org/api/'
+      ? 'https://staging--gui-staging-lincbrain-org.netlify.app/dandiset/'
+      : 'https://lincbrain.org/dandiset/';
+    return `lincbrain download ${baseUrl}${identifier}/draft`;
   }
+
   if (!version) {
     return `lincbrain download DANDI:${identifier}`;
   }
+
   return `lincbrain download DANDI:${identifier}/${version}`;
 }
+
 
 const store = useDandisetStore();
 
