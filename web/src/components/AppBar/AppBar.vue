@@ -115,7 +115,7 @@
               <v-btn
                 id="login"
                 class="mx-1"
-                color="primary"
+                color="#c44fc4"
                 rounded
                 :disabled="!cookiesEnabled"
                 @click="login"
@@ -142,10 +142,10 @@ import {
   user,
 } from '@/rest';
 import {
-  dandiAboutUrl, dandiDocumentationUrl, dandiHelpUrl, dandihubUrl,
+  dandiAboutUrl, dandiDocumentationUrl, dandiHelpUrl, dandihubUrl, lincBrainUrl,
 } from '@/utils/constants';
 import UserMenu from '@/components/AppBar/UserMenu.vue';
-import logo from '@/assets/logo.svg';
+import logo from '@/assets/linc-logo.svg';
 
 interface NavigationItem {
   text: string,
@@ -171,11 +171,16 @@ const navItems: NavigationItem[] = [
     external: false,
     if: loggedInFunc,
   },
-  {
-    text: 'About',
-    to: dandiAboutUrl,
+    {
+    text: 'About LINC',
+    to: lincBrainUrl,
     external: true,
   },
+  // {
+  //   text: 'About DANDI',
+  //   to: dandiAboutUrl,
+  //   external: true,
+  // },
   {
     text: 'Documentation',
     to: dandiDocumentationUrl,

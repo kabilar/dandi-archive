@@ -4,6 +4,8 @@ const dandiDocumentationUrl = 'https://www.dandiarchive.org/handbook/10_using_da
 const dandiHelpUrl = 'https://github.com/dandi/helpdesk/issues/new/choose';
 const dandihubUrl = 'https://hub.dandiarchive.org/';
 
+const lincBrainUrl = "https://connects.mgh.harvard.edu/"
+
 const draftVersion = 'draft';
 
 const VALIDATION_ICONS = {
@@ -55,6 +57,7 @@ export {
   dandihubUrl,
   draftVersion,
   dandiHelpUrl,
+  lincBrainUrl,
   VALIDATION_ICONS,
   sortingOptions,
   DANDISETS_PER_PAGE,
