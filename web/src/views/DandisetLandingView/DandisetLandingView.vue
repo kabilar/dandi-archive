@@ -22,7 +22,7 @@
         <br><br>
         <span class="text-body-2">
           Proceed to the <a href="/dandiset">Public Datasets page</a>
-          or use the search bar to find a valid Dandiset.
+          or use the search bar to find a valid dataset.
         </span>
       </div>
     </v-container>

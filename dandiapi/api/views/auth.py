@@ -19,11 +19,12 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-# from dandiapi.api.mail import (
-#     send_approved_user_message,
-#     send_new_user_message_email,
-#     send_registered_notice_email,
-# )
+from dandiapi.api.mail import (
+    send_approved_user_message,
+    send_new_user_message_email,
+    send_registered_notice_email,
+)
+
 from dandiapi.api.models import UserMetadata
 from dandiapi.api.permissions import IsApproved
 
@@ -132,15 +133,15 @@ def user_questionnaire_form_view(request: HttpRequest) -> HttpResponse:
             )
             user_metadata.save(update_fields=['status'])
 
-        #             # send email indicating the user has signed up
-        #             for socialaccount in user.socialaccount_set.all():
-        #                 # Send approved email if they have been auto-approved
-        #                 if user_metadata.status == UserMetadata.Status.APPROVED:
-        #                     send_approved_user_message(user, socialaccount)
-        #                 # otherwise, send "awaiting approval" email
-        #                 else:
-        #                     send_registered_notice_email(user, socialaccount)
-        #                     send_new_user_message_email(user, socialaccount)
+            # send email indicating the user has signed up
+            for socialaccount in user.socialaccount_set.all():
+                # Send approved email if they have been auto-approved
+                if user_metadata.status == UserMetadata.Status.APPROVED:
+                    send_approved_user_message(user, socialaccount)
+                # otherwise, send "awaiting approval" email
+                else:
+                    send_registered_notice_email(user, socialaccount)
+                    send_new_user_message_email(user, socialaccount)
 
         # pass on OAuth query string params to auth endpoint
         return HttpResponseRedirect(

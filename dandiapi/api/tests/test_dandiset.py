@@ -158,28 +158,32 @@ def test_dandiset_versions(
             'modified': TIMESTAMP_RE,
             'contact_person': contact_person,
             'embargo_status': 'OPEN',
-            'draft_version': {
-                'version': draft_version.version,
-                'name': draft_version.name,
-                'asset_count': draft_version.asset_count,
-                'size': draft_version.size,
-                'status': 'Pending',
-                'created': TIMESTAMP_RE,
-                'modified': TIMESTAMP_RE,
-            }
-            if draft_version is not None
-            else None,
-            'most_recent_published_version': {
-                'version': published_version.version,
-                'name': published_version.name,
-                'asset_count': published_version.asset_count,
-                'size': published_version.size,
-                'status': 'Pending',
-                'created': TIMESTAMP_RE,
-                'modified': TIMESTAMP_RE,
-            }
-            if published_version is not None
-            else None,
+            'draft_version': (
+                {
+                    'version': draft_version.version,
+                    'name': draft_version.name,
+                    'asset_count': draft_version.asset_count,
+                    'size': draft_version.size,
+                    'status': 'Pending',
+                    'created': TIMESTAMP_RE,
+                    'modified': TIMESTAMP_RE,
+                }
+                if draft_version is not None
+                else None
+            ),
+            'most_recent_published_version': (
+                {
+                    'version': published_version.version,
+                    'name': published_version.name,
+                    'asset_count': published_version.asset_count,
+                    'size': published_version.size,
+                    'status': 'Pending',
+                    'created': TIMESTAMP_RE,
+                    'modified': TIMESTAMP_RE,
+                }
+                if published_version is not None
+                else None
+            ),
         }
 
     possible_results = {

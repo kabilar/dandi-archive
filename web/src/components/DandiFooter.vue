@@ -6,7 +6,7 @@
           <span
             v-if="cookiesEnabled()"
           >We use cookies to ensure you get the best experience on
-            DANDI.</span>
+            LINC Brain</span>
           <span
             v-else
           >We noticed you're blocking cookies - note that certain aspects of
@@ -15,7 +15,7 @@
       </cookie-law>
       <v-row>
         <v-col offset="2">
-          &copy; 2019 - 2023 The DANDI Team<br>
+          &copy; 2024 The LINC Platform Team<br>
           version
           <a
             class="version-link"
@@ -24,36 +24,45 @@
             rel="noopener"
           >{{ version }}</a>
         </v-col>
-        <v-col>
-          Funding / In-Kind Support:<br>
-          - <a
-            target="_blank"
-            rel="noopener"
-            href="https://braininitiative.nih.gov/"
-          >BRAIN Initiative</a>
-          <v-icon x-small>
-            mdi-open-in-new
-          </v-icon> / <a
-            target="_blank"
-            rel="noopener"
-            href="https://www.nimh.nih.gov/index.shtml"
-          >NIMH</a>
-          <v-icon x-small>
-            mdi-open-in-new
-          </v-icon>
-          <br>
-          - <a
-            target="_blank"
-            rel="noopener"
-            href="https://registry.opendata.aws/dandiarchive/"
-          >AWS Open Dataset</a>
-          <v-icon x-small>
-            mdi-open-in-new
-          </v-icon>
-          <br>
-        </v-col>
+<!--        <v-col>-->
+<!--          Funding / In-Kind Support:<br>-->
+<!--          - <a-->
+<!--            target="_blank"-->
+<!--            rel="noopener"-->
+<!--            href="https://braininitiative.nih.gov/"-->
+<!--          >BRAIN Initiative</a>-->
+<!--          <v-icon x-small>-->
+<!--            mdi-open-in-new-->
+<!--          </v-icon> / <a-->
+<!--            target="_blank"-->
+<!--            rel="noopener"-->
+<!--            href="https://www.nimh.nih.gov/index.shtml"-->
+<!--          >NIMH</a>-->
+<!--          <v-icon x-small>-->
+<!--            mdi-open-in-new-->
+<!--          </v-icon>-->
+<!--          <br>-->
+<!--          - <a-->
+<!--            target="_blank"-->
+<!--            rel="noopener"-->
+<!--            href="https://registry.opendata.aws/dandiarchive/"-->
+<!--          >AWS Open Dataset</a>-->
+<!--          <v-icon x-small>-->
+<!--            mdi-open-in-new-->
+<!--          </v-icon>-->
+<!--          <br>-->
+<!--        </v-col>-->
         <v-col>
           Support:<br>
+          - <a
+            target="_blank"
+            rel="noopener"
+            :href="lincBrainUrl"
+          >LINC Homepage</a>
+          <v-icon x-small>
+            mdi-open-in-new
+          </v-icon>
+          <br>
           - <a
             target="_blank"
             rel="noopener"
@@ -66,14 +75,14 @@
           - <a
             target="_blank"
             rel="noopener"
-            href="https://github.com/dandi/dandi-archive"
+            href="https://github.com/lincbrain/linc-archive"
           >Project GitHub</a>
           <v-icon x-small>
             mdi-open-in-new
           </v-icon> / <a
             target="_blank"
             rel="noopener"
-            href="https://github.com/dandi/dandi-archive/issues"
+            href="https://github.com/lincbrain/linc-archive/issues"
           >Issues</a>
           <v-icon x-small>
             mdi-open-in-new
@@ -88,17 +97,18 @@
 import { defineComponent } from 'vue';
 import CookieLaw from 'vue-cookie-law';
 
-import { dandiAboutUrl } from '@/utils/constants';
+import { dandiAboutUrl, lincBrainUrl } from '@/utils/constants';
 import { cookiesEnabled } from '@/rest';
 
 const version = import.meta.env.VITE_APP_VERSION;
-const githubLink = import.meta.env.VITE_APP_GIT_REVISION ? `https://github.com/dandi/dandi-archive/commit/${import.meta.env.VITE_APP_GIT_REVISION}` : 'https://github.com/dandi/dandi-archive';
+const githubLink = import.meta.env.VITE_APP_GIT_REVISION ? `https://github.com/lincbrain/linc-archive/commit/${import.meta.env.VITE_APP_GIT_REVISION}` : 'https://github.com/lincbrain/linc-archive';
 
 export default defineComponent({
   name: 'DandiFooter',
   components: { CookieLaw },
   setup() {
     return {
+      lincBrainUrl,
       dandiAboutUrl,
       version,
       githubLink,

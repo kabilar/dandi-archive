@@ -3,7 +3,7 @@ name: Deploy backend to staging
 on:
   push:
     branches:
-      - master
+      - staging
     paths-ignore:
       - "web/**"
       - "CHANGELOG.md"
@@ -34,7 +34,7 @@ jobs:
         run: python setup.py sdist --formats=gztar
 
       - name: Create Heroku Build
-        run: heroku builds:create -a linc-staging-terraform --source-tar=dist/$(python setup.py --fullname).tar.gz
+        run: heroku builds:create -a linc-brain-staging --source-tar=dist/$(python setup.py --fullname).tar.gz
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY  }}
           HEROKU_EMAIL: ${{ secrets.HEROKU_EMAIL  }}
