@@ -31,7 +31,7 @@
         </div>
       </div>
       <div>
-        <span class="text-subtitle-1">Don't have DANDI CLI?</span>
+        <span class="text-subtitle-1">Don't have LINC Brain CLI?</span>
         <div>
           <span class="text-body-2 grey--text text--darken-1">
             <span class="text-body-2 grey--text text--darken-1">
@@ -56,7 +56,7 @@ const dandisetIdentifier = computed(() => store.dandiset?.dandiset.identifier);
 
 const downloadCommand = computed(() => {
   const baseUrl = import.meta.env.VITE_APP_DANDI_API_ROOT === 'https://staging-api.lincbrain.org/api/'
-    ? 'https://staging--gui-staging-lincbrain-org.netlify.app/dandiset/'
+    ? 'https://staging--lincbrain-org.netlify.app/dandiset/'
     : 'https://lincbrain.org/dandiset/';
 
   return dandisetIdentifier.value

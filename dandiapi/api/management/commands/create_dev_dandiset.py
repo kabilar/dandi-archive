@@ -1,4 +1,6 @@
 import hashlib
+from __future__ import annotations
+
 from uuid import uuid4
 
 from django.conf import settings

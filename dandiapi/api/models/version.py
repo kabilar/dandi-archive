@@ -36,7 +36,7 @@ class Version(PublishableMetadataMixin, TimeStampedModel):
         max_length=13,
         validators=[RegexValidator(f'^{VERSION_REGEX}$')],
     )
-    doi = models.CharField(max_length=64, null=True, blank=True)
+    doi = models.CharField(max_length=64, null=True, default=None, blank=True)  # noqa: DJ001
     """Track the validation status of this version, without considering assets"""
     status = models.CharField(
         max_length=10,
@@ -139,11 +139,7 @@ class Version(PublishableMetadataMixin, TimeStampedModel):
         citation = f'{name} ({year}). (Version {version}) [Data set]. DANDI archive. {url}'
         if 'contributor' in metadata and isinstance(metadata['contributor'], list):
             cl = '; '.join(
-                [
-                    val['name']
-                    for val in metadata['contributor']
-                    if 'includeInCitation' in val and val['includeInCitation']
-                ]
+                [val['name'] for val in metadata['contributor'] if val.get('includeInCitation')]
             )
             if cl:
                 citation = (
@@ -185,7 +181,10 @@ class Version(PublishableMetadataMixin, TimeStampedModel):
             'version': self.version,
             'id': f'DANDI:{self.dandiset.identifier}/{self.version}',
             'repository': settings.DANDI_WEB_APP_URL,
-            'url': f'{settings.DANDI_WEB_APP_URL}/dandiset/{self.dandiset.identifier}/{self.version}',  # noqa
+            'url': (
+                f'{settings.DANDI_WEB_APP_URL}/dandiset/'
+                f'{self.dandiset.identifier}/{self.version}'
+            ),
             'dateCreated': self.dandiset.created.isoformat(),
         }
 

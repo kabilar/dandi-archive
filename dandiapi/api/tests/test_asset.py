@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 import os.path
 from uuid import uuid4
@@ -199,7 +201,7 @@ def test_asset_full_metadata(draft_asset_factory):
         'contentUrl': [download_url, blob_url],
         'contentSize': asset.blob.size,
         'digest': asset.blob.digest,
-        '@context': f'https://raw.githubusercontent.com/dandi/schema/master/releases/{settings.DANDI_SCHEMA_VERSION}/context.json',  # noqa: E501
+        '@context': f'https://raw.githubusercontent.com/dandi/schema/master/releases/{settings.DANDI_SCHEMA_VERSION}/context.json',
     }
 
 
@@ -227,7 +229,7 @@ def test_asset_full_metadata_zarr(draft_asset_factory, zarr_archive):
         'digest': asset.digest,
         # This should be injected on all zarr assets
         'encodingFormat': 'application/x-zarr',
-        '@context': f'https://raw.githubusercontent.com/dandi/schema/master/releases/{settings.DANDI_SCHEMA_VERSION}/context.json',  # noqa: E501
+        '@context': f'https://raw.githubusercontent.com/dandi/schema/master/releases/{settings.DANDI_SCHEMA_VERSION}/context.json',
     }
 
 
