@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import datetime
 
 from django.conf import settings
@@ -379,7 +381,7 @@ def test_dandiset_rest_create(api_client, user):
     assert dandiset.draft_version.metadata == {
         **metadata,
         'manifestLocation': [
-            f'{settings.DANDI_API_URL}/api/dandisets/{dandiset.identifier}/versions/draft/assets/'  # noqa: E501
+            f'{settings.DANDI_API_URL}/api/dandisets/{dandiset.identifier}/versions/draft/assets/'
         ],
         'name': name,
         'identifier': DANDISET_SCHEMA_ID_RE,
@@ -391,7 +393,7 @@ def test_dandiset_rest_create(api_client, user):
             f'{user.last_name}, {user.first_name} ({year}) {name} '
             f'(Version draft) [Data set]. DANDI archive. {url}'
         ),
-        '@context': f'https://raw.githubusercontent.com/dandi/schema/master/releases/{settings.DANDI_SCHEMA_VERSION}/context.json',  # noqa: E501
+        '@context': f'https://raw.githubusercontent.com/dandi/schema/master/releases/{settings.DANDI_SCHEMA_VERSION}/context.json',
         'schemaVersion': settings.DANDI_SCHEMA_VERSION,
         'schemaKey': 'Dandiset',
         'access': [{'schemaKey': 'AccessRequirements', 'status': 'dandi:OpenAccess'}],
@@ -472,7 +474,7 @@ def test_dandiset_rest_create_with_identifier(api_client, admin_user):
     assert dandiset.draft_version.metadata == {
         **metadata,
         'manifestLocation': [
-            f'{settings.DANDI_API_URL}/api/dandisets/{dandiset.identifier}/versions/draft/assets/'  # noqa: E501
+            f'{settings.DANDI_API_URL}/api/dandisets/{dandiset.identifier}/versions/draft/assets/'
         ],
         'name': name,
         'identifier': f'DANDI:{identifier}',
@@ -484,7 +486,7 @@ def test_dandiset_rest_create_with_identifier(api_client, admin_user):
             f'{admin_user.last_name}, {admin_user.first_name} ({year}) {name} '
             f'(Version draft) [Data set]. DANDI archive. {url}'
         ),
-        '@context': f'https://raw.githubusercontent.com/dandi/schema/master/releases/{settings.DANDI_SCHEMA_VERSION}/context.json',  # noqa: E501
+        '@context': f'https://raw.githubusercontent.com/dandi/schema/master/releases/{settings.DANDI_SCHEMA_VERSION}/context.json',
         'schemaVersion': settings.DANDI_SCHEMA_VERSION,
         'schemaKey': 'Dandiset',
         'access': [{'schemaKey': 'AccessRequirements', 'status': 'dandi:OpenAccess'}],
@@ -579,7 +581,7 @@ def test_dandiset_rest_create_with_contributor(api_client, admin_user):
     assert dandiset.draft_version.metadata == {
         **metadata,
         'manifestLocation': [
-            f'{settings.DANDI_API_URL}/api/dandisets/{dandiset.identifier}/versions/draft/assets/'  # noqa: E501
+            f'{settings.DANDI_API_URL}/api/dandisets/{dandiset.identifier}/versions/draft/assets/'
         ],
         'name': name,
         'identifier': f'DANDI:{identifier}',
@@ -590,7 +592,7 @@ def test_dandiset_rest_create_with_contributor(api_client, admin_user):
         'citation': (
             f'Jane Doe ({year}) {name} ' f'(Version draft) [Data set]. DANDI archive. {url}'
         ),
-        '@context': f'https://raw.githubusercontent.com/dandi/schema/master/releases/{settings.DANDI_SCHEMA_VERSION}/context.json',  # noqa: E501
+        '@context': f'https://raw.githubusercontent.com/dandi/schema/master/releases/{settings.DANDI_SCHEMA_VERSION}/context.json',
         'schemaVersion': settings.DANDI_SCHEMA_VERSION,
         'schemaKey': 'Dandiset',
         'access': [{'schemaKey': 'AccessRequirements', 'status': 'dandi:OpenAccess'}],
@@ -669,7 +671,7 @@ def test_dandiset_rest_create_embargoed(api_client, user):
     assert dandiset.draft_version.metadata == {
         **metadata,
         'manifestLocation': [
-            f'{settings.DANDI_API_URL}/api/dandisets/{dandiset.identifier}/versions/draft/assets/'  # noqa: E501
+            f'{settings.DANDI_API_URL}/api/dandisets/{dandiset.identifier}/versions/draft/assets/'
         ],
         'name': name,
         'identifier': DANDISET_SCHEMA_ID_RE,
@@ -681,7 +683,7 @@ def test_dandiset_rest_create_embargoed(api_client, user):
             f'{user.last_name}, {user.first_name} ({year}) {name} '
             f'(Version draft) [Data set]. DANDI archive. {url}'
         ),
-        '@context': f'https://raw.githubusercontent.com/dandi/schema/master/releases/{settings.DANDI_SCHEMA_VERSION}/context.json',  # noqa: E501
+        '@context': f'https://raw.githubusercontent.com/dandi/schema/master/releases/{settings.DANDI_SCHEMA_VERSION}/context.json',
         'schemaVersion': settings.DANDI_SCHEMA_VERSION,
         'schemaKey': 'Dandiset',
         'access': [{'schemaKey': 'AccessRequirements', 'status': 'dandi:EmbargoedAccess'}],

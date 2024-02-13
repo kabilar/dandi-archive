@@ -96,16 +96,16 @@
           </v-expansion-panel>
           <v-expansion-panel>
             <v-expansion-panel-header>
-              Don't have DANDI CLI?
+              Don't have LINC Brain CLI?
             </v-expansion-panel-header>
             <v-expansion-panel-content>
               <v-list>
                 <v-list-item>
-                  Install the Python client (DANDI CLI)
+                  Install the Python client (LINC Brain CLI)
                   in a Python 3.7+ environment using command:
                 </v-list-item>
                 <v-list-item>
-                  <kbd>pip install "dandi>=0.13.0"</kbd>
+                  <kbd>pip install lincbrain</kbd>
                 </v-list-item>
               </v-list>
             </v-expansion-panel-content>
@@ -123,7 +123,7 @@ import CopyText from '@/components/CopyText.vue';
 function formatDownloadCommand(identifier: string, version: string): string {
   if (version === 'draft') {
     const baseUrl = import.meta.env.VITE_APP_DANDI_API_ROOT === 'https://staging-api.lincbrain.org/api/'
-      ? 'https://staging--gui-staging-lincbrain-org.netlify.app/dandiset/'
+      ? 'https://staging--lincbrain-org.netlify.app/dandiset/'
       : 'https://lincbrain.org/dandiset/';
     return `lincbrain download ${baseUrl}${identifier}/draft`;
   }

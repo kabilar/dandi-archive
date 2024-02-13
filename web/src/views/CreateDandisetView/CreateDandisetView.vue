@@ -5,46 +5,46 @@
     </v-card-title>
     <v-card-text class="my-3">
       <v-form>
-        <div>
-          <v-switch
-            v-model="embargoed"
-          >
-            <template #label>
-              Embargo this Dandiset
-              <v-tooltip
-                right
-                max-width="25%"
-              >
-                <template #activator="{ on, attrs }">
-                  <div
-                    v-bind="attrs"
-                    style="cursor: help"
-                    v-on="on"
-                  >
-                    <small class="ml-3 d-flex align-center">
-                      (What is this?)
-                      <v-icon small>
-                        mdi-information
-                      </v-icon>
-                    </small>
-                  </div>
-                </template>
-                <span>
-                  Embargoed datasets are hidden from public access until a specific time period has
-                  elapsed. Uploading data to the DANDI archive under embargo requires a relevant
-                  NIH award number, and the data will be automatically published when the embargo
-                  period expires.
-                </span>
-              </v-tooltip>
-            </template>
-          </v-switch>
-        </div>
+<!--        <div>-->
+<!--          <v-switch-->
+<!--            v-model="embargoed"-->
+<!--          >-->
+<!--            <template #label>-->
+<!--              Embargo this Dandiset-->
+<!--              <v-tooltip-->
+<!--                right-->
+<!--                max-width="25%"-->
+<!--              >-->
+<!--                <template #activator="{ on, attrs }">-->
+<!--                  <div-->
+<!--                    v-bind="attrs"-->
+<!--                    style="cursor: help"-->
+<!--                    v-on="on"-->
+<!--                  >-->
+<!--                    <small class="ml-3 d-flex align-center">-->
+<!--                      (What is this?)-->
+<!--                      <v-icon small>-->
+<!--                        mdi-information-->
+<!--                      </v-icon>-->
+<!--                    </small>-->
+<!--                  </div>-->
+<!--                </template>-->
+<!--                <span>-->
+<!--                  Embargoed datasets are hidden from public access until a specific time period has-->
+<!--                  elapsed. Uploading data to the DANDI archive under embargo requires a relevant-->
+<!--                  NIH award number, and the data will be automatically published when the embargo-->
+<!--                  period expires.-->
+<!--                </span>-->
+<!--              </v-tooltip>-->
+<!--            </template>-->
+<!--          </v-switch>-->
+<!--        </div>-->
         <div class="text-h4">
           Title
         </div>
         <div>
-          Provide a title for this Dandiset. The title will appear in search
-          results and at the top of the home page for this Dandiset, so make it
+          Provide a title for this Dataset. The title will appear in search
+          results and at the top of the home page for this Dataset, so make it
           concise and descriptive.
         </div>
         <v-text-field
@@ -61,8 +61,8 @@
           Description
         </div>
         <div>
-          Provide a description for this Dandiset. This will appear prominently
-          under the title in the home page for this Dandiset.
+          Provide a description for this Dataset. This will appear prominently
+          under the title in the home page for this Dataset.
         </div>
         <v-textarea
           v-model="description"
@@ -78,7 +78,7 @@
             License
           </div>
           <div>
-            Select a license under which to share the contents of this Dandiset.
+            Select a license under which to share the contents of this Dataset.
             You can learn more about <a
               href="https://www.dandiarchive.org/handbook/35_data_licenses/"
               target="_blank"
@@ -101,7 +101,7 @@
             NIH Award Number
           </div>
           <div>
-            Provide an NIH award number for this embargoed Dandiset. Note: this
+            Provide an NIH award number for this embargoed Dataset. Note: this
             can be changed at any time and additional award numbers can be added
             later.
           </div>
@@ -123,12 +123,12 @@
       <v-spacer />
       <v-btn
         type="submit"
-        color="primary"
+        color="#c44fc4"
         :disabled="saveDisabled"
         depressed
         @click="registerDandiset"
       >
-        Register Dandiset
+        Register Dataset
         <template #loader>
           <span>Registering...</span>
         </template>

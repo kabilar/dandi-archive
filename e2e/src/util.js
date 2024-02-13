@@ -115,7 +115,7 @@ export async function registerDandiset(name, description) {
   await page.waitForTimeout(500); // Give dropdown time to render
   await expect(page).toClickXPath(vListItem('spdx:CC0-1.0'));
   await page.waitForTimeout(500); // Form validation can *sometimes* take too long
-  await expect(page).toClickXPath(vBtn('Register Dandiset'));
+  await expect(page).toClickXPath(vBtn('Register Dataset'));
   await waitForRequestsToFinish();
   return page.url().split('/').pop();
 }

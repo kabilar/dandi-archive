@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from django.conf import settings
 from guardian.shortcuts import assign_perm
 import pytest
@@ -434,7 +436,7 @@ def test_zarr_file_list(
     )
     assert resp.status_code == 302
     assert resp.headers['Location'].startswith(
-        f'http://{settings.MINIO_STORAGE_ENDPOINT}/test-dandiapi-dandisets/test-prefix/test-zarr/{zarr_archive.zarr_id}/foo/bar/a.txt?'  # noqa: E501
+        f'http://{settings.MINIO_STORAGE_ENDPOINT}/test-dandiapi-dandisets/test-prefix/test-zarr/{zarr_archive.zarr_id}/foo/bar/a.txt?'
     )
 
 
@@ -449,5 +451,5 @@ def test_zarr_explore_head(authenticated_api_client, storage, zarr_archive: Zarr
     )
     assert resp.status_code == 302
     assert resp.headers['Location'].startswith(
-        f'http://{settings.MINIO_STORAGE_ENDPOINT}/test-dandiapi-dandisets/test-prefix/test-zarr/{zarr_archive.zarr_id}/{filepath}?'  # noqa: E501
+        f'http://{settings.MINIO_STORAGE_ENDPOINT}/test-dandiapi-dandisets/test-prefix/test-zarr/{zarr_archive.zarr_id}/{filepath}?'
     )
