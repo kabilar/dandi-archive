@@ -6,7 +6,7 @@
     outlined
   >
     <div class="black--text text-h5 mt-2">
-      Dandiset Actions
+      Dataset Actions
     </div>
 
     <!-- Download and Cite As buttons -->
