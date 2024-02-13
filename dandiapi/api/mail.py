@@ -55,7 +55,7 @@ def build_removed_message(dandiset, removed_owner):
     }
     # Email sent when a user is removed as an owner from a dandiset
     return build_message(
-        subject=f'Removed from Dandiset "{dandiset.draft_version.name}"',
+        subject=f'Removed from dataset "{dandiset.draft_version.name}"',
         message=render_to_string('api/mail/removed_message.txt', render_context),
         to=[removed_owner.email],
     )
@@ -69,7 +69,7 @@ def build_added_message(dandiset, added_owner):
     }
     # Email sent when a user is added as an owner of a dandiset
     return build_message(
-        subject=f'Added to Dandiset "{dandiset.draft_version.name}"',
+        subject=f'Added to dataset "{dandiset.draft_version.name}"',
         message=render_to_string('api/mail/added_message.txt', render_context),
         to=[added_owner.email],
     )
@@ -85,7 +85,7 @@ def send_ownership_change_emails(dandiset, removed_owners, added_owners):
 def build_registered_message(user: User, socialaccount: SocialAccount):
     # Email sent to the DANDI list when a new user logs in for the first time
     return build_message(
-        subject=f'DANDI: New user registered: {user.email}',
+        subject=f'LINC: New user registered: {user.email}',
         message=render_to_string(
             'api/mail/registered_message.txt',
             {'greeting_name': user_greeting_name(user, socialaccount)},
