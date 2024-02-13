@@ -202,56 +202,56 @@
                   </v-tooltip>
                 </v-list-item-action>
 
-                <v-list-item-action v-if="item.asset">
-                  <v-menu
-                    bottom
-                    left
-                  >
-                    <template #activator="{ on, attrs }">
-                      <v-btn
-                        v-if="item.services && item.services.length"
-                        color="primary"
-                        icon
-                        title="Open in external service"
-                        v-bind="attrs"
-                        v-on="on"
-                      >
-                        <v-icon>mdi-dots-vertical</v-icon>
-                      </v-btn>
-                      <v-btn
-                        v-else
-                        color="primary"
-                        disabled
-                        icon
-                      >
-                        <v-icon>mdi-dots-vertical</v-icon>
-                      </v-btn>
-                    </template>
-                    <v-list
-                      v-if="item && item.services"
-                      dense
-                    >
-                      <v-subheader
-                        v-if="item.services.length"
-                        class="font-weight-medium"
-                      >
-                        EXTERNAL SERVICES
-                      </v-subheader>
+<!--                <v-list-item-action v-if="item.asset">-->
+<!--                  <v-menu-->
+<!--                    bottom-->
+<!--                    left-->
+<!--                  >-->
+<!--                    <template #activator="{ on, attrs }">-->
+<!--                      <v-btn-->
+<!--                        v-if="item.services && item.services.length"-->
+<!--                        color="primary"-->
+<!--                        icon-->
+<!--                        title="Open in external service"-->
+<!--                        v-bind="attrs"-->
+<!--                        v-on="on"-->
+<!--                      >-->
+<!--                        <v-icon>mdi-dots-vertical</v-icon>-->
+<!--                      </v-btn>-->
+<!--                      <v-btn-->
+<!--                        v-else-->
+<!--                        color="primary"-->
+<!--                        disabled-->
+<!--                        icon-->
+<!--                      >-->
+<!--                        <v-icon>mdi-dots-vertical</v-icon>-->
+<!--                      </v-btn>-->
+<!--                    </template>-->
+<!--&lt;!&ndash;                    <v-list&ndash;&gt;-->
+<!--&lt;!&ndash;                      v-if="item && item.services"&ndash;&gt;-->
+<!--&lt;!&ndash;                      dense&ndash;&gt;-->
+<!--&lt;!&ndash;                    >&ndash;&gt;-->
+<!--&lt;!&ndash;                      <v-subheader&ndash;&gt;-->
+<!--&lt;!&ndash;                        v-if="item.services.length"&ndash;&gt;-->
+<!--&lt;!&ndash;                        class="font-weight-medium"&ndash;&gt;-->
+<!--&lt;!&ndash;                      >&ndash;&gt;-->
+<!--&lt;!&ndash;                        EXTERNAL SERVICES&ndash;&gt;-->
+<!--&lt;!&ndash;                      </v-subheader>&ndash;&gt;-->
 
-                      <v-list-item
-                        v-for="el in item.services"
-                        :key="el.name"
-                        :href="el.url"
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        <v-list-item-title class="font-weight-light">
-                          {{ el.name }}
-                        </v-list-item-title>
-                      </v-list-item>
-                    </v-list>
-                  </v-menu>
-                </v-list-item-action>
+<!--&lt;!&ndash;                      <v-list-item&ndash;&gt;-->
+<!--&lt;!&ndash;                        v-for="el in item.services"&ndash;&gt;-->
+<!--&lt;!&ndash;                        :key="el.name"&ndash;&gt;-->
+<!--&lt;!&ndash;                        :href="el.url"&ndash;&gt;-->
+<!--&lt;!&ndash;                        target="_blank"&ndash;&gt;-->
+<!--&lt;!&ndash;                        rel="noreferrer"&ndash;&gt;-->
+<!--&lt;!&ndash;                      >&ndash;&gt;-->
+<!--&lt;!&ndash;                        <v-list-item-title class="font-weight-light">&ndash;&gt;-->
+<!--&lt;!&ndash;                          {{ el.name }}&ndash;&gt;-->
+<!--&lt;!&ndash;                        </v-list-item-title>&ndash;&gt;-->
+<!--&lt;!&ndash;                      </v-list-item>&ndash;&gt;-->
+<!--&lt;!&ndash;                    </v-list>&ndash;&gt;-->
+<!--                  </v-menu>-->
+<!--                </v-list-item-action>-->
 
                 <v-list-item-action
                   v-if="item.aggregate_size"
