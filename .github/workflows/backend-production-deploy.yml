@@ -1,7 +1,13 @@
 name: Deploy backend to production
 
+# This is a temporary workflow used by the LINC project that differs from the "release" strategy in the DANDI Archive ecosystem
+#
+# The reason for the difference is that the LINC project is still a work-in-progress, thus we want updates to be not tied to version updates
+
 on:
   workflow_dispatch:
+    branches:
+      - release
 
 concurrency:
   # If this workflow is already running, cancel it to avoid a scenario
@@ -19,6 +25,13 @@ jobs:
         with:
           fetch-depth: 0 # fetch history for all branches and tags
 
+      - name: Check allowed users for deploying to production
+        run: |
+          if [[ ! "aaronkanzer kabilar" =~ "${{ github.actor }}" ]]; then
+            echo "Error: User ${{ github.actor }} is not allowed to deploy."
+            exit 1
+          fi
+
       - name: Install Heroku CLI
         run: curl https://cli-assets.heroku.com/install.sh | sh
 
@@ -35,63 +48,3 @@ jobs:
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY  }}
           HEROKU_EMAIL: ${{ secrets.HEROKU_EMAIL  }}
-
-
-#name: Deploy backend to production
-#
-#on:
-#  workflow_dispatch:
-#
-##on:
-##  release:
-##    types: [released]
-#
-#concurrency:
-#  # If this workflow is already running, cancel it to avoid a scenario
-#  # where the older run finishes *after* the newer run and overwrites
-#  # the deployment with an older version of the app.
-#  group: ${{ github.workflow }}
-#  cancel-in-progress: true
-#
-#jobs:
-#  reset-release-branch:
-#    name: Update release branch
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: actions/checkout@v4
-#        with:
-#          fetch-depth: 0 # fetch history for all branches and tags
-#          token: ${{ secrets.GH_TOKEN }} # use PAT with permissions to push to master
-##          ref: release
-#
-#      - name: Perform reset
-#        run: |
-#          git reset --hard ${{ github.ref }}
-#          git push --force origin release
-#
-#  production-deploy:
-#    name: Deploy to Heroku
-#    runs-on: ubuntu-latest
-#    needs: reset-release-branch
-#    steps:
-#      - uses: actions/checkout@v4
-#        with:
-#          fetch-depth: 0 # fetch history for all branches and tags
-##          ref: release
-#
-#      - name: Install Heroku CLI
-#        run: curl https://cli-assets.heroku.com/install.sh | sh
-#
-#      - name: Install builds plugin
-#        run: heroku plugins:install heroku-builds
-#
-#      - name: Build app into tarball
-#        run: |
-#          pip install build
-#          python -m build --sdist
-#
-#      - name: Create Heroku Build
-#        run: heroku builds:create -a ${{ secrets.HEROKU_PRODUCTION_APP_NAME  }} --source-tar=dist/$(python setup.py --fullname).tar.gz
-#        env:
-#          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY  }}
-#          HEROKU_EMAIL: ${{ secrets.HEROKU_EMAIL  }}
