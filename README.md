@@ -1,24 +1,21 @@
-# DANDI Archive
+# LINC Archive
 
-![](https://www.dandiarchive.org/assets/dandi_logo.svg)
+![Alt text](web/src/assets/linc-logo.svg "LINC Logo")
 
-## DANDI: Distributed Archives for Neurophysiology Data Integration
+LINC Archive is cloud infrastructure and data archival platform for the center for Large-scale Imaging of Neural Circuits (LINC). [See here for details](https://connects.mgh.harvard.edu/)
 
-[DANDI](https://dandiarchive.org/) is a platform for publishing, sharing, and processing neurophysiology data
-funded by the [BRAIN Initiative](https://braininitiative.nih.gov/). The archive
-accepts cellular neurophysiology data including electrophysiology,
-optophysiology, and behavioral time-series, and images from immunostaining
-experiments. This archive is not just an endpoint to store data, it is intended as a living repository that enables
-collaboration within and across labs, as well as the entry point for research.
+The LINC Archive site can be (visited online here)[https://lincbrain.org]
+
+This repository is a fork of the [DANDI Archive](https://github.com/dandi/dandi-archive) project. For more information, please visit the [DANDI Archive](https://dandiarchive.org/)
 
 ## Structure
 
-The dandi-archive repository contains a Django-based [backend](dandiapi/) to run the DANDI REST API, and a
+The linc-archive repository contains a Django-based [backend](dandiapi/) to run the LINC REST API, and a
 Vue-based [frontend](web/) to provide a user interface to the archive.
 
 ## Resources
 
-* To learn how to interact with the archive,
+* To learn how to interact with LINC Archive, please temporarily refer to the DANDI Handbook,
 see [the handbook](https://www.dandiarchive.org/handbook/).
 
 * To get help:

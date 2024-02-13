@@ -1,12 +1,12 @@
-# DANDI Archive Web Application ![ci](https://github.com/dandi/dandi-archive/actions/workflows/frontend-ci.yml/badge.svg) [![Netlify Status](https://api.netlify.com/api/v1/badges/e7424684-fbdb-4b77-a546-d5757a0f7552/deploy-status)](https://app.netlify.com/sites/gui-dandiarchive-org/deploys)
-The DANDI Archive web application (i.e. the dandi-archive frontend).
+# LINC Archive Web Application
+The LINC Archive web application (i.e. the linc-archive frontend).
 
 ## Develop
 
 ### Build and Run
 
 ```bash
-git clone https://github.com/dandi/dandi-archive
+git clone https://github.com/lincbrain/linc-archive
 cd web
 yarn install
 yarn run serve

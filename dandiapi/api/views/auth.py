@@ -50,7 +50,7 @@ def auth_token_view(request: Request) -> HttpResponseBase:
 QUESTIONS = [
     {'question': 'First Name', 'max_length': 100},
     {'question': 'Last Name', 'max_length': 100},
-    {'question': 'What do you plan to use DANDI for?', 'max_length': 1000},
+    {'question': 'What do you plan to use LINC Archive for?', 'max_length': 1000},
     {'question': 'Please list any affiliations you have.', 'max_length': 1000},
 ]
 
@@ -63,28 +63,25 @@ COLLECT_USER_NAME_QUESTIONS = QUESTIONS[:2]
 
 @require_http_methods(['GET'])
 def authorize_view(request: HttpRequest) -> HttpResponse:
-    # from django.contrib.sites.models import Site
-
-    #     raise Exception(Site.objects.get_current())
     """Override authorization endpoint to handle user questionnaire."""
-    #     user: User = request.user
-    #     if (
-    #         user.is_authenticated
-    #         and not user.is_superuser
-    #         and user.metadata.status == UserMetadata.Status.INCOMPLETE
-    #     ):
-    #         # send user to questionnaire if they haven't filled it out yet
-    #         return HttpResponseRedirect(
-    #             f'{reverse("user-questionnaire")}'
-    #             f'?{request.META["QUERY_STRING"]}&QUESTIONS={json.dumps(NEW_USER_QUESTIONS)}'
-    #         )
-    #     elif not user.is_anonymous and (not user.first_name or not user.last_name):
-    #         # if this user doesn't have a first/last name available, redirect them to a
-    #         # form to provide those before they can log in.
-    #         return HttpResponseRedirect(
-    #             f'{reverse("user-questionnaire")}'
-    #             f'?{request.META["QUERY_STRING"]}&QUESTIONS={json.dumps(COLLECT_USER_NAME_QUESTIONS)}'
-    #         )
+    user: User = request.user
+    if (
+        user.is_authenticated
+        and not user.is_superuser
+        and user.metadata.status == UserMetadata.Status.INCOMPLETE
+    ):
+        # send user to questionnaire if they haven't filled it out yet
+        return HttpResponseRedirect(
+            f'{reverse("user-questionnaire")}'
+            f'?{request.META["QUERY_STRING"]}&QUESTIONS={json.dumps(NEW_USER_QUESTIONS)}'
+        )
+    elif not user.is_anonymous and (not user.first_name or not user.last_name):
+        # if this user doesn't have a first/last name available, redirect them to a
+        # form to provide those before they can log in.
+        return HttpResponseRedirect(
+            f'{reverse("user-questionnaire")}'
+            f'?{request.META["QUERY_STRING"]}&QUESTIONS={json.dumps(COLLECT_USER_NAME_QUESTIONS)}'
+        )
 
     # otherwise, continue with normal authorization workflow
     return AuthorizationView.as_view()(request)
