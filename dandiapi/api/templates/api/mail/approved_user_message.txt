@@ -1,19 +1,14 @@
 {% autoescape off %}
 Dear {{ greeting_name }},
 
-Your DANDI account has been approved. You can go to {{ dandi_web_app_url }} and login with your GitHub account
+Your LINC Brain account has been approved. You can go to {{ dandi_web_app_url }} and login with your GitHub account
 to start creating dandisets and uploading data.
 
 Please use the following links to post any questions or issues.
 
-Discussions: https://github.com/dandi/helpdesk/discussions
-Issues: https://github.com/dandi/helpdesk/issues/new/choose
-YouTube: https://www.youtube.com/@dandiarchive
-(please Subscribe)
-
-Thank you for choosing DANDI for your neurophysiology data needs.
+Thank you for joining the LINC Archive.
 
 Sincerely,
 
-The DANDI team
+The LINC team
 {% endautoescape %}

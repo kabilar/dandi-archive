@@ -182,7 +182,7 @@ const navItems: NavigationItem[] = [
   //   external: true,
   // },
   {
-    text: 'Documentation',
+    text: 'DANDI Documentation',
     to: dandiDocumentationUrl,
     external: true,
   }
