@@ -98,7 +98,7 @@
           :to="{ name: 'createDandiset' }"
           exact
           class="mx-3"
-          color="primary"
+          color="#c44fc4"
           rounded
         >
           New Dataset
@@ -185,17 +185,17 @@ const navItems: NavigationItem[] = [
     text: 'Documentation',
     to: dandiDocumentationUrl,
     external: true,
-  },
-  {
-    text: 'Help',
-    to: dandiHelpUrl,
-    external: true,
-  },
-  {
-    text: 'DandiHub',
-    to: dandihubUrl,
-    external: true,
-  },
+  }
+  // {
+  //   text: 'Help',
+  //   to: dandiHelpUrl,
+  //   external: true,
+  // },
+  // {
+  //   text: 'DandiHub',
+  //   to: dandihubUrl,
+  //   external: true,
+  // },
 ];
 
 function login() {
