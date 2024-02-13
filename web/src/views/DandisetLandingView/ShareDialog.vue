@@ -39,26 +39,26 @@
       </v-toolbar>
       <v-card-text>
         <span class="font-weight-black">
-          Dandiset link:
+          Dataset link:
         </span>
         <CopyText
           class="pa-2"
           :text="permalink"
-          icon-hover-text="Copy Dandiset link to clipboard"
+          icon-hover-text="Copy Dataset link to clipboard"
         />
       </v-card-text>
-      <v-card-text
-        v-if="doiLink"
-      >
-        <span class="font-weight-black">
-          DOI link:
-        </span>
-        <CopyText
-          class="pa-2"
-          :text="doiLink"
-          icon-hover-text="Copy DOI link to clipboard"
-        />
-      </v-card-text>
+<!--      <v-card-text-->
+<!--        v-if="doiLink"-->
+<!--      >-->
+<!--        <span class="font-weight-black">-->
+<!--          DOI link:-->
+<!--        </span>-->
+<!--        <CopyText-->
+<!--          class="pa-2"-->
+<!--          :text="doiLink"-->
+<!--          icon-hover-text="Copy DOI link to clipboard"-->
+<!--        />-->
+<!--      </v-card-text>-->
       <v-divider class="mx-4" />
       <v-card-actions>
         <v-list-item class="grow">

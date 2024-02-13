@@ -13,41 +13,41 @@
             <ShareDialog />
             {{ meta.name }}
           </h1>
-          <v-chip
-            v-if="currentDandiset.version != 'draft'"
-            outlined
-            class="mx-2 pl-1"
-          >
-            <v-tooltip
-              top
-            >
-              <template #activator="{ on, attrs }">
-                <v-btn
-                  v-if="currentDandiset !== null"
-                  icon
-                  small
-                  v-bind="attrs"
-                  v-on="on"
-                  @click="copy('DOI')"
-                >
-                  <v-icon
-                    small
-                  >
-                    mdi-content-copy
-                  </v-icon>
-                </v-btn>
-              </template>
-              <span>Copy DOI URL to clipboard</span>
-            </v-tooltip>
-            <span>
-              DOI:
-            </span>
-            <v-divider
-              vertical
-              class="mx-2"
-            />
-            {{ meta.doi }}
-          </v-chip>
+<!--          <v-chip-->
+<!--            v-if="currentDandiset.version != 'draft'"-->
+<!--            outlined-->
+<!--            class="mx-2 pl-1"-->
+<!--          >-->
+<!--            <v-tooltip-->
+<!--              top-->
+<!--            >-->
+<!--              <template #activator="{ on, attrs }">-->
+<!--                <v-btn-->
+<!--                  v-if="currentDandiset !== null"-->
+<!--                  icon-->
+<!--                  small-->
+<!--                  v-bind="attrs"-->
+<!--                  v-on="on"-->
+<!--                  @click="copy('DOI')"-->
+<!--                >-->
+<!--                  <v-icon-->
+<!--                    small-->
+<!--                  >-->
+<!--                    mdi-content-copy-->
+<!--                  </v-icon>-->
+<!--                </v-btn>-->
+<!--              </template>-->
+<!--              <span>Copy DOI URL to clipboard</span>-->
+<!--            </v-tooltip>-->
+<!--            <span>-->
+<!--              DOI:-->
+<!--            </span>-->
+<!--            <v-divider-->
+<!--              vertical-->
+<!--              class="mx-2"-->
+<!--            />-->
+<!--            {{ meta.doi }}-->
+<!--          </v-chip>-->
         </v-col>
       </v-row>
       <v-row class="mx-1">
