@@ -37,32 +37,32 @@
           </template>
         </DownloadDialog>
       </v-row>
-      <v-row no-gutters>
-        <CiteAsDialog>
-          <template
-            #activator="{ on }"
-          >
-            <v-btn
-              id="download"
-              outlined
-              block
-              v-on="on"
-            >
-              <v-icon
-                color="primary"
-                left
-              >
-                mdi-format-quote-close
-              </v-icon>
-              <span>Cite As</span>
-              <v-spacer />
-              <v-icon right>
-                mdi-chevron-down
-              </v-icon>
-            </v-btn>
-          </template>
-        </CiteAsDialog>
-      </v-row>
+<!--      <v-row no-gutters>-->
+<!--        <CiteAsDialog>-->
+<!--          <template-->
+<!--            #activator="{ on }"-->
+<!--          >-->
+<!--            <v-btn-->
+<!--              id="download"-->
+<!--              outlined-->
+<!--              block-->
+<!--              v-on="on"-->
+<!--            >-->
+<!--              <v-icon-->
+<!--                color="primary"-->
+<!--                left-->
+<!--              >-->
+<!--                mdi-format-quote-close-->
+<!--              </v-icon>-->
+<!--              <span>Cite As</span>-->
+<!--              <v-spacer />-->
+<!--              <v-icon right>-->
+<!--                mdi-chevron-down-->
+<!--              </v-icon>-->
+<!--            </v-btn>-->
+<!--          </template>-->
+<!--        </CiteAsDialog>-->
+<!--      </v-row>-->
     </div>
 
     <!-- Files and Metadata buttons -->
@@ -123,19 +123,19 @@
     </div>
 
     <!-- Share button -->
-    <div class="mt-6 mb-4">
-      <v-row
-        no-gutters
-        class="justify-center"
-      >
-        <v-btn
-          outlined
-          class="justify-center"
-        >
-          <ShareDialog text="Share" />
-        </v-btn>
-      </v-row>
-    </div>
+<!--    <div class="mt-6 mb-4">-->
+<!--      <v-row-->
+<!--        no-gutters-->
+<!--        class="justify-center"-->
+<!--      >-->
+<!--        <v-btn-->
+<!--          outlined-->
+<!--          class="justify-center"-->
+<!--        >-->
+<!--          <ShareDialog text="Share" />-->
+<!--        </v-btn>-->
+<!--      </v-row>-->
+<!--    </div>-->
   </v-card>
 </template>
 

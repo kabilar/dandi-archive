@@ -71,10 +71,10 @@
                   </v-icon>
                 </template>
                 <template v-if="modelValid">
-                  All metadata for this dandiset is valid.
+                  All metadata for this dataset is valid.
                 </template>
                 <template v-else>
-                  There are errors in the metadata for this Dandiset.
+                  There are errors in the metadata for this dataset.
                 </template>
               </v-tooltip>
               <v-tooltip bottom>
