@@ -16,7 +16,7 @@
         </v-card-title>
         <v-divider class="my-3" />
         <v-card-text>
-          This action will force publish this Dandiset, potentially
+          This action will force publish this dataset, potentially
           before the owners are prepared to do so.
         </v-card-text>
         <v-card-text>

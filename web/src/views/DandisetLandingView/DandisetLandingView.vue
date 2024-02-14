@@ -17,7 +17,7 @@
       <div class="d-block">
         <span class="text-h5">
           <v-icon>mdi-alert</v-icon>
-          Error: Dandiset does not exist
+          Error: Dataset does not exist
         </span>
         <br><br>
         <span class="text-body-2">
