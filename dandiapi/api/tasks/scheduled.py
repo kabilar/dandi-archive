@@ -144,7 +144,6 @@ def register_scheduled_tasks(sender: Celery, **kwargs):
     # Process new S3 logs every hour
     for log_bucket in [
         settings.DANDI_DANDISETS_LOG_BUCKET_NAME,
-        settings.DANDI_DANDISETS_EMBARGO_LOG_BUCKET_NAME,
     ]:
         sender.add_periodic_task(
             timedelta(hours=1),
