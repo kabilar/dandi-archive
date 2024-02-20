@@ -106,10 +106,10 @@
           >
             <v-card>
               <v-card-title>
-                Remove yourself from this Dandiset?
+                Remove yourself from this Dataset?
               </v-card-title>
               <v-card-subtitle>
-                To regain ownership of this dandiset, you will
+                To regain ownership of this dataset, you will
                 need another owner or an admin to add you.
               </v-card-subtitle>
               <v-card-actions>
@@ -183,8 +183,8 @@
         </v-card-title>
         <v-divider class="my-3" />
         <v-card-text>
-          This action will modify the owners of this dandiset.
-          <span class="font-weight-bold">You are not an owner of this dandiset,</span>
+          This action will modify the owners of this dataset.
+          <span class="font-weight-bold">You are not an owner of this dataset,</span>
           but as an admin you may still perform this action.
         </v-card-text>
         <v-card-text>
