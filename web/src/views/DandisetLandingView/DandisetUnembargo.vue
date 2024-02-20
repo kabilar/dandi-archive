@@ -17,7 +17,7 @@
         <v-divider class="my-3" />
         <v-card-text>
           <span>
-            This action will unembargo this dandiset. Note that this is a
+            This action will unembargo this dataset. Note that this is a
             <span class="font-weight-bold">
               permanent
             </span>
@@ -28,7 +28,7 @@
           </span>
         </v-card-text>
         <v-card-text>
-          Please enter this dandiset's identifier (
+          Please enter this dataset's identifier (
           <span class="font-weight-bold">
             {{ currentDandiset.dandiset.identifier }}
           </span>
@@ -86,7 +86,7 @@
             </v-btn>
           </div>
         </template>
-        <span v-if="unembargoing">This dandiset is being unembargoed, please wait.</span>
+        <span v-if="unembargoing">This dataset is being unembargoed, please wait.</span>
       </v-tooltip>
     </v-row>
     <v-row>

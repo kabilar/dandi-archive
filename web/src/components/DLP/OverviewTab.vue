@@ -141,7 +141,7 @@
           v-else-if="!assetSummary || !Object.keys(assetSummary).length"
           class="font-italic font-weight-bold"
         >
-          This Dandiset does not contain any assets.
+          This Dataset does not contain any assets.
         </div>
         <div
           v-for="([type, items], i) in Object.entries(assetSummary)"

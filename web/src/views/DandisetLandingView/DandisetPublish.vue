@@ -188,7 +188,7 @@
                       v-if="currentDandiset"
                       class="text-caption"
                     >
-                      Validation of the dandiset is pending.
+                      Validation of the dataset is pending.
                     </div>
                   </v-col>
                 </v-row>
@@ -236,7 +236,7 @@
             v-if="currentDandiset"
             class="text-caption"
           >
-            This Dandiset has {{ currentDandiset.version_validation_errors.length }}
+            This Dataset has {{ currentDandiset.version_validation_errors.length }}
             metadata validation error(s).
           </div>
         </v-col>
@@ -265,7 +265,7 @@
         <v-spacer />
         <v-col cols="9">
           <div class="text-caption">
-            This Dandiset has {{ numAssetValidationErrors }}
+            This Dataset has {{ numAssetValidationErrors }}
             asset validation error(s).
           </div>
         </v-col>
@@ -321,7 +321,7 @@
       </v-col>
     </v-row>
     <v-snackbar :value="!!alreadyBeingPublishedError">
-      This dandiset is already being published. Please wait for publishing to complete.
+      This dataset is already being published. Please wait for publishing to complete.
     </v-snackbar>
     <v-snackbar :value="!!publishedVersion">
       Publish complete.
@@ -439,25 +439,25 @@ const publishDisabledMessage: ComputedRef<string> = computed(() => {
     return 'Only draft versions can be published.';
   }
   if (!props.userCanModifyDandiset && !user.value?.admin) {
-    return 'You do not have permission to edit this dandiset.';
+    return 'You do not have permission to edit this dataset.';
   }
   if (currentDandiset.value?.status === 'Pending') {
-    return 'This dandiset has not yet been validated.';
+    return 'This dataset has not yet been validated.';
   }
   if (currentDandiset.value?.status === 'Validating') {
-    return 'Currently validating this dandiset.';
+    return 'Currently validating this dataset.';
   }
   if (currentDandiset.value?.status === 'Published') {
     return 'No changes since last publish.';
   }
   if (currentDandiset.value?.dandiset.embargo_status === 'UNEMBARGOING') {
-    return 'This dandiset is being unembargoed, please wait.';
+    return 'This dataset is being unembargoed, please wait.';
   }
   if (publishing.value) {
-    return 'This dandiset is being published, please wait.';
+    return 'This dataset is being published, please wait.';
   }
   if (containsZarr.value) {
-    return 'Dandisets containing Zarr archives cannot currently be published.';
+    return 'Datasets containing Zarr archives cannot currently be published.';
   }
   return '';
 });

@@ -17,17 +17,17 @@ class DandisetAlreadyPublishingError(DandiError):
 
 class DandisetBeingValidatedError(DandiError):
     http_status_code = status.HTTP_409_CONFLICT
-    message = 'Dandiset is currently being validated'
+    message = 'Dataset is currently being validated'
 
 
 class DandisetInvalidMetadataError(DandiError):
     http_status_code = status.HTTP_400_BAD_REQUEST
-    message = 'Dandiset metadata or asset metadata is not valid'
+    message = 'Dataset metadata or asset metadata is not valid'
 
 
 class DandisetValidationPendingError(DandiError):
     http_status_code = status.HTTP_409_CONFLICT
-    message = 'Metadata validation is pending for this dandiset, please try again later.'
+    message = 'Metadata validation is pending for this dataset, please try again later.'
 
 
 class DandisetNotLockedError(DandiError):
