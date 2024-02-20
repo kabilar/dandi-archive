@@ -8,7 +8,7 @@
       class="d-flex flex-column justify-center text-center"
     >
       <div class="text-h6 font-weight-light">
-        This Dandiset does not currently have any files associated with it,
+        This Dataset does not currently have any files associated with it,
         but this is where they will appear once they're added.
       </div>
       <div class="my-7">

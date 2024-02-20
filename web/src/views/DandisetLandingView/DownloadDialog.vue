@@ -105,7 +105,7 @@
                   in a Python 3.7+ environment using command:
                 </v-list-item>
                 <v-list-item>
-                  <kbd>pip install lincbrain</kbd>
+                  <kbd>pip install lincbrain-cli</kbd>
                 </v-list-item>
               </v-list>
             </v-expansion-panel-content>
