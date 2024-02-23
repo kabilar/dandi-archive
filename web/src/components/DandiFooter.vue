@@ -24,34 +24,27 @@
             rel="noopener"
           >{{ version }}</a>
         </v-col>
-<!--        <v-col>-->
-<!--          Funding / In-Kind Support:<br>-->
-<!--          - <a-->
-<!--            target="_blank"-->
-<!--            rel="noopener"-->
-<!--            href="https://braininitiative.nih.gov/"-->
-<!--          >BRAIN Initiative</a>-->
-<!--          <v-icon x-small>-->
-<!--            mdi-open-in-new-->
-<!--          </v-icon> / <a-->
-<!--            target="_blank"-->
-<!--            rel="noopener"-->
-<!--            href="https://www.nimh.nih.gov/index.shtml"-->
-<!--          >NIMH</a>-->
-<!--          <v-icon x-small>-->
-<!--            mdi-open-in-new-->
-<!--          </v-icon>-->
-<!--          <br>-->
-<!--          - <a-->
-<!--            target="_blank"-->
-<!--            rel="noopener"-->
-<!--            href="https://registry.opendata.aws/dandiarchive/"-->
-<!--          >AWS Open Dataset</a>-->
-<!--          <v-icon x-small>-->
-<!--            mdi-open-in-new-->
-<!--          </v-icon>-->
-<!--          <br>-->
-<!--        </v-col>-->
+        <v-col>
+          Funding / In-Kind Support:<br>
+          - <a
+            target="_blank"
+            rel="noopener"
+            href="https://braininitiative.nih.gov/"
+          >BRAIN Initiative</a>
+          <v-icon x-small>
+            mdi-open-in-new
+          </v-icon>
+          <br>
+          - <a
+            target="_blank"
+            rel="noopener"
+            :href="sentryLandingPageUrl"
+          >Sentry</a>
+          <v-icon x-small>
+            mdi-open-in-new
+          </v-icon>
+          <br>
+        </v-col>
         <v-col>
           Support:<br>
           - <a
@@ -97,7 +90,7 @@
 import { defineComponent } from 'vue';
 import CookieLaw from 'vue-cookie-law';
 
-import { dandiAboutUrl, lincBrainUrl } from '@/utils/constants';
+import { dandiAboutUrl, lincBrainUrl, sentryLandingPageUrl } from '@/utils/constants';
 import { cookiesEnabled } from '@/rest';
 
 const version = import.meta.env.VITE_APP_VERSION;
@@ -110,6 +103,7 @@ export default defineComponent({
     return {
       lincBrainUrl,
       dandiAboutUrl,
+      sentryLandingPageUrl,
       version,
       githubLink,
       cookiesEnabled,
