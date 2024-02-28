@@ -62,6 +62,8 @@ setup(
         'requests',
         's3-log-parse',
         'zarr-checksum>=0.2.8',
+        'rsa',
+        'httpx',
         # Production-only
         'django-composed-configuration[prod]>=0.23.0',
         'django-s3-file-field[s3]>=1.0.0',

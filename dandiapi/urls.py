@@ -103,6 +103,7 @@ urlpatterns = [
     ),
     path('api/search/genotypes/', search_genotypes),
     path('api/search/species/', search_species),
+    path('api/permissions/s3/', presigned_cookie_s3_cloudfront_view),
     path('admin/', admin.site.urls),
     path('dashboard/', DashboardView.as_view(), name='dashboard-index'),
     path('dashboard/user/<str:username>/', user_approval_view, name='user-approval'),

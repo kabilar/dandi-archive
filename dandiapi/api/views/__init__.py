@@ -17,6 +17,7 @@ from .upload import (
 from .users import users_me_view, users_search_view
 from .version import VersionViewSet
 
+
 __all__ = [
     'NestedAssetViewSet',
     'AssetViewSet',
