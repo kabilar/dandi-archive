@@ -18,6 +18,7 @@ from dandiapi.api.views import (
     authorize_view,
     blob_read_view,
     info_view,
+    presigned_cookie_s3_cloudfront_view,
     root_content_view,
     stats_view,
     upload_complete_view,
