@@ -63,6 +63,7 @@ setup(
         's3-log-parse',
         'zarr-checksum>=0.2.8',
         'rsa',
+        'cryptography',
         'httpx',
         # Production-only
         'django-composed-configuration[prod]>=0.23.0',

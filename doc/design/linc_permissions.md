@@ -15,6 +15,8 @@ https://github.com/orgs/lincbrain/projects/2?pane=issue&itemId=54650571
 
 https://github.com/neuroscales/ngtools/blob/main/notebooks/show_tract.ipynb
 
+https://github.com/google/neuroglancer/issues/507
+
 ## Implementation Options
 
 #### Issue read-only credentials for S3 bucket. Quick set up.
