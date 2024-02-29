@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
+
 from composed_configuration import (
     ComposedConfiguration,
     ConfigMixin,
