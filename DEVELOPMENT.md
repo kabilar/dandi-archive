@@ -38,8 +38,8 @@ but allows developers to run Python code on their native system.
 7. Run `source ./dev/export-env.sh`
 8. Run `./manage.py migrate`
 9. Run `./manage.py createcachetable`
-10. Run `./manage.py createsuperuser` and follow the prompts to create your own user
-11. Run `./manage.py create_dev_dandiset --owner your.email@email.com`
+10. Run `./manage.py createsuperuser --email $(git config user.email)` and follow the prompts.
+11. Run `./manage.py create_dev_dandiset --owner $(git config user.email)`
    to create a dummy dandiset to start working with.
 
 ### Run Application
@@ -115,7 +115,7 @@ to call.
 
 ### Creating a Token
 Visit the URL `/admin` with a web browser, logging
-in with the credentials entered during the `createsuperuser` setup step..
+in with the credentials entered during the `createsuperuser` setup step.
 Then go to `/swagger` and use `GET /auth/token` end-point.
 
 ### Supplying the Token
@@ -130,7 +130,7 @@ For frequent deployment administration tasks, `django-extensions` provides a con
 ### create_dev_dandiset
 
 ```
-python manage.py create_dev_dandiset --owner your.email@email.com --name My Dummy Dandiset
+python manage.py create_dev_dandiset --owner $(git config user.email) --name My Dummy Dandiset
 ```
 
 This creates a dummy dandiset with valid metadata and a single dummy asset.
