@@ -19,6 +19,7 @@ if TYPE_CHECKING:
     from django.http.response import HttpResponseBase
     from rest_framework.request import Request
 
+
 def rsa_signer(message):
     import os
     print(os.getcwd())
