@@ -8,47 +8,99 @@ from rest_framework.parsers import JSONParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from dandiapi.api.utils import CloudFrontCookieGenerator
-
-import datetime
-from botocore.signers import CloudFrontSigner
-import rsa
+import time
 import json
+import base64
 
-if TYPE_CHECKING:
-    from django.http.response import HttpResponseBase
-    from rest_framework.request import Request
-
-def rsa_signer(message):
-    import os
-    print(os.getcwd())
-    private_pem_location = 'private_key.pem' # Aaron - TODO
-    with open(private_pem_location, 'r') as key_file:
-        private_key = rsa.PrivateKey.load_pkcs1(key_file.read())
-    return rsa.sign(message, private_key, 'SHA-1')
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.asymmetric import padding
+from cryptography.hazmat.primitives.serialization import load_pem_private_key
 
 
-def get_cloudfront_cookies():
-    key_pair_id = 'fa996026-f6b3-4979-b758-ccfdc7515ec8'  # test-bucket-key-group -- lincbrain AWS
-    asset_url_folder = 'zarr'  # Aaron - TODO asset_url_folder should be parent folder for all zarr, etc. assets in LINC Archive -- should be OS Env Secret
-    number_of_days = 1
+def _replace_unsupported_chars(some_str):
+    """Replace unsupported chars: '+=/' with '-_~'"""
+    return some_str.replace("+", "-") \
+        .replace("=", "_") \
+        .replace("/", "~")
 
-    policy = {
+
+def _in_an_hour():
+    """Returns a UTC POSIX timestamp for one hour in the future"""
+    return int(time.time()) + (60*60)
+
+
+def rsa_signer(message, key):
+    """
+    Sign a message using RSA private key with PKCS#1 v1.5 padding and SHA-1 hash.
+
+    :param message: The message to sign
+    :param key: RSA private key in PEM format
+    :return: The signature
+    """
+    private_key = load_pem_private_key(
+        key,
+        password=None,  # Replace with password if the private key is encrypted
+    )
+
+    # Updated signing process
+    signature = private_key.sign(
+        message,
+        padding.PKCS1v15(),
+        hashes.SHA1()
+    )
+
+    return signature
+
+
+def generate_policy_cookie(url):
+    """Returns a tuple: (policy json, policy base64)"""
+
+    policy_dict = {
         "Statement": [
             {
-                "Resource": f"{asset_url_folder}/*",
+                "Resource": url,
                 "Condition": {
-                    "DateLessThan": {"AWS:EpochTime": int((datetime.datetime.now() + datetime.timedelta(days=number_of_days)).timestamp())}
+                    "DateLessThan": {
+                        "AWS:EpochTime": _in_an_hour()
+                    }
                 }
             }
         ]
     }
-    print(3)
-    cloudfront_signer = CloudFrontSigner(key_pair_id, rsa_signer)
-    print(4)
-    cookies = cloudfront_signer.generate_cookies(policy=json.dumps(policy), secure=True)
-    print(5)
-    return cookies
+
+    # Using separators=(',', ':') removes seperator whitespace
+    policy_json = json.dumps(policy_dict, separators=(",", ":"))
+
+    policy_64 = str(base64.b64encode(policy_json.encode("utf-8")), "utf-8")
+    policy_64 = _replace_unsupported_chars(policy_64)
+    return policy_json, policy_64
+
+
+def generate_signature(policy, key):
+    """Creates a signature for the policy from the key, returning a string"""
+    sig_bytes = rsa_signer(policy.encode("utf-8"), key)
+    sig_64 = _replace_unsupported_chars(str(base64.b64encode(sig_bytes), "utf-8"))
+    return sig_64
+
+
+def generate_cookies(policy, signature, cloudfront_id):
+    """Returns a dictionary for cookie values in the form 'COOKIE NAME': 'COOKIE VALUE'"""
+    return {
+        "CloudFront-Policy": policy,
+        "CloudFront-Signature": signature,
+        "CloudFront-Key-Pair-Id": cloudfront_id
+    }
+
+
+def generate_signed_cookies(url, cloudfront_id, key):
+    policy_json, policy_64 = generate_policy_cookie(url)
+    signature = generate_signature(policy_json, key)
+    return generate_cookies(policy_64, signature, cloudfront_id)
+
+
+if TYPE_CHECKING:
+    from django.http.response import HttpResponseBase
+    from rest_framework.request import Request
 
 @swagger_auto_schema(
     method='GET',
@@ -61,29 +113,23 @@ def get_cloudfront_cookies():
 @parser_classes([JSONParser])
 @permission_classes([IsAuthenticated])
 def presigned_cookie_s3_cloudfront_view(request: Request) -> HttpResponseBase:
-    expires_in_minutes = 20
-    key_pair_id = 'fa996026-f6b3-4979-b758-ccfdc7515ec8'  # test-bucket-key-group -- lincbrain AWS
-    object_url = 'https://d2du7pzm1jeax1.cloudfront.net/zarr'
+    import os
+    path = f'{os.getcwd()}/dandiapi/api/privkey.pem'
+    key_id = 'K350HZY8RS1FBD'  # pkcs1 -- lincbrain AWS
+    object_url = 'https://neuroglancer.lincbrain.org/*'
+    with open(path, "rb") as f:
+        cookies = generate_signed_cookies(object_url, key_id, f.read())
 
-    cloudfront_cookie_generator = CloudFrontCookieGenerator(private_key_file='private_key.pem')
-    expires_at = int((datetime.datetime.utcnow() + datetime.timedelta(minutes=expires_in_minutes)).timestamp())
 
-    cookies = cloudfront_cookie_generator.create_signed_cookies(
-        resource=object_url,
-        keypair_id=key_pair_id,
-        expires_at=expires_at
-    )
-
-    response_data = {"message": "Cookies successfully generated"}
+    response_data = {"message": cookies}
     response = Response(response_data)
     for cookie_name, cookie_value in cookies.items():
-        response.set_cookie(
-            key=cookie_name,
-            value=cookie_value,
-            max_age=60*60*24,
-            expires=60*60*24, # 1 day
-            secure=True,
-            httponly=True
-        )
+            response.set_cookie(
+                key=cookie_name,
+                value=cookie_value,
+                secure=True,
+                httponly=True,
+                domain=".lincbrain.org"
+            )
 
     return response
