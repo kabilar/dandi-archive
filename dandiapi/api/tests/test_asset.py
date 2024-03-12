@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-import os.path
 from uuid import uuid4
 
 from django.conf import settings
@@ -1367,7 +1366,7 @@ def test_asset_download(api_client, user, storage, version, asset):
     download = requests.get(download_url, timeout=5)
     cd_header = download.headers.get('Content-Disposition')
 
-    assert cd_header == f'attachment; filename="{os.path.basename(asset.path)}"'
+    assert cd_header == f'attachment; filename="{asset.path.split("/")[-1]}"'
 
     with asset.blob.blob.file.open('rb') as reader:
         assert download.content == reader.read()
@@ -1413,7 +1412,7 @@ def test_asset_download_embargo(
     download = requests.get(download_url, timeout=5)
     cd_header = download.headers.get('Content-Disposition')
 
-    assert cd_header == f'attachment; filename="{os.path.basename(asset.path)}"'
+    assert cd_header == f'attachment; filename="{asset.path.split("/")[-1]}"'
 
     with asset.embargoed_blob.blob.file.open('rb') as reader:
         assert download.content == reader.read()
@@ -1451,7 +1450,7 @@ def test_asset_direct_download(api_client, user, storage, version, asset):
     download = requests.get(download_url, timeout=5)
     cd_header = download.headers.get('Content-Disposition')
 
-    assert cd_header == f'attachment; filename="{os.path.basename(asset.path)}"'
+    assert cd_header == f'attachment; filename="{asset.path.split("/")[-1]}"'
 
     with asset.blob.blob.file.open('rb') as reader:
         assert download.content == reader.read()
@@ -1487,7 +1486,7 @@ def test_asset_direct_download_head(api_client, user, storage, version, asset):
     download = requests.get(download_url, timeout=5)
     cd_header = download.headers.get('Content-Disposition')
 
-    assert cd_header == f'attachment; filename="{os.path.basename(asset.path)}"'
+    assert cd_header == f'attachment; filename="{asset.path.split("/")[-1]}"'
 
     with asset.blob.blob.file.open('rb') as reader:
         assert download.content == reader.read()

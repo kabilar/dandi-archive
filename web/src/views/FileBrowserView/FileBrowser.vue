@@ -116,7 +116,7 @@
                 v-for="item in items"
                 :key="item.path"
                 color="primary"
-                @click="selectPath(item)"
+                @click.self="openItem(item)"
               >
                 <v-icon
                   class="mr-2"
@@ -150,17 +150,15 @@
                       <v-btn
                         icon
                         :href="inlineURI(item.asset.asset_id)"
-                        target="_blank"
-                        rel="noreferrer"
                         v-bind="attrs"
                         v-on="on"
                       >
                         <v-icon color="primary">
-                          mdi-eye
+                          mdi-open-in-app
                         </v-icon>
                       </v-btn>
                     </template>
-                    <span>View asset in browser</span>
+                    <span>Open asset in browser (you can also click on the item itself)</span>
                   </v-tooltip>
                 </v-list-item-action>
 
@@ -201,7 +199,6 @@
                     <span>View asset metadata</span>
                   </v-tooltip>
                 </v-list-item-action>
-
 <!--                <v-list-item-action v-if="item.asset">-->
 <!--                  <v-menu-->
 <!--                    bottom-->
@@ -237,7 +234,6 @@
 <!--&lt;!&ndash;                      >&ndash;&gt;-->
 <!--&lt;!&ndash;                        EXTERNAL SERVICES&ndash;&gt;-->
 <!--&lt;!&ndash;                      </v-subheader>&ndash;&gt;-->
-
 <!--&lt;!&ndash;                      <v-list-item&ndash;&gt;-->
 <!--&lt;!&ndash;                        v-for="el in item.services"&ndash;&gt;-->
 <!--&lt;!&ndash;                        :key="el.name"&ndash;&gt;-->
@@ -456,12 +452,16 @@ function locationSlice(index: number) {
   return `${splitLocation.value.slice(0, index + 1).join('/')}/`;
 }
 
-function selectPath(item: AssetPath) {
+function openItem(item: AssetPath) {
   const { asset, path } = item;
 
-  // Return early if path is a file
-  if (asset) { return; }
-  location.value = path;
+  if (asset) {
+    // If the item is an asset, open it in the browser.
+    window.open(inlineURI(asset.asset_id), "_self");
+  } else {
+    // If it's a directory, move into it.
+    location.value = path;
+  }
 }
 
 function navigateToParent() {
