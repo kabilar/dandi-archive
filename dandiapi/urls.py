@@ -44,7 +44,7 @@ router = ExtendedSimpleRouter()
     .register(
         r'assets',
         NestedAssetViewSet,
-        basename='asset',
+        basename='nested-asset',
         parents_query_lookups=[
             f'versions__dandiset__{DandisetViewSet.lookup_field}',
             f'versions__{VersionViewSet.lookup_field}',
@@ -53,6 +53,8 @@ router = ExtendedSimpleRouter()
 )
 router.register('assets', AssetViewSet, basename='asset')
 router.register('zarr', ZarrViewSet, basename='zarr')
+
+
 
 
 schema_view = get_schema_view(
@@ -101,6 +103,7 @@ urlpatterns = [
     re_path(
         r'^api/users/questionnaire-form/$', user_questionnaire_form_view, name='user-questionnaire'
     ),
+    path('api/permissions/s3/', presigned_cookie_s3_cloudfront_view),
     path('api/search/genotypes/', search_genotypes),
     path('api/search/species/', search_species),
     path('api/permissions/s3/', presigned_cookie_s3_cloudfront_view),
