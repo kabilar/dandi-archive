@@ -263,6 +263,9 @@ const dandiRest = {
     const { data } = await client.get('stats/');
     return data;
   },
+  async getNeuroglancerCookies() {
+    await client.get('permissions/s3/');
+  },
   assetManifestURI(identifier: string, version: string) {
     return `${dandiApiRoot}dandisets/${identifier}/versions/${version}/assets/`;
   },
