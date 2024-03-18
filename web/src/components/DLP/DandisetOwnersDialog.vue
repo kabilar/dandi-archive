@@ -184,7 +184,7 @@
         <v-divider class="my-3" />
         <v-card-text>
           This action will modify the owners of this dataset.
-          <span class="font-weight-bold">You are not an owner of this dataset,</span>
+          <span class="font-weight-bold">t an owner of this dataset,</span>
           but as an admin you may still perform this action.
         </v-card-text>
         <v-card-text>

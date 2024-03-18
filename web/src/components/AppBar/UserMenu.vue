@@ -32,6 +32,14 @@
         </v-list-item-content>
       </v-list-item>
       <ApiKeyItem v-if="user?.approved" />
+      <v-list-item @click="getNeuroglancerCookies">
+        <v-list-item-content>
+          Get Neuroglancer Cookies
+        </v-list-item-content>
+        <v-list-item-action>
+          <v-icon>mdi-cookie</v-icon>
+        </v-list-item-action>
+      </v-list-item>
       <v-list-item @click="logout">
         <v-list-item-content>
           Logout
@@ -66,6 +74,10 @@ const userInitials = computed(() => {
   }
   return '??';
 });
+
+async function getNeuroglancerCookies() {
+  await dandiRest.getNeuroglancerCookies();
+}
 
 async function logout() {
   await dandiRest.logout();

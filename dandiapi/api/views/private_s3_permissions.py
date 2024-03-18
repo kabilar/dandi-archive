@@ -12,6 +12,7 @@ import time
 import json
 import base64
 import io
+import os
 
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding
@@ -42,7 +43,7 @@ def rsa_signer(message, key):
     """
     private_key = load_pem_private_key(
         key,
-        password=None,  # Replace with password if the private key is encrypted
+        password=None
     )
 
     # Updated signing process
@@ -86,19 +87,19 @@ def generate_signature(policy, key):
     return sig_64
 
 
-def generate_cookies(policy, signature, cloudfront_id):
+def generate_cookies(policy, signature):
     """Returns a dictionary for cookie values in the form 'COOKIE NAME': 'COOKIE VALUE'"""
     return {
         "CloudFront-Policy": policy,
         "CloudFront-Signature": signature,
-        "CloudFront-Key-Pair-Id": cloudfront_id
+        "CloudFront-Key-Pair-Id": os.getenv('CLOUDFRONT_PEM_KEY_ID')
     }
 
 
-def generate_signed_cookies(url, cloudfront_id, key):
-    policy_json, policy_64 = generate_policy_cookie(url)
+def generate_signed_cookies(key):
+    policy_json, policy_64 = generate_policy_cookie(os.getenv('CLOUDFRONT_NEUROGLANCER_URL'))
     signature = generate_signature(policy_json, key)
-    return generate_cookies(policy_64, signature, cloudfront_id)
+    return generate_cookies(policy_64, signature)
 
 
 if TYPE_CHECKING:
@@ -119,15 +120,12 @@ def presigned_cookie_s3_cloudfront_view(request: Request) -> HttpResponseBase:
 
     # Get Private PEM Key from S3
     client = get_boto_client(get_storage())
-    private_pem_key = f'cloudfront/private_key_{settings.DJANGO_SENTRY_ENVIRONMENT}_new.pem'
+    private_pem_key = os.getenv('CLOUDFRONT_PRIVATE_PEM_S3_LOCATION')
     response = client.get_object(Bucket=settings.DANDI_DANDISETS_BUCKET_NAME, Key=private_pem_key)
     pem_content = response['Body'].read()
 
-    public_cloudfront_key_id = 'KZQ92MU8PCLJ8'  # pkcs1 -- lincbrain AWS -- staging-key
-    neuroglancer_url = 'https://neuroglancer.lincbrain.org/*'
-
     with io.BytesIO(pem_content) as pem_file:
-        cookies = generate_signed_cookies(neuroglancer_url, public_cloudfront_key_id, pem_file.read())
+        cookies = generate_signed_cookies(pem_file.read())
 
     response_data = {"message": cookies}
     response = Response(response_data)
@@ -137,7 +135,7 @@ def presigned_cookie_s3_cloudfront_view(request: Request) -> HttpResponseBase:
                 value=cookie_value,
                 secure=True,
                 httponly=True,
-                domain=".lincbrain.org"
+                domain=f".{os.getenv('CLOUDFRONT_BASE_URL')}"
             )
 
     return response
