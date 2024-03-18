@@ -118,11 +118,12 @@ if TYPE_CHECKING:
 def presigned_cookie_s3_cloudfront_view(request: Request) -> HttpResponseBase:
 
     # Get Private PEM Key from S3
+    client = get_boto_client(get_storage())
     private_pem_key = f'cloudfront/private_key_{settings.DJANGO_SENTRY_ENVIRONMENT}_new.pem'
     response = client.get_object(Bucket=settings.DANDI_DANDISETS_BUCKET_NAME, Key=private_pem_key)
     pem_content = response['Body'].read()
 
-    public_cloudfront_key_id = 'KZQ92MU8PCLJ8'  # pkcs1 -- lincbrain AWS
+    public_cloudfront_key_id = 'KZQ92MU8PCLJ8'  # pkcs1 -- lincbrain AWS -- staging-key
     neuroglancer_url = 'https://neuroglancer.lincbrain.org/*'
 
     with io.BytesIO(pem_content) as pem_file:
