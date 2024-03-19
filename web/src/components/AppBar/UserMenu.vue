@@ -1,13 +1,7 @@
 <template>
-  <!-- maybe...
-    :close-on-content-click="false"
-  -->
-  <v-menu offset-y>
+  <v-menu offset-y :close-on-content-click="false">
     <template #activator="{ on }">
-      <v-btn
-        icon
-        v-on="on"
-      >
+      <v-btn icon v-on="on">
         <v-avatar color="light-blue lighten-4">
           <span class="primary--text">
             {{ userInitials }}
@@ -15,29 +9,28 @@
         </v-avatar>
       </v-btn>
     </template>
-    <v-list
-      id="user-menu"
-      dense
-    >
+    <v-list id="user-menu" dense>
       <v-list-item>
         <v-list-item-content>
           <span v-if="user">
-            You are logged in as <a
-              :href="`https://github.com/${user.username}`"
-              target="_blank"
-              rel="noopener"
-              v-text="user.username"
-            />.
+            You are logged in as
+            <a :href="`https://github.com/${user.username}`" target="_blank" rel="noopener" v-text="user.username" />.
           </span>
         </v-list-item-content>
       </v-list-item>
       <ApiKeyItem v-if="user?.approved" />
-      <v-list-item @click="getNeuroglancerCookies">
+      <v-list-item @click="getNeuroglancerCookies" v-if="user?.approved">
         <v-list-item-content>
           Get Neuroglancer Cookies
         </v-list-item-content>
         <v-list-item-action>
           <v-icon>mdi-cookie</v-icon>
+          <span v-if="cookiesRequestSuccess == 1" style="color: green; margin-left: 10px;">
+            Success!
+          </span>
+          <span v-if="cookiesRequestSuccess == -1" style="color: red; margin-left: 10px;">
+            Unable to get cookies
+          </span>
         </v-list-item-action>
       </v-list-item>
       <v-list-item @click="logout">
@@ -53,8 +46,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
-
+import { computed, ref } from 'vue';
 import { user, dandiRest } from '@/rest';
 import ApiKeyItem from '@/components/AppBar/ApiKeyItem.vue';
 
@@ -75,12 +67,24 @@ const userInitials = computed(() => {
   return '??';
 });
 
+const cookiesRequestSuccess = ref(0);
+
 async function getNeuroglancerCookies() {
-  await dandiRest.getNeuroglancerCookies();
+  try {
+    await dandiRest.getNeuroglancerCookies();
+    // If the API call doesn't throw an error, consider it a success
+    cookiesRequestSuccess.value = 1;
+    // Optionally, reset the success state after a delay
+    setTimeout(() => { cookiesRequestSuccess.value = 0; }, 3000); // Reset after 3 seconds
+  } catch (error) {
+    // If there is an error, consider it a failure
+    cookiesRequestSuccess.value = -1;
+    setTimeout(() => { cookiesRequestSuccess.value = 0; }, 3000); // Reset after 3 seconds
+  }
 }
+
 
 async function logout() {
   await dandiRest.logout();
 }
-
 </script>
