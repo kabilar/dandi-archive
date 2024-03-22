@@ -118,7 +118,7 @@ if TYPE_CHECKING:
 @parser_classes([JSONParser])
 @permission_classes([IsAuthenticated])
 def presigned_cookie_s3_cloudfront_view(request: Request, asset_path=None) -> HttpResponseBase:
-    print(asset_path)
+    print(f'{asset_path} Aaron')
     # Get Private PEM Key from S3
     client = get_boto_client(get_storage())
     private_pem_key = os.getenv('CLOUDFRONT_PRIVATE_PEM_S3_LOCATION')

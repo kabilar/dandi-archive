@@ -237,7 +237,7 @@
                       <v-list-item
                         v-for="el in item.services"
                         :key="el.name"
-                        @click="el.isNeuroglancer ? redirectToNeuroglancerUrl() : null"
+                        @click="el.isNeuroglancer ? redirectToNeuroglancerUrl(item) : null"
                         :href="!el.isNeuroglancer ? el.url : null"
                         target="_blank"
                         rel="noreferrer"
@@ -419,8 +419,11 @@ function serviceURL(endpoint: string, data: {
     .replaceAll('$asset_s3_url$', data.assetS3Url);
 }
 
-function redirectToNeuroglancerUrl() {
-  window.open("https://www.google.com", "_blank");
+async function redirectToNeuroglancerUrl(item: any) {
+  console.log(item.path)
+  const response = await dandiRest.getNeuroglancerCookiesWithNeuroglancerUrl(item.path)
+  console.log(response)
+  // window.open("https://www.google.com", "_blank");
 }
 
 function getExternalServices(path: AssetPath, info: {dandisetId: string, dandisetVersion: string}) {
@@ -468,8 +471,10 @@ function openItem(item: AssetPath) {
   const { asset, path } = item;
 
   if (asset) {
+    // If the item is an asset, open it in the browser.
     window.open(inlineURI(asset.asset_id), "_self");
   } else {
+    // If it's a directory, move into it.
     location.value = path;
   }
 }
