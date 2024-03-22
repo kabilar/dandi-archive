@@ -28,9 +28,9 @@ def _replace_unsupported_chars(some_str):
         .replace("/", "~")
 
 
-def _in_an_hour():
-    """Returns a UTC POSIX timestamp for one hour in the future"""
-    return int(time.time()) + (60*60)
+def _in_a_day():
+    """Returns a UTC POSIX timestamp for one day in the future"""
+    return int(time.time()) + (24 * 60 * 60)
 
 
 def rsa_signer(message, key):
@@ -62,10 +62,10 @@ def generate_policy_cookie(url):
     policy_dict = {
         "Statement": [
             {
-                "Resource": url,
+                "Resource": f'{url}/*',
                 "Condition": {
                     "DateLessThan": {
-                        "AWS:EpochTime": _in_an_hour()
+                        "AWS:EpochTime": _in_a_day()
                     }
                 }
             }
@@ -97,7 +97,8 @@ def generate_cookies(policy, signature):
 
 
 def generate_signed_cookies(key):
-    policy_json, policy_64 = generate_policy_cookie(os.getenv('CLOUDFRONT_NEUROGLANCER_URL'))
+    neuroglancer_url = os.getenv('CLOUDFRONT_NEUROGLANCER_URL')
+    policy_json, policy_64 = generate_policy_cookie(neuroglancer_url)
     signature = generate_signature(policy_json, key)
     return generate_cookies(policy_64, signature)
 
@@ -116,8 +117,8 @@ if TYPE_CHECKING:
 @api_view(['GET'])
 @parser_classes([JSONParser])
 @permission_classes([IsAuthenticated])
-def presigned_cookie_s3_cloudfront_view(request: Request) -> HttpResponseBase:
-
+def presigned_cookie_s3_cloudfront_view(request: Request, asset_path=None) -> HttpResponseBase:
+    print(f'{asset_path} Aaron')
     # Get Private PEM Key from S3
     client = get_boto_client(get_storage())
     private_pem_key = os.getenv('CLOUDFRONT_PRIVATE_PEM_S3_LOCATION')
@@ -127,15 +128,19 @@ def presigned_cookie_s3_cloudfront_view(request: Request) -> HttpResponseBase:
     with io.BytesIO(pem_content) as pem_file:
         cookies = generate_signed_cookies(pem_file.read())
 
-    response_data = {"message": cookies}
+    if not asset_path:
+        response_data = {"message": cookies}
+    else:
+        response_data = {}
+
     response = Response(response_data)
     for cookie_name, cookie_value in cookies.items():
-            response.set_cookie(
-                key=cookie_name,
-                value=cookie_value,
-                secure=True,
-                httponly=True,
-                domain=f".{os.getenv('CLOUDFRONT_BASE_URL')}"
-            )
+        response.set_cookie(
+            key=cookie_name,
+            value=cookie_value,
+            secure=True,
+            httponly=True,
+            domain=f".{os.getenv('CLOUDFRONT_BASE_URL')}"
+        )
 
     return response
