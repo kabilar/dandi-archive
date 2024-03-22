@@ -100,3 +100,4 @@ export interface AssetPath {
   aggregate_size: number;
   asset: AssetFile | null;
 }
+
