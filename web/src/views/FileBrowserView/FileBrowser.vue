@@ -420,8 +420,8 @@ function serviceURL(endpoint: string, data: {
 }
 
 async function redirectToNeuroglancerUrl(item: any) {
-  console.log(item.path)
-  const response = await dandiRest.getNeuroglancerCookiesWithNeuroglancerUrl(item.path)
+  console.log(item)
+  const response = await dandiRest.getNeuroglancerCookiesWithNeuroglancerUrl(item.asset.url)
   console.log(response)
   // window.open("https://www.google.com", "_blank");
 }
