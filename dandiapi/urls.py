@@ -103,7 +103,8 @@ urlpatterns = [
     re_path(
         r'^api/users/questionnaire-form/$', user_questionnaire_form_view, name='user-questionnaire'
     ),
-    path('api/permissions/s3/', presigned_cookie_s3_cloudfront_view),
+    path('api/permissions/s3/', presigned_cookie_s3_cloudfront_view, name='presigned_cookie_s3_cloudfront'),
+    path('s3/cloudfront/presigned-cookie/<path:asset_path>/', presigned_cookie_s3_cloudfront_view, name='presigned_cookie_s3_cloudfront_detail'),
     path('api/search/genotypes/', search_genotypes),
     path('api/search/species/', search_species),
     path('api/permissions/s3/', presigned_cookie_s3_cloudfront_view),
@@ -117,6 +118,7 @@ urlpatterns = [
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 ]
+
 
 if settings.ENABLE_GITHUB_OAUTH:
     # Include github oauth endpoints only
