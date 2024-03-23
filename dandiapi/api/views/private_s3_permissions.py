@@ -13,6 +13,7 @@ import json
 import base64
 import io
 import os
+import urllib
 
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding
@@ -20,6 +21,32 @@ from cryptography.hazmat.primitives.serialization import load_pem_private_key
 
 from dandiapi.api.storage import get_boto_client, get_storage
 from django.conf import settings
+
+
+def construct_neuroglancer_url(source, layer_name):
+    neuroglancer_url = os.getenv('CLOUDFRONT_NEUROGLANCER_URL')
+    base_url = f'{neuroglancer_url}/cloudfront/frontend/index.html#!'
+    json_object = {
+        "layers": [
+            {
+                "type": "new",
+                "source": source,
+                "tab": "source",
+                "name": layer_name
+            }
+        ],
+        "selectedLayer": {
+            "visible": True,
+            "layer": layer_name
+        },
+        "layout": "4panel"
+    }
+
+    json_str = json.dumps(json_object)
+    encoded_json = urllib.parse.quote(json_str)
+    full_url = f"{base_url}{encoded_json}"
+
+    return full_url
 
 def _replace_unsupported_chars(some_str):
     """Replace unsupported chars: '+=/' with '-_~'"""
@@ -118,7 +145,6 @@ if TYPE_CHECKING:
 @parser_classes([JSONParser])
 @permission_classes([IsAuthenticated])
 def presigned_cookie_s3_cloudfront_view(request: Request, asset_path=None) -> HttpResponseBase:
-    print(f'{asset_path} Aaron')
     # Get Private PEM Key from S3
     client = get_boto_client(get_storage())
     private_pem_key = os.getenv('CLOUDFRONT_PRIVATE_PEM_S3_LOCATION')
@@ -129,9 +155,24 @@ def presigned_cookie_s3_cloudfront_view(request: Request, asset_path=None) -> Ht
         cookies = generate_signed_cookies(pem_file.read())
 
     if not asset_path:
-        response_data = {"message": cookies}
+        response_data = {"message": "Cookies successfully generated"}
     else:
-        response_data = {}
+        replacement_url = os.getenv('CLOUDFRONT_NEUROGLANCER_URL')
+        parts = asset_path.split('/')
+        file_type_prefix = parts[3]
+        cloudfront_s3_location = replacement_url + '/' + '/'.join(parts[3:])
+
+        if file_type_prefix != 'zarr':
+            file_type_prefix = 'nifti'
+
+        complete_url = construct_neuroglancer_url(
+            f'{file_type_prefix}://{cloudfront_s3_location}',
+            parts[4]
+        )
+
+        response_data = {
+            "full_url": complete_url
+        }
 
     response = Response(response_data)
     for cookie_name, cookie_value in cookies.items():

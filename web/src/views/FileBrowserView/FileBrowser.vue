@@ -420,10 +420,9 @@ function serviceURL(endpoint: string, data: {
 }
 
 async function redirectToNeuroglancerUrl(item: any) {
-  console.log(item)
   const response = await dandiRest.getNeuroglancerCookiesWithNeuroglancerUrl(item.asset.url)
-  console.log(response)
-  // window.open("https://www.google.com", "_blank");
+  const data = await response.json();
+  window.open(data.full_url, "_blank");
 }
 
 function getExternalServices(path: AssetPath, info: {dandisetId: string, dandisetVersion: string}) {
