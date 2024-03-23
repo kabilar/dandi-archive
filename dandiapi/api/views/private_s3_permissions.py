@@ -14,6 +14,8 @@ import base64
 import io
 import os
 import neuroglancer
+from neuroglancer.viewer_base import ViewerBase
+from urllib.parse import quote
 
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding
@@ -21,6 +23,17 @@ from cryptography.hazmat.primitives.serialization import load_pem_private_key
 
 from dandiapi.api.storage import get_boto_client, get_storage
 from django.conf import settings
+
+def ordered_dict_to_neuroglancer_url(ordered_dict, base_url):
+    dict_data = json.loads(json.dumps(ordered_dict))
+
+    json_str = json.dumps(dict_data)
+
+    encoded_json = quote(json_str)
+
+    full_url = f"{base_url}#!{encoded_json}"
+
+    return full_url
 
 def _replace_unsupported_chars(some_str):
     """Replace unsupported chars: '+=/' with '-_~'"""
@@ -129,13 +142,35 @@ def presigned_cookie_s3_cloudfront_view(request: Request, asset_path=None) -> Ht
         cookies = generate_signed_cookies(pem_file.read())
 
     if not asset_path:
-        response_data = {"message": cookies}
+        response_data = {"message": "cookies successfully generated"}
     else:
-        # https://linc-brain-mit-staging-us-east-2.s3.amazonaws.com/zarr/4bc0cab1-31a8-4305-9158-0e7fd7e12bcb/ Aaron
+        # https://linc-brain-mit-staging-us-east-2.s3.amazonaws.com/zarr/4bc0cab1-31a8-4305-9158-0e7fd7e12bcb/
         replacement_url = os.getenv('CLOUDFRONT_NEUROGLANCER_URL')
         parts = asset_path.split('/')
+        file_prefix = parts[3]
         cloudfront_s3_location = replacement_url + '/' + '/'.join(parts[3:])
-        response_data = {}
+
+        if file_prefix != 'zarr':
+            file_prefix = 'nifti'
+
+        viewer = ViewerBase(token='1') # use ViewerBase instead of Viewer to not launch server
+        with viewer.txn() as state:
+            state.layers.append(
+                name=parts[4],
+                layer=neuroglancer.ImageLayer(
+                    source=[f'{file_prefix}://' + cloudfront_s3_location],
+                )
+            )
+            x = ordered_dict_to_neuroglancer_url(
+                state._json_data,
+                f'{replacement_url}/cloudfront/frontend/index.html'
+            )
+            print(x)
+
+        response_data = {
+            "url": cloudfront_s3_location,
+
+        }
 
     response = Response(response_data)
     for cookie_name, cookie_value in cookies.items():
