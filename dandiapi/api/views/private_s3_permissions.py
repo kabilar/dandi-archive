@@ -13,6 +13,7 @@ import json
 import base64
 import io
 import os
+import neuroglancer
 
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding
@@ -118,7 +119,6 @@ if TYPE_CHECKING:
 @parser_classes([JSONParser])
 @permission_classes([IsAuthenticated])
 def presigned_cookie_s3_cloudfront_view(request: Request, asset_path=None) -> HttpResponseBase:
-    print(f'{asset_path} Aaron')
     # Get Private PEM Key from S3
     client = get_boto_client(get_storage())
     private_pem_key = os.getenv('CLOUDFRONT_PRIVATE_PEM_S3_LOCATION')
@@ -131,6 +131,10 @@ def presigned_cookie_s3_cloudfront_view(request: Request, asset_path=None) -> Ht
     if not asset_path:
         response_data = {"message": cookies}
     else:
+        # https://linc-brain-mit-staging-us-east-2.s3.amazonaws.com/zarr/4bc0cab1-31a8-4305-9158-0e7fd7e12bcb/ Aaron
+        replacement_url = os.getenv('CLOUDFRONT_NEUROGLANCER_URL')
+        parts = asset_path.split('/')
+        cloudfront_s3_location = replacement_url + '/' + '/'.join(parts[3:])
         response_data = {}
 
     response = Response(response_data)

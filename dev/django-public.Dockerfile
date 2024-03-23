@@ -3,7 +3,7 @@ FROM python:3.11-slim
 # * psycopg2
 RUN apt-get update && \
     apt-get install --no-install-recommends --yes \
-    libpq-dev gcc libc6-dev git && \
+    libpq-dev gcc g++ libc6-dev git && \
     rm -rf /var/lib/apt/lists/*
 
 ENV PYTHONUNBUFFERED 1
