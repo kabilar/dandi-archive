@@ -18,6 +18,7 @@ from dandiapi.api.views import (
     authorize_view,
     blob_read_view,
     info_view,
+    presigned_cookie_s3_cloudfront_view,
     root_content_view,
     stats_view,
     upload_complete_view,
@@ -43,7 +44,7 @@ router = ExtendedSimpleRouter()
     .register(
         r'assets',
         NestedAssetViewSet,
-        basename='asset',
+        basename='nested-asset',
         parents_query_lookups=[
             f'versions__dandiset__{DandisetViewSet.lookup_field}',
             f'versions__{VersionViewSet.lookup_field}',
@@ -52,6 +53,8 @@ router = ExtendedSimpleRouter()
 )
 router.register('assets', AssetViewSet, basename='asset')
 router.register('zarr', ZarrViewSet, basename='zarr')
+
+
 
 
 schema_view = get_schema_view(
@@ -100,8 +103,15 @@ urlpatterns = [
     re_path(
         r'^api/users/questionnaire-form/$', user_questionnaire_form_view, name='user-questionnaire'
     ),
+    path('api/permissions/s3/', presigned_cookie_s3_cloudfront_view, name='presigned_cookie_s3_cloudfront'),
+    re_path(
+        r'^api/permissions/s3/(?P<asset_path>.*)$',
+        presigned_cookie_s3_cloudfront_view,
+        name='presigned_cookie_s3_cloudfront'
+    ),
     path('api/search/genotypes/', search_genotypes),
     path('api/search/species/', search_species),
+    path('api/permissions/s3/', presigned_cookie_s3_cloudfront_view),
     path('admin/', admin.site.urls),
     path('dashboard/', DashboardView.as_view(), name='dashboard-index'),
     path('dashboard/user/<str:username>/', user_approval_view, name='user-approval'),
@@ -112,6 +122,7 @@ urlpatterns = [
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 ]
+
 
 if settings.ENABLE_GITHUB_OAUTH:
     # Include github oauth endpoints only
