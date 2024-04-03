@@ -5,6 +5,7 @@ import re
 from typing import TYPE_CHECKING
 from urllib.parse import urlparse, urlunparse
 import uuid
+import os
 
 from django.conf import settings
 from django.contrib.postgres.indexes import HashIndex
@@ -38,6 +39,17 @@ ASSET_COMPUTED_FIELDS = [
     'datePublished',
     'publishedBy',
 ]
+
+def construct_neuroglancer_url(asset_path: str):
+    replacement_url = os.getenv('CLOUDFRONT_NEUROGLANCER_URL')
+    parts = asset_path.split('/')
+    file_type_prefix = parts[3]
+    cloudfront_s3_location = replacement_url + '/' + '/'.join(parts[3:])
+
+    if file_type_prefix != 'zarr':
+        file_type_prefix = 'nifti'
+
+    return f'{file_type_prefix}://{cloudfront_s3_location}'
 
 
 def validate_asset_path(path: str):
@@ -280,6 +292,13 @@ class Asset(PublishableMetadataMixin, TimeStampedModel):
             'asset-download',
             kwargs={'asset_id': str(self.asset_id)},
         )
+
+        neuroglancer_url = "Neuroglancer not supported for asset"
+        try:
+            neuroglancer_url = construct_neuroglancer_url(self.s3_url)
+        except Exception:  # Generic exception just to cover all future URL possibilities
+            pass
+
         metadata = {
             **self.metadata,
             'id': self.dandi_asset_id(self.asset_id),
@@ -288,6 +307,7 @@ class Asset(PublishableMetadataMixin, TimeStampedModel):
             'contentUrl': [download_url, self.s3_url],
             'contentSize': self.size,
             'digest': self.digest,
+            'neuroglancerUrl': neuroglancer_url,
         }
         schema_version = metadata['schemaVersion']
         metadata['@context'] = (
