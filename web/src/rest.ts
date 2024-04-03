@@ -264,14 +264,10 @@ const dandiRest = {
     return data;
   },
   async getNeuroglancerCookies() {
-    await client.get('permissions/s3/', {
-        withCredentials: true // Ensures that cookies are included with the request
-    });
+    await client.get('permissions/s3/');
   },
   async getNeuroglancerCookiesWithNeuroglancerUrl(assetPath: string) {
-    const { data } = await client.get(`permissions/s3/${assetPath}`, {
-        withCredentials: true // Ensures that cookies are included with the request
-    });
+    const { data } = await client.get(`permissions/s3/${assetPath}`);
     return data;
   },
   assetManifestURI(identifier: string, version: string) {
