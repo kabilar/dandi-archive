@@ -51,4 +51,3 @@ objects at once as a user zooms, scrolls, etc., thus unless we generated a pre-s
 #### Netlify OAuth requirement to render site
 
 Solves rendering issue, but does not solve accessing private S3 assets
-
