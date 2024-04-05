@@ -23,15 +23,6 @@
         <v-list-item-content>
           Get Neuroglancer Cookies
         </v-list-item-content>
-        <v-list-item-action>
-          <v-icon>mdi-cookie</v-icon>
-          <span v-if="cookiesRequestSuccess == 1" style="color: green; margin-left: 10px;">
-            Success! Expires 1 hr
-          </span>
-          <span v-if="cookiesRequestSuccess == -1" style="color: red; margin-left: 10px;">
-            Unable to get cookies
-          </span>
-        </v-list-item-action>
       </v-list-item>
       <v-list-item @click="logout">
         <v-list-item-content>
@@ -71,17 +62,18 @@ const cookiesRequestSuccess = ref(0);
 
 async function getNeuroglancerCookies() {
   try {
-    await dandiRest.getNeuroglancerCookies();
-    // If the API call doesn't throw an error, consider it a success
-    cookiesRequestSuccess.value = 1;
-    // Optionally, reset the success state after a delay
-    setTimeout(() => { cookiesRequestSuccess.value = 0; }, 3000); // Reset after 3 seconds
+    const response = await fetch('https://api.lincbrain.org/api/permissions/s3/', {
+      method: 'GET', // or 'POST' if that's what the API requires
+      credentials: 'include' // to ensure cookies are sent and received
+    });
+    const data = await response.json();
+    console.log('Data retrieved:', data);
+    // Handle the response data here
   } catch (error) {
-    // If there is an error, consider it a failure
-    cookiesRequestSuccess.value = -1;
-    setTimeout(() => { cookiesRequestSuccess.value = 0; }, 3000); // Reset after 3 seconds
+    console.error('Error fetching data:', error);
   }
 }
+
 
 
 async function logout() {
