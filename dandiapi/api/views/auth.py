@@ -125,12 +125,15 @@ def user_questionnaire_form_view(request: HttpRequest) -> HttpResponse:
             not questionnaire_already_filled_out
             and user_metadata.status == UserMetadata.Status.INCOMPLETE
         ):
-            is_edu_email: bool = user.email.endswith('.edu')
+            # Specific to DANDI Archive
+            # is_edu_email: bool = user.email.endswith('.edu')
 
-            # auto-approve users with edu emails, otherwise require manual approval
-            user_metadata.status = (
-                UserMetadata.Status.APPROVED if is_edu_email else UserMetadata.Status.PENDING
-            )
+            # Require manual approval
+            user.metadata.status = UserMetadata.Status.PENDING
+            # Specific to DANDI Archive
+            # user_metadata.status = (
+            #     UserMetadata.Status.APPROVED if is_edu_email else UserMetadata.Status.PENDING
+            # )
             user_metadata.save(update_fields=['status'])
 
             # send email indicating the user has signed up
