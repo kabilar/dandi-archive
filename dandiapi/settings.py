@@ -32,6 +32,12 @@ class DandiMixin(ConfigMixin):
     # Needed for Sentry Performance to work in frontend
     CORS_ALLOW_HEADERS = (*default_headers, 'baggage', 'sentry-trace')
 
+    CORS_ALLOW_CREDENTIALS = True
+    CORS_ALLOWED_ORIGINS = [
+        'https://lincbrain.org',
+        'https://staging--lincbrain-org.netlify.app'
+    ]
+
     @staticmethod
     def mutate_configuration(configuration: type[ComposedConfiguration]):
         # Install local apps first, to ensure any overridden resources are found first

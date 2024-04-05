@@ -420,9 +420,22 @@ function serviceURL(endpoint: string, data: {
 }
 
 async function redirectToNeuroglancerUrl(item: any) {
-  const response = await dandiRest.getNeuroglancerCookiesWithNeuroglancerUrl(item.asset.url)
-  window.open(response.full_url, "_blank");
+  try {
+    const url = 'https://api.lincbrain.org/api/permissions/s3/' + item.asset.url; // Directly appending
+    const response = await fetch(url, {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    const data = await response.json();
+    window.open(data.full_url, "_blank");
+  } catch (error) {
+    console.error('Error fetching data:', error);
+  }
 }
+
 
 function getExternalServices(path: AssetPath, info: {dandisetId: string, dandisetVersion: string}) {
   if (path.asset === null) {
