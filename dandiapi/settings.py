@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
+
 from composed_configuration import (
     ComposedConfiguration,
     ConfigMixin,
@@ -30,6 +31,12 @@ class DandiMixin(ConfigMixin):
 
     # Needed for Sentry Performance to work in frontend
     CORS_ALLOW_HEADERS = (*default_headers, 'baggage', 'sentry-trace')
+
+    CORS_ALLOW_CREDENTIALS = True
+    CORS_ALLOWED_ORIGINS = [
+        'https://lincbrain.org',
+        'https://staging--lincbrain-org.netlify.app'
+    ]
 
     @staticmethod
     def mutate_configuration(configuration: type[ComposedConfiguration]):
@@ -71,13 +78,13 @@ class DandiMixin(ConfigMixin):
         ]
 
         # Pagination
-        configuration.REST_FRAMEWORK[
-            'DEFAULT_PAGINATION_CLASS'
-        ] = 'dandiapi.api.views.common.DandiPagination'
+        configuration.REST_FRAMEWORK['DEFAULT_PAGINATION_CLASS'] = (
+            'dandiapi.api.views.common.DandiPagination'
+        )
 
-        configuration.REST_FRAMEWORK[
-            'EXCEPTION_HANDLER'
-        ] = 'dandiapi.drf_utils.rewrap_django_core_exceptions'
+        configuration.REST_FRAMEWORK['EXCEPTION_HANDLER'] = (
+            'dandiapi.drf_utils.rewrap_django_core_exceptions'
+        )
 
         # If this environment variable is set, the pydantic model will allow URLs with localhost
         # in them. This is important for development and testing environments, where URLs will

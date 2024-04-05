@@ -11,6 +11,7 @@ VITE_APP_OAUTH_CLIENT_ID = "Dk0zosgt1GAAKfN8LT4STJmLJXwMDPbYWYzfNtAl"
 VITE_APP_DANDI_API_ROOT = "https://staging-api.lincbrain.org/api/"
 VITE_APP_SENTRY_DSN = "https://833c159dc622528b21b4ce4adef6dbf8@o4506237212033024.ingest.sentry.io/4506237213212672"
 VITE_APP_SENTRY_ENVIRONMENT = "staging"
+VITE_CLOUDFRONT_NEUROGLANCER_URL = "https://neuroglancer-staging.lincbrain.org"
 
 # Deploy previews
 [context.deploy-preview.environment]
@@ -20,6 +21,7 @@ VITE_APP_OAUTH_CLIENT_ID = "Dk0zosgt1GAAKfN8LT4STJmLJXwMDPbYWYzfNtAl"
 VITE_APP_DANDI_API_ROOT = "https://staging-api.lincbrain.org/api/"
 VITE_APP_SENTRY_DSN = "https://833c159dc622528b21b4ce4adef6dbf8@o4506237212033024.ingest.sentry.io/4506237213212672"
 VITE_APP_SENTRY_ENVIRONMENT = "staging"
+VITE_CLOUDFRONT_NEUROGLANCER_URL = "https://neuroglancer-staging.lincbrain.org/"
 
 # Production
 [context.release.environment]
@@ -29,6 +31,7 @@ VITE_APP_OAUTH_CLIENT_ID = "29651e4821c59cba741b"
 VITE_APP_DANDI_API_ROOT = "https://api.lincbrain.org/api/"
 VITE_APP_SENTRY_DSN = "https://833c159dc622528b21b4ce4adef6dbf8@o4506237212033024.ingest.sentry.io/4506237213212672"
 VITE_APP_SENTRY_ENVIRONMENT = "production"
+VITE_CLOUDFRONT_NEUROGLANCER_URL = "https://neuroglancer.lincbrain.org/"
 
 [[redirects]]
 from = "/*"

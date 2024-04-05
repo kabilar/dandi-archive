@@ -47,7 +47,7 @@ def ingest_zarr_archive(zarr_id: str, *, force: bool = False):
                     endpoint_url=storage_params['endpoint_url'],
                     aws_access_key_id=storage_params['access_key'],
                     aws_secret_access_key=storage_params['secret_key'],
-                    region_name='us-east-1',
+                    region_name='us-east-2',
                 ),
             )
         )
