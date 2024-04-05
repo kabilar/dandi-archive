@@ -1,4 +1,4 @@
-# Permissions for S3 Assets in LINC Archive
+# Visualize private S3 assets with Neuroglancer
 
 Collaborators: Aaron Kanzer, Kabilar Gunalan
 
@@ -8,6 +8,8 @@ Collaborators: Aaron Kanzer, Kabilar Gunalan
 • As a CONNECTS developer, I shall be able to view data locally or on neuroglancer
 • As a CONNECTS developer, I shall be able to have direct access to S3 asset URI
 • As a LINC Archive user, I shall be able to render neuroglancer layers view similar to DANDI
+• Zarr archives are stored in a private AWS S3 bucket
+• Provide direct access to the LINC users of the assets on the private S3 bucket using a URI.
 
 #### Relevant Links
 
@@ -50,4 +52,16 @@ objects at once as a user zooms, scrolls, etc., thus unless we generated a pre-s
 
 #### Netlify OAuth requirement to render site
 
-Solves rendering issue, but does not solve accessing private S3 assets
+Would pass credentials to AWS.  Solves rendering issue, but does not solve accessing private S3 assets.
+
+#### Diagram
+
+```mermaid
+%%{init: {"flowchart": {"curve": "linear"}}}%%
+flowchart LR
+    E --> B
+    A(User) -->| If client has CloudFront cookies from prior session, <br/> then proceed. | B(Static Webpage i.e. Neuroglancer)
+    A --> | If client does not have CloudFront cookies, <br/> then GET upon /api/permissions/s3 in LINC Archive API. | E(LINC Archive API)
+    B --> | Upon user activity, <br/> sends presigned cookies | C(AWS CloudFront)
+    C -->| Allows data to be fetched | D(Private AWS S3 Bucket)
+    D -->| 1. Neuroglancer able to access S3 data <br/> 2. Data rendered on screen | B
