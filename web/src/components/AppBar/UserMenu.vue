@@ -23,6 +23,15 @@
         <v-list-item-content>
           Get Neuroglancer Cookies
         </v-list-item-content>
+        <v-list-item-action>
+          <v-icon>mdi-cookie</v-icon>
+          <span v-if="cookiesRequestSuccess == 1" style="color: green; margin-left: 10px;">
+            Success! Expires 1 hr
+          </span>
+          <span v-if="cookiesRequestSuccess == -1" style="color: red; margin-left: 10px;">
+            Unable to get cookies
+          </span>
+        </v-list-item-action>
       </v-list-item>
       <v-list-item @click="logout">
         <v-list-item-content>
