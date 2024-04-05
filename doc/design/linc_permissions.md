@@ -2,14 +2,17 @@
 
 Collaborators: Aaron Kanzer, Kabilar Gunalan
 
-## Requirements
+Outlined below are 3 use cases for visualizing private assets in Neuroglancer.
+In the current effort, requirements and a subsequent implementation will be developed for use cases 1 and 2.
 
 • As a CONNECTS developer, I shall be able to view multiple datasets/layers (e.g. dMRI, tractography, HiP-CT) in the same neuroglancer
 • As a CONNECTS developer, I shall be able to view data locally or on neuroglancer
 • As a CONNECTS developer, I shall be able to have direct access to S3 asset URI
-• As a LINC Archive user, I shall be able to render neuroglancer layers view similar to DANDI
-• Zarr archives are stored in a private AWS S3 bucket
-• Provide direct access to the LINC users of the assets on the private S3 bucket using a URI.
+
+## Requirements
+
+1. Zarr archives are stored in a private AWS S3 bucket
+2. Provide direct access to the LINC users of the assets on the private S3 bucket using a URI.
 
 #### Relevant Links
 
