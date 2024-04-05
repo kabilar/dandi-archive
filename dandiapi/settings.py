@@ -35,6 +35,7 @@ class DandiMixin(ConfigMixin):
     CORS_ALLOW_CREDENTIALS = True
     CORS_ALLOWED_ORIGINS = [
         'https://lincbrain.org',
+        'https://staging--lincbrain-org.netlify.app'
     ]
 
     @staticmethod
