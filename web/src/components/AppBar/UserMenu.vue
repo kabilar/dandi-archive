@@ -76,10 +76,14 @@ async function getNeuroglancerCookies() {
       credentials: 'include' // to ensure cookies are sent and received
     });
     const data = await response.json();
-    console.log('Data retrieved:', data);
+    cookiesRequestSuccess.value = 1;
+    // Optionally, reset the success state after a delay
+    setTimeout(() => { cookiesRequestSuccess.value = 0; }, 3000);
     // Handle the response data here
   } catch (error) {
-    console.error('Error fetching data:', error);
+    cookiesRequestSuccess.value = -1;
+    setTimeout(() => { cookiesRequestSuccess.value = 0; }, 3000);
+    console.error('Error fetching data');
   }
 }
 

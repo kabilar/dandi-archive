@@ -175,6 +175,11 @@ def presigned_cookie_s3_cloudfront_view(request: Request, asset_path=None) -> Ht
         }
 
     response = Response(response_data)
+    response['Access-Control-Allow-Credentials'] = 'true'
+    response['Access-Control-Allow-Origin'] = request.headers.get('Origin', 'https://lincbrain.org')
+    response['Access-Control-Allow-Methods'] = 'GET, OPTIONS'  # Adjust as needed
+    response['Access-Control-Allow-Headers'] = 'X-Requested-With, Content-Type'  # Adjust as needed
+
     for cookie_name, cookie_value in cookies.items():
         response.set_cookie(
             key=cookie_name,
