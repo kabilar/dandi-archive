@@ -8,7 +8,7 @@ from rest_framework.parsers import JSONParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-import time
+import datetime
 import json
 import base64
 import io
@@ -55,10 +55,10 @@ def _replace_unsupported_chars(some_str):
         .replace("/", "~")
 
 
-def _in_a_day():
-    """Returns a UTC POSIX timestamp for one day in the future"""
-    return int(time.time()) + (24 * 60 * 60)
-
+def _in_a_month():
+    """Returns a UTC POSIX timestamp for one month in the future."""
+    one_month_later = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=30)
+    return int(one_month_later.timestamp())
 
 def rsa_signer(message, key):
     """
@@ -92,7 +92,7 @@ def generate_policy_cookie(url):
                 "Resource": f'{url}/*',
                 "Condition": {
                     "DateLessThan": {
-                        "AWS:EpochTime": _in_a_day()
+                        "AWS:EpochTime": _in_a_month()
                     }
                 }
             }
