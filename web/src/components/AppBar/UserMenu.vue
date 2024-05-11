@@ -26,7 +26,7 @@
         <v-list-item-action>
           <v-icon>mdi-cookie</v-icon>
           <span v-if="cookiesRequestSuccess == 1" style="color: green; margin-left: 10px;">
-            Success! Expires 1 hr
+            Success! Expires in 30 days
           </span>
           <span v-if="cookiesRequestSuccess == -1" style="color: red; margin-left: 10px;">
             Unable to get cookies
