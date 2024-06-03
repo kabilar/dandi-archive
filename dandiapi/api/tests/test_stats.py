@@ -40,8 +40,8 @@ def test_stats_user(api_client, user):
     for status in UserMetadata.Status.choices:
         status_value = status[0]
         user = User.objects.create(username=f'{status_value.lower()}_user')
-        UserMetadata.objects.create(user=user, status=status)
-        if status == UserMetadata.Status.APPROVED:
+        UserMetadata.objects.create(user=user, status=status_value)
+        if status_value == UserMetadata.Status.APPROVED:
             approved_user_count += 1
 
     stats = api_client.get('/api/stats/').data
