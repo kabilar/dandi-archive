@@ -27,7 +27,7 @@
               </div>
               <br>
               <div class="text-h6 font-weight-light text-center">
-                A data sharing and visualization platform for the <a target="_blank" href="https://connects.mgh.harvard.edu/">LINC Project</a>, helping develop novel technologies for imaging brain connections down to the microscopic scale.
+                A private data sharing and visualization platform for the <a target="_blank" href="https://connects.mgh.harvard.edu/">LINC Project</a>, helping develop novel technologies for imaging brain connections down to the microscopic scale.
               </div>
             </v-col>
           </v-row>
