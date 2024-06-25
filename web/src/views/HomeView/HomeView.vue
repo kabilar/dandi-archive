@@ -23,7 +23,7 @@
           >
             <v-col class="splash-text my-12">
               <div class="text-h2 font-weight-thin text-center light-blue--text text--darken-1">
-                LINC Archive
+                LINC Data Platform
               </div>
               <br>
               <div class="text-h6 font-weight-light text-center">
