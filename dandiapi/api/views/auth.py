@@ -50,7 +50,7 @@ def auth_token_view(request: Request) -> HttpResponseBase:
 QUESTIONS = [
     {'question': 'First Name', 'max_length': 100},
     {'question': 'Last Name', 'max_length': 100},
-    {'question': 'What do you plan to use LINC Archive for?', 'max_length': 1000},
+    {'question': 'What do you plan to use LINC Data Platform for?', 'max_length': 1000},
     {'question': 'Please list any affiliations you have.', 'max_length': 1000},
 ]
 
