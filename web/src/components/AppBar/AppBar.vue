@@ -172,30 +172,25 @@ const navItems: NavigationItem[] = [
     if: loggedInFunc,
   },
     {
-    text: 'About LINC',
+    text: 'Homepage',
     to: lincBrainUrl,
     external: true,
   },
-  // {
-  //   text: 'About DANDI',
-  //   to: dandiAboutUrl,
-  //   external: true,
-  // },
   {
-    text: 'DANDI Documentation',
-    to: dandiDocumentationUrl,
+    text: 'Documentation',
+    to: lincDocumentationUrl,
     external: true,
   }
-  // {
-  //   text: 'Help',
-  //   to: dandiHelpUrl,
-  //   external: true,
-  // },
-  // {
-  //   text: 'DandiHub',
-  //   to: dandihubUrl,
-  //   external: true,
-  // },
+  {
+    text: 'Help',
+    to: lincHelpUrl,
+    external: true,
+  },
+  {
+    text: 'JupyterHub',
+    to: lincHubUrl,
+    external: true,
+  },
 ];
 
 function login() {
