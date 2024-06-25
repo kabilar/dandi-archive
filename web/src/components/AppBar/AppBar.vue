@@ -142,7 +142,7 @@ import {
   user,
 } from '@/rest';
 import {
-  dandiAboutUrl, dandiDocumentationUrl, dandiHelpUrl, dandihubUrl, lincBrainUrl,
+  dandiAboutUrl, lincDocumentationUrl, lincHelpUrl, lincHubUrl, lincBrainUrl,
 } from '@/utils/constants';
 import UserMenu from '@/components/AppBar/UserMenu.vue';
 import logo from '@/assets/linc-logo.svg';
@@ -180,7 +180,7 @@ const navItems: NavigationItem[] = [
     text: 'Documentation',
     to: lincDocumentationUrl,
     external: true,
-  }
+  },
   {
     text: 'Help',
     to: lincHelpUrl,
