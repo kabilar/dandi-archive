@@ -27,11 +27,7 @@
               </div>
               <br>
               <div class="text-h6 font-weight-light text-center">
-                A cloud infrastructure and data archival platform for <a target="_blank" href="https://connects.mgh.harvard.edu/">LINC</a>, helping develop novel technologies for imaging brain connections down to the microscopic scale
-              </div>
-              <br>
-              <div class="text-h6 font-weight-light text-center">
-                This website is a fork of the DANDI Archive project. For more information, please visit <a target="_blank" href="https://dandiarchive.org/">the DANDI Archive</a>
+                A data sharing and visualization platform for the <a target="_blank" href="https://connects.mgh.harvard.edu/">LINC Project</a>, helping develop novel technologies for imaging brain connections down to the microscopic scale.
               </div>
             </v-col>
           </v-row>
