@@ -6,7 +6,7 @@
           <span
             v-if="cookiesEnabled()"
           >We use cookies to ensure you get the best experience on
-            LINC Brain</span>
+            the LINC Data Platform</span>
           <span
             v-else
           >We noticed you're blocking cookies - note that certain aspects of
@@ -15,7 +15,7 @@
       </cookie-law>
       <v-row>
         <v-col offset="2">
-          &copy; 2024 The LINC Platform Team<br>
+          &copy; 2023 - 2024 LINC<br>
           version
           <a
             class="version-link"
@@ -30,7 +30,7 @@
             target="_blank"
             rel="noopener"
             href="https://braininitiative.nih.gov/"
-          >BRAIN Initiative</a>
+          >BRAIN Initiative CONNECTS Program</a>
           <v-icon x-small>
             mdi-open-in-new
           </v-icon>
@@ -44,42 +44,6 @@
             mdi-open-in-new
           </v-icon>
           <br>
-        </v-col>
-        <v-col>
-          Support:<br>
-          - <a
-            target="_blank"
-            rel="noopener"
-            :href="lincBrainUrl"
-          >LINC Homepage</a>
-          <v-icon x-small>
-            mdi-open-in-new
-          </v-icon>
-          <br>
-          - <a
-            target="_blank"
-            rel="noopener"
-            :href="dandiAboutUrl"
-          >DANDI Project Homepage</a>
-          <v-icon x-small>
-            mdi-open-in-new
-          </v-icon>
-          <br>
-          - <a
-            target="_blank"
-            rel="noopener"
-            href="https://github.com/lincbrain/linc-archive"
-          >Project GitHub</a>
-          <v-icon x-small>
-            mdi-open-in-new
-          </v-icon> / <a
-            target="_blank"
-            rel="noopener"
-            href="https://github.com/lincbrain/linc-archive/issues"
-          >Issues</a>
-          <v-icon x-small>
-            mdi-open-in-new
-          </v-icon>
         </v-col>
       </v-row>
     </v-container>

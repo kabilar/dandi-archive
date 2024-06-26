@@ -1,5 +1,5 @@
-# LINC Archive Web Application
-The LINC Archive web application (i.e. the linc-archive frontend).
+# LINC Data Platform Web Application
+The LINC Data Platform web application (i.e. the linc-archive frontend).
 
 ## Develop
 
