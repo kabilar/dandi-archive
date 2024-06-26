@@ -6,7 +6,7 @@
           <span
             v-if="cookiesEnabled()"
           >We use cookies to ensure you get the best experience on
-            LINC Brain</span>
+            the LINC Data Platform</span>
           <span
             v-else
           >We noticed you're blocking cookies - note that certain aspects of
