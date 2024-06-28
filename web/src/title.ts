@@ -2,7 +2,7 @@ import Vue from 'vue';
 
 import type { DirectiveBinding } from 'vue/types/options';
 
-const TITLE = 'LINC Archive';
+const TITLE = 'LINC Data Platform';
 
 const setPageTitle = (el: HTMLElement, binding: DirectiveBinding) => {
   if (binding?.value) {

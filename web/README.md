@@ -1,5 +1,5 @@
-# LINC Archive Web Application
-The LINC Archive web application (i.e. the linc-archive frontend).
+# LINC Data Platform Web Application
+The LINC Data Platform web application (i.e. the linc-archive frontend).
 
 ## Develop
 
@@ -40,5 +40,5 @@ yarn migrate 0.5.1
 
 ### Environment Variables
 
-- VUE_APP_SERVER_DOWNTIME_MESSAGE
+- VITE_APP_SERVER_DOWNTIME_MESSAGE
   - A custom error message displayed when the backend server can't be reached.
