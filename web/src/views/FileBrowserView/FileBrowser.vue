@@ -209,7 +209,7 @@
                         v-if="item.services && item.services.length"
                         color="primary"
                         icon
-                        title="Copy asset links"
+                        title="Relevant asset links"
                         v-bind="attrs"
                         v-on="on"
                       >
@@ -252,22 +252,13 @@
                   >
                     <template #activator="{ on, attrs }">
                       <v-btn
-                        v-if="item.services && item.services.length"
                         color="primary"
-                        icon
-                        title="Open in external service"
+                        x-small
+                        :disabled="!item.services || !item.services.length"
                         v-bind="attrs"
                         v-on="on"
                       >
-                        <v-icon>mdi-dots-vertical</v-icon>
-                      </v-btn>
-                      <v-btn
-                        v-else
-                        color="primary"
-                        disabled
-                        icon
-                      >
-                        <v-icon>mdi-dots-vertical</v-icon>
+                        Open With <v-icon small>mdi-menu-down</v-icon>
                       </v-btn>
                     </template>
                     <v-list

@@ -40,7 +40,7 @@ setup(
     include_package_data=True,
     install_requires=[
         'celery',
-        'dandischema~=0.9.0',
+        'dandischema~=0.10.1',
         'django~=4.1.0',
         'django-admin-display',
         # Require 0.58.0 as it is the first version to support postgres' native
@@ -52,7 +52,9 @@ setup(
         'django-filter',
         'django-guardian',
         'django-oauth-toolkit>=1.7,<2',
-        'djangorestframework',
+        # TODO: pin this until we figure out what the cause of
+        # https://github.com/dandi/dandi-archive/issues/1894 is.
+        'djangorestframework==3.14.0',
         'djangorestframework-yaml',
         'drf-extensions',
         'drf-yasg',
@@ -67,7 +69,7 @@ setup(
         # Production-only
         'django-composed-configuration[prod]>=0.23.0',
         'django-s3-file-field[s3]>=1.0.0',
-        'django-storages[s3]>=1.14.2',
+        'django-storages[s3]>=1.14.3',
         'gunicorn',
         # Development-only, but required
         'django-minio-storage',
