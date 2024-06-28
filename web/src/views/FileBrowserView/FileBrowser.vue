@@ -201,15 +201,17 @@
 
                 <v-list-item-action v-if="item.asset">
                   <v-menu
+                    v-model="menuOpen"
                     bottom
                     left
+                    close-on-content-click="false"
                   >
                    <template #activator="{ on, attrs }">
                       <v-btn
                         v-if="item.asset.s3_uri"
                         color="primary"
                         icon
-                        title="Relevant asset links"
+                        title="Links"
                         v-bind="attrs"
                         v-on="on"
                       >
@@ -230,17 +232,17 @@
                       <v-subheader
                         class="font-weight-medium"
                       >
-                        RELEVANT ASSET LINKS
+                        LINKS
                       </v-subheader>
                       <v-list-item
                         target="_blank"
                         rel="noreferrer"
                       >
                         <v-list-item-title class="font-weight-light">
-                          AWS S3 URI
+                          AWS S3 URI <span v-if="copied" style="color: green; padding-left: 8px; padding-right: 8px; margin-left: 16px;">Copied!</span>
                         </v-list-item-title>
                         <v-spacer></v-spacer>
-                        <v-icon @click="copyToClipboard(item.asset.s3_uri)">mdi-content-copy</v-icon>
+                        <v-icon @click.stop="copyToClipboard(item.asset.s3_uri)">mdi-content-copy</v-icon>
                       </v-list-item>
                     </v-list>
                   </v-menu>
@@ -430,6 +432,8 @@ const itemToDelete: Ref<AssetPath | null> = ref(null);
 const page = ref(1);
 const pages = ref(0);
 const updating = ref(false);
+const copied = ref(false);
+const menuOpen = ref(false);
 
 // Computed
 const owners = computed(() => store.owners?.map((u) => u.username) || null);
@@ -476,9 +480,12 @@ async function redirectToNeuroglancerUrl(item: any) {
 
 function copyToClipboard(s3Uri: string) {
   navigator.clipboard.writeText(s3Uri).then(() => {
-    console.log("Success")
+    copied.value = true;
+    setTimeout(() => {
+      copied.value = false;
+    }, 2000);
   }).catch(err => {
-    console.error('Failed to copy text: ', err);
+    console.error('Failed to copy text: ', err)
   });
 }
 
