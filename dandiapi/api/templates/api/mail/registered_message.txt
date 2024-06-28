@@ -11,6 +11,7 @@ away.
 It may take up to 48 hours for your account to be approved and for your email to be
 registered with our Slack workspace.
 
+
 Sincerely,
 
 The LINC team

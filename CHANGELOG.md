@@ -1,3 +1,134 @@
+# v0.3.87 (Fri Jun 21 2024)
+
+#### 🐛 Bug Fix
+
+- Lock dandisets during un-embargo [#1957](https://github.com/dandi/dandi-archive/pull/1957) ([@jjnesbitt](https://github.com/jjnesbitt))
+
+#### Authors: 1
+
+- Jacob Nesbitt ([@jjnesbitt](https://github.com/jjnesbitt))
+
+---
+
+# v0.3.86 (Tue Jun 18 2024)
+
+#### 🐛 Bug Fix
+
+- Restrict updates to metadata `access` field [#1954](https://github.com/dandi/dandi-archive/pull/1954) ([@jjnesbitt](https://github.com/jjnesbitt))
+- Fix race condition in sha256 calculation task [#1936](https://github.com/dandi/dandi-archive/pull/1936) ([@mvandenburgh](https://github.com/mvandenburgh))
+
+#### Authors: 2
+
+- Jacob Nesbitt ([@jjnesbitt](https://github.com/jjnesbitt))
+- Mike VanDenburgh ([@mvandenburgh](https://github.com/mvandenburgh))
+
+---
+
+# v0.3.85 (Mon Jun 03 2024)
+
+:tada: This release contains work from a new contributor! :tada:
+
+Thank you, Ben Dichter ([@bendichter](https://github.com/bendichter)), for all your work!
+
+#### 🐛 Bug Fix
+
+- Empty PR to trigger a release [#1951](https://github.com/dandi/dandi-archive/pull/1951) ([@jjnesbitt](https://github.com/jjnesbitt))
+- Only use custom pagination class for asset list endpoint [#1947](https://github.com/dandi/dandi-archive/pull/1947) ([@jjnesbitt](https://github.com/jjnesbitt))
+- In 1.14.3 it became client_config and .config was announced deprecated [#1946](https://github.com/dandi/dandi-archive/pull/1946) ([@yarikoptic](https://github.com/yarikoptic))
+- neurosift external service for .nwb.lindi.json [#1922](https://github.com/dandi/dandi-archive/pull/1922) ([@magland](https://github.com/magland))
+- Fix documentation for server downtime message var [#1927](https://github.com/dandi/dandi-archive/pull/1927) ([@jjnesbitt](https://github.com/jjnesbitt))
+- Revert "Add `workflow_dispatch` trigger to staging deploy workflow" [#1930](https://github.com/dandi/dandi-archive/pull/1930) ([@jjnesbitt](https://github.com/jjnesbitt))
+
+#### 📝 Documentation
+
+- add handbook to welcome email [#1945](https://github.com/dandi/dandi-archive/pull/1945) ([@bendichter](https://github.com/bendichter))
+
+#### Authors: 4
+
+- Ben Dichter ([@bendichter](https://github.com/bendichter))
+- Jacob Nesbitt ([@jjnesbitt](https://github.com/jjnesbitt))
+- Jeremy Magland ([@magland](https://github.com/magland))
+- Yaroslav Halchenko ([@yarikoptic](https://github.com/yarikoptic))
+
+---
+
+# v0.3.84 (Mon Apr 29 2024)
+
+#### 🐛 Bug Fix
+
+- Remove all-contributors auto plugin [#1928](https://github.com/dandi/dandi-archive/pull/1928) ([@jjnesbitt](https://github.com/jjnesbitt))
+- Embargo Re-Design [#1890](https://github.com/dandi/dandi-archive/pull/1890) ([@jjnesbitt](https://github.com/jjnesbitt) [@mvandenburgh](https://github.com/mvandenburgh))
+- Remove unnecessary `noqa` directive [#1926](https://github.com/dandi/dandi-archive/pull/1926) ([@jjnesbitt](https://github.com/jjnesbitt))
+- Update our instructions for installation to state newer versions of python and dandi-cli [#1919](https://github.com/dandi/dandi-archive/pull/1919) ([@yarikoptic](https://github.com/yarikoptic))
+- Add `workflow_dispatch` trigger to staging deploy workflow [#1924](https://github.com/dandi/dandi-archive/pull/1924) ([@mvandenburgh](https://github.com/mvandenburgh))
+- Optimize asset permission check function [#1912](https://github.com/dandi/dandi-archive/pull/1912) ([@mvandenburgh](https://github.com/mvandenburgh))
+
+#### Authors: 3
+
+- Jacob Nesbitt ([@jjnesbitt](https://github.com/jjnesbitt))
+- Mike VanDenburgh ([@mvandenburgh](https://github.com/mvandenburgh))
+- Yaroslav Halchenko ([@yarikoptic](https://github.com/yarikoptic))
+
+---
+
+# v0.3.83 (Mon Apr 01 2024)
+
+#### 🐛 Bug Fix
+
+- Add default ordering to paginated models [#1910](https://github.com/dandi/dandi-archive/pull/1910) ([@jjnesbitt](https://github.com/jjnesbitt))
+
+#### Authors: 1
+
+- Jacob Nesbitt ([@jjnesbitt](https://github.com/jjnesbitt))
+
+---
+
+# v0.3.82 (Fri Mar 29 2024)
+
+#### 🐛 Bug Fix
+
+- Only include total count in the first page of list views [#1911](https://github.com/dandi/dandi-archive/pull/1911) ([@jjnesbitt](https://github.com/jjnesbitt))
+
+#### Authors: 1
+
+- Jacob Nesbitt ([@jjnesbitt](https://github.com/jjnesbitt))
+
+---
+
+# v0.3.81 (Mon Mar 25 2024)
+
+#### 🐛 Bug Fix
+
+- Optimize asset list endpoint [#1904](https://github.com/dandi/dandi-archive/pull/1904) ([@jjnesbitt](https://github.com/jjnesbitt))
+- Revert rate limiting of asset list endpoint [#1905](https://github.com/dandi/dandi-archive/pull/1905) ([@mvandenburgh](https://github.com/mvandenburgh))
+- Add missing setting for DRF throttle class [#1903](https://github.com/dandi/dandi-archive/pull/1903) ([@mvandenburgh](https://github.com/mvandenburgh))
+- Rate limit assets list endpoint for unauthenticated users [#1899](https://github.com/dandi/dandi-archive/pull/1899) ([@mvandenburgh](https://github.com/mvandenburgh))
+
+#### Authors: 2
+
+- Jacob Nesbitt ([@jjnesbitt](https://github.com/jjnesbitt))
+- Mike VanDenburgh ([@mvandenburgh](https://github.com/mvandenburgh))
+
+---
+
+# v0.3.80 (Thu Mar 21 2024)
+
+#### 🐛 Bug Fix
+
+- Temporarily pin DRF [#1895](https://github.com/dandi/dandi-archive/pull/1895) ([@mvandenburgh](https://github.com/mvandenburgh))
+- Improve Swagger documentation for /dandisets/ query params [#1875](https://github.com/dandi/dandi-archive/pull/1875) ([@mvandenburgh](https://github.com/mvandenburgh))
+
+#### 🏠 Internal
+
+- Boost dandischema to 0.10.1 which released 0.6.7 schema [#1893](https://github.com/dandi/dandi-archive/pull/1893) ([@yarikoptic](https://github.com/yarikoptic))
+
+#### Authors: 2
+
+- Mike VanDenburgh ([@mvandenburgh](https://github.com/mvandenburgh))
+- Yaroslav Halchenko ([@yarikoptic](https://github.com/yarikoptic))
+
+---
+
 # v0.3.79 (Thu Mar 07 2024)
 
 #### 🐛 Bug Fix
