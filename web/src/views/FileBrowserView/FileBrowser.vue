@@ -206,7 +206,7 @@
                   >
                    <template #activator="{ on, attrs }">
                       <v-btn
-                        v-if="item.services && item.services.length"
+                        v-if="item.asset"
                         color="primary"
                         icon
                         title="Relevant asset links"
