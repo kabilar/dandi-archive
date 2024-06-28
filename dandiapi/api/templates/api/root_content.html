@@ -3,7 +3,7 @@
 {% block body %}
     <h5>Welcome! Are you lost?</h5>
 
-    <p>This is the Django service that supports the LINC Brain API. There's
+    <p>This is the Django service that supports the LINC Data Platform API. There's
     nothing specifically valuable at this exact location. You are probably
     looking for one of the following instead:</p>
 
@@ -14,13 +14,13 @@
         <li><a href="{% url 'schema-redoc' %}">Redoc</a> documentation for
         the same</lit>
 
-        <li>The <a href="{{ web_app_url }}">LINC Archive</a>
+        <li>The <a href="{{ web_app_url }}">LINC Data Platform</a>
         instance associated with this API server</li>
 
-        <li>The <a href="https://www.lincbrain.org">LINC Brain project</a>
+        <li>The <a href="https://www.lincbrain.org">LINC Data Platform</a>
         website</li>
     </ul>
 
-    <p>If none of these is helpful, you can contact the LINC Brain team by <a
+    <p>If none of these is helpful, you can contact the LINC team by <a
     href="mailto:help@lincbrain.org">email</a>. Have a great day!</p>
 {% endblock body %}

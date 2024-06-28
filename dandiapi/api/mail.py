@@ -108,7 +108,7 @@ def build_new_user_messsage(user: User, socialaccount: SocialAccount = None):
     }
     # Email sent to the DANDI list when a new user logs in for the first time
     return build_message(
-        subject=f'LINC Brain: Review new user: {user.username}',
+        subject=f'LINC Data Platform: Review new user: {user.username}',
         message=render_to_string('api/mail/new_user_message.txt', render_context),
         to=[ADMIN_EMAIL],
     )
@@ -123,7 +123,7 @@ def send_new_user_message_email(user: User, socialaccount: SocialAccount):
 
 def build_approved_user_message(user: User, socialaccount: SocialAccount = None):
     return build_message(
-        subject='Your LINC Brain Account',
+        subject='Your LINC Data Platform Account',
         message=render_to_string(
             'api/mail/approved_user_message.txt',
             {
@@ -144,7 +144,7 @@ def send_approved_user_message(user: User, socialaccount: SocialAccount):
 
 def build_rejected_user_message(user: User, socialaccount: SocialAccount = None):
     return build_message(
-        subject='Your LINC Brain Account',
+        subject='Your LINC Data Platform Account',
         message=render_to_string(
             'api/mail/rejected_user_message.txt',
             {
@@ -166,7 +166,7 @@ def send_rejected_user_message(user: User, socialaccount: SocialAccount):
 def build_pending_users_message(users: Iterable[User]):
     render_context = {**BASE_RENDER_CONTEXT, 'users': users}
     return build_message(
-        subject='LINC Brain: new user registrations to review',
+        subject='LINC Data Platform: new user registrations to review',
         message=render_to_string('api/mail/pending_users_message.txt', render_context),
         to=[ADMIN_EMAIL],
     )

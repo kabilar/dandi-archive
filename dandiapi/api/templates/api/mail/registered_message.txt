@@ -4,7 +4,7 @@ Dear {{ greeting_name }},
 Welcome to LINC.
 
 
-Thank you for registering on the LINC archive. Your account is now pending approval by
+Thank you for registering on the LINC Data Platform. Your account is now pending approval by
 a LINC admin. Once approved, you will be able to create datasets and upload data right
 away.
 

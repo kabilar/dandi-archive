@@ -244,6 +244,26 @@ class Asset(PublishableMetadataMixin, TimeStampedModel):
             return self.embargoed_blob.s3_url
         return self.zarr.s3_url
 
+    @property
+    def s3_uri(self) -> str:
+
+        s3_url_substring = None
+        if self.s3_url.startswith("https://"):
+            s3_url_substring = self.s3_url[len("https://"):]
+        elif self.s3_url.startswith("http://"):
+            s3_url_substring = self.s3_url[len("http://"):]
+
+        bucket_name_end_index = s3_url_substring.find(".s3.amazonaws.com")
+        bucket_name = s3_url_substring[:bucket_name_end_index]
+        path = s3_url_substring[bucket_name_end_index + len(".s3.amazonaws.com"):]
+
+        if not path.startswith("/"):
+            path = "/" + path
+
+        s3_uri = f"s3://{bucket_name}{path}"
+        return s3_uri
+
+
     def is_different_from(
         self,
         *,
@@ -304,7 +324,7 @@ class Asset(PublishableMetadataMixin, TimeStampedModel):
             'id': self.dandi_asset_id(self.asset_id),
             'path': self.path,
             'identifier': str(self.asset_id),
-            'contentUrl': [download_url, self.s3_url],
+            'contentUrl': [download_url, self.s3_url, self.s3_uri],
             'contentSize': self.size,
             'digest': self.digest,
             'neuroglancerUrl': neuroglancer_url,

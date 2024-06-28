@@ -23,15 +23,11 @@
           >
             <v-col class="splash-text my-12">
               <div class="text-h2 font-weight-thin text-center light-blue--text text--darken-1">
-                LINC Archive
+                LINC Data Platform
               </div>
               <br>
               <div class="text-h6 font-weight-light text-center">
-                A cloud infrastructure and data archival platform for <a target="_blank" href="https://connects.mgh.harvard.edu/">LINC</a>, helping develop novel technologies for imaging brain connections down to the microscopic scale
-              </div>
-              <br>
-              <div class="text-h6 font-weight-light text-center">
-                This website is a fork of the DANDI Archive project. For more information, please visit <a target="_blank" href="https://dandiarchive.org/">the DANDI Archive</a>
+                A private data sharing and visualization platform for the <a target="_blank" href="https://connects.mgh.harvard.edu/">LINC Project</a>, which aims to develop novel technologies for imaging brain connections down to the microscopic scale.
               </div>
             </v-col>
           </v-row>
