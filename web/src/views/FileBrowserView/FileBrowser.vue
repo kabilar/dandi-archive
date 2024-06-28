@@ -161,7 +161,6 @@
                     <span>Open asset in browser (you can also click on the item itself)</span>
                   </v-tooltip>
                 </v-list-item-action>
-
                 <v-list-item-action v-if="item.asset">
                   <v-tooltip top>
                     <template v-slot:activator="{ on, attrs }">
@@ -198,6 +197,53 @@
                     </template>
                     <span>View asset metadata</span>
                   </v-tooltip>
+                </v-list-item-action>
+
+                <v-list-item-action v-if="item.asset">
+                  <v-menu
+                    bottom
+                    left
+                  >
+                   <template #activator="{ on, attrs }">
+                      <v-btn
+                        v-if="item.services && item.services.length"
+                        color="primary"
+                        icon
+                        title="Copy asset links"
+                        v-bind="attrs"
+                        v-on="on"
+                      >
+                        <v-icon>mdi-content-copy</v-icon>
+                      </v-btn>
+                      <v-btn
+                        v-else
+                        color="primary"
+                        disabled
+                        icon
+                      >
+                        <v-icon>mdi-content-copy</v-icon>
+                      </v-btn>
+                    </template>
+                    <v-list
+                      dense
+                    >
+                      <v-subheader
+                        class="font-weight-medium"
+                      >
+                        RELEVANT ASSET LINKS
+                      </v-subheader>
+                      <v-list-item
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        <v-list-item-title class="font-weight-light">
+                          AWS S3 URI
+                        </v-list-item-title>
+                        <v-spacer></v-spacer>
+                        <v-icon @click="copyToClipboard(item.asset.s3_uri)">mdi-content-copy</v-icon>
+                      </v-list-item>
+                    </v-list>
+                  </v-menu>
                 </v-list-item-action>
                 <v-list-item-action v-if="item.asset">
                   <v-menu
@@ -302,6 +348,7 @@ interface AssetService {
 interface ExtendedAssetPath extends AssetPath {
   services?: AssetService[];
   name: string;
+  s3Uri?: string;
 }
 
 const sortByFolderThenName = (a: ExtendedAssetPath, b: ExtendedAssetPath) => {
@@ -434,6 +481,14 @@ async function redirectToNeuroglancerUrl(item: any) {
   } catch (error) {
     console.error('Error fetching data:', error);
   }
+}
+
+function copyToClipboard(s3Uri: string) {
+  navigator.clipboard.writeText(s3Uri).then(() => {
+    console.log("Success")
+  }).catch(err => {
+    console.error('Failed to copy text: ', err);
+  });
 }
 
 
