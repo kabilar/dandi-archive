@@ -206,7 +206,7 @@
                   >
                    <template #activator="{ on, attrs }">
                       <v-btn
-                        v-if="item.asset"
+                        v-if="item.asset.s3_uri"
                         color="primary"
                         icon
                         title="Relevant asset links"
