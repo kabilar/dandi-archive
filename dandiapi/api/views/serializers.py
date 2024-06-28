@@ -383,7 +383,7 @@ class AssetPathsQueryParameterSerializer(serializers.Serializer):
 
 class AssetFileSerializer(AssetSerializer):
     class Meta(AssetSerializer.Meta):
-        fields = ['asset_id', 'url']
+        fields = ['asset_id', 'url', 's3_uri']
 
     url = serializers.URLField(source='s3_url')
 
