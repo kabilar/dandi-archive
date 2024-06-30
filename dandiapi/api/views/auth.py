@@ -47,6 +47,18 @@ def auth_token_view(request: Request) -> HttpResponseBase:
     return Response(token.key)
 
 
+@swagger_auto_schema(
+    methods=['POST'],
+    responses={200: 'The token necessary for WebKNOSSOS'},
+)
+@api_view(['POST'])
+@permission_classes([IsApproved])
+def auth_webknossos_view(request: Request) -> HttpResponseBase:
+    # Ensure user's request is coming from a specific host/domain
+    # curl -X POST -H "Content-Type: application/json" -d '{"email":"akanzer@mit.edu","password":"<some-password>"}' https://webknossos-staging.lincbrain.org/api/auth/login -v
+    return Response()
+
+
 QUESTIONS = [
     {'question': 'First Name', 'max_length': 100},
     {'question': 'Last Name', 'max_length': 100},

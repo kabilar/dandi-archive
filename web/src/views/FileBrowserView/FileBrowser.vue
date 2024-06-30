@@ -401,7 +401,13 @@ const EXTERNAL_SERVICES = [
   // },
   {
     name: 'Neuroglancer',
-    regex: /\.(nwb|txt|nii(\.gz)?|ome\.zarr)$/,
+    regex: /\.(nwb|txt|nii(\.gz)?|ome\.zarr)$/,  // TODO: .txt for testing purposes
+    maxsize: Infinity,
+    endpoint: 'value-defaults-to-endpoint-logic'
+  },
+  {
+    name: 'WebKNOSSOS',
+    regex: /\.(nwb|txt|nii(\.gz)?|ome\.zarr)$/,  // TODO: .txt for testing purposes
     maxsize: Infinity,
     endpoint: 'value-defaults-to-endpoint-logic'
   }

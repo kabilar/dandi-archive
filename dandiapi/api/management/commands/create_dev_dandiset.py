@@ -36,7 +36,7 @@ def create_dev_dandiset(name: str, email: str, first_name: str, last_name: str):
 
     files_names_and_etags = [
         {"etag": '76d36e98f312e98ff908c8c82c8dd623-0', "file_name": "foo/bar.txt"},
-        {"etag": '86d36e98f312e98ff908c8c82c8dd623-0', "file_name": "foo/buzz.txt"},
+        {"etag": '86d36e98f312e98ff908c8c82c8dd623-0', "file_name": "foo/buzz.ome.zarr"},
     ]
 
     for file_name_and_etag in files_names_and_etags:
