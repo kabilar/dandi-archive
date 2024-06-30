@@ -201,7 +201,7 @@
 
                 <v-list-item-action v-if="item.asset">
                   <v-menu
-                    v-model="menuOpen"
+                    v-model="menuOpen[item.asset.asset_id]"
                     bottom
                     left
                     close-on-content-click="false"
@@ -433,7 +433,8 @@ const page = ref(1);
 const pages = ref(0);
 const updating = ref(false);
 const copied = ref(false);
-const menuOpen = ref(false);
+
+const menuOpen = ref({});
 
 // Computed
 const owners = computed(() => store.owners?.map((u) => u.username) || null);
