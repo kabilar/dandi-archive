@@ -5,6 +5,7 @@ from json.decoder import JSONDecodeError
 from typing import TYPE_CHECKING
 
 from django.conf import settings
+from django.contrib.auth.models import User
 from django.db import transaction
 from django.http.response import Http404, HttpResponseBase, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
@@ -25,6 +26,9 @@ from dandiapi.api.mail import (
 
 from dandiapi.api.models import UserMetadata
 from dandiapi.api.permissions import IsApproved
+
+from dandiapi.api.views.users import social_account_to_dict, user_to_dict
+from dandiapi.api.views.serializers import UserDetailSerializer
 
 if TYPE_CHECKING:
     from django.contrib.auth.models import User
@@ -54,9 +58,35 @@ def auth_token_view(request: Request) -> HttpResponseBase:
 @api_view(['POST'])
 @permission_classes([IsApproved])
 def auth_webknossos_view(request: Request) -> HttpResponseBase:
+
+    if request.user.socialaccount_set.count() == 1:
+        social_account = request.user.socialaccount_set.get()
+        user_dict = social_account_to_dict(social_account)
+    else:
+        user_dict = user_to_dict(request.user)
+
+    user_detail_serializer = UserDetailSerializer(user_dict)
+    approved_user_email = user_detail_serializer.data["username"]
+
+    # Identify User, UserMetadata object
+    current_user = User.objects.get(email=approved_user_email)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     # Ensure user's request is coming from a specific host/domain
     # curl -X POST -H "Content-Type: application/json" -d '{"email":"akanzer@mit.edu","password":"<some-password>"}' https://webknossos-staging.lincbrain.org/api/auth/login -v
-    return Response()
+    # return Response()
 
 
 QUESTIONS = [
