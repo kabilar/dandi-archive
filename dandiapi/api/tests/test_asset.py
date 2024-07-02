@@ -21,7 +21,7 @@ from dandiapi.api.tasks.scheduled import validate_pending_asset_metadata
 from dandiapi.zarr.models import ZarrArchive, ZarrArchiveStatus
 from dandiapi.zarr.tasks import ingest_zarr_archive
 
-from .fuzzy import HTTP_URL_RE, S3_URL_RE, TIMESTAMP_RE, URN_RE, UTC_ISO_TIMESTAMP_RE, UUID_RE
+from .fuzzy import HTTP_URL_RE, S3_URI_RE, TIMESTAMP_RE, URN_RE, UTC_ISO_TIMESTAMP_RE, UUID_RE
 
 # Model tests
 
@@ -137,7 +137,8 @@ def test_publish_asset(draft_asset: Asset):
         },
         'datePublished': UTC_ISO_TIMESTAMP_RE,
         'identifier': str(draft_asset_id),
-        'contentUrl': [HTTP_URL_RE, HTTP_URL_RE, S3_URL_RE],
+        'contentUrl': [HTTP_URL_RE, HTTP_URL_RE],
+        's3_uri': S3_URI_RE,
         'neuroglancerUrl': 'Neuroglancer not supported for asset'
     }
 
@@ -198,7 +199,8 @@ def test_asset_full_metadata(draft_asset_factory):
         'id': f'dandiasset:{asset.asset_id}',
         'path': asset.path,
         'identifier': str(asset.asset_id),
-        'contentUrl': [download_url, blob_url, S3_URL_RE],
+        'contentUrl': [download_url, blob_url],
+        's3_uri': S3_URI_RE,
         'neuroglancerUrl': 'Neuroglancer not supported for asset',
         'contentSize': asset.blob.size,
         'digest': asset.blob.digest,
@@ -225,7 +227,8 @@ def test_asset_full_metadata_zarr(draft_asset_factory, zarr_archive):
         'id': f'dandiasset:{asset.asset_id}',
         'path': asset.path,
         'identifier': str(asset.asset_id),
-        'contentUrl': [download_url, s3_url, S3_URL_RE],
+        'contentUrl': [download_url, s3_url],
+        's3_uri': S3_URI_RE,
         'neuroglancerUrl': 'Neuroglancer not supported for asset',
         'contentSize': asset.size,
         'digest': asset.digest,
@@ -382,6 +385,7 @@ def test_asset_rest_list_ordering(api_client, user, version, asset_factory, orde
     result_paths = [asset['path'] for asset in results]
     assert result_paths == ordering
 
+@pytest.mark.django_db
 def test_asset_path_ordering(api_client, version, asset_factory):
     # The default collation will ignore special characters, including slashes, on the first pass. If
     # there are ties, it uses these characters to break ties. This means that in the below example,
