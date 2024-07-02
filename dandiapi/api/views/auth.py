@@ -68,21 +68,7 @@ def auth_webknossos_view(request: Request) -> HttpResponseBase:
     # Identify User, UserMetadata object
     User.objects.get(email=approved_user_email)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
     # Ensure user's request is coming from a specific host/domain
-    # curl -X POST -H "Content-Type: application/json" -d '{"email":"akanzer@mit.edu","password":"<some-password>"}' https://webknossos-staging.lincbrain.org/api/auth/login -v
     # return Response()
 
 
@@ -114,7 +100,7 @@ def authorize_view(request: HttpRequest) -> HttpResponse:
             f'{reverse("user-questionnaire")}'
             f'?{request.META["QUERY_STRING"]}&QUESTIONS={json.dumps(NEW_USER_QUESTIONS)}'
         )
-    elif not user.is_anonymous and (not user.first_name or not user.last_name):
+    elif not user.is_anonymous and (not user.first_name or not user.last_name):  # noqa: RET505
         # if this user doesn't have a first/last name available, redirect them to a
         # form to provide those before they can log in.
         return HttpResponseRedirect(

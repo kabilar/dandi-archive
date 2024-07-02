@@ -385,7 +385,7 @@ def test_asset_rest_list_ordering(api_client, user, version, asset_factory, orde
     result_paths = [asset['path'] for asset in results]
     assert result_paths == ordering
 
-@pytest.mark.django_db
+@pytest.mark.django_db()
 def test_asset_path_ordering(api_client, version, asset_factory):
     # The default collation will ignore special characters, including slashes, on the first pass. If
     # there are ties, it uses these characters to break ties. This means that in the below example,

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import datetime
+import logging
 import os
 import re
 from typing import TYPE_CHECKING
@@ -33,6 +34,8 @@ ASSET_COMPUTED_FIELDS = [
     'datePublished',
     'publishedBy',
 ]
+
+logging.basicConfig(level=logging.ERROR)
 
 def construct_neuroglancer_url(asset_path: str):
     replacement_url = os.getenv('CLOUDFRONT_NEUROGLANCER_URL')
@@ -265,8 +268,8 @@ class Asset(PublishableMetadataMixin, TimeStampedModel):
         neuroglancer_url = "Neuroglancer not supported for asset"
         try:
             neuroglancer_url = construct_neuroglancer_url(self.s3_url)
-        except Exception:  # Generic exception just to cover all future URL possibilities
-            pass
+        except Exception:  # Catching all exceptions, but logging them
+            logging.exception("Error constructing neuroglancer URL")
 
         metadata = {
             **self.metadata,

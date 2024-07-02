@@ -346,7 +346,12 @@ def test_user_questionnaire_view(
         ('test@test.edu', UserMetadata.Status.APPROVED),
     ],
 )
-def test_user_edu_no_auto_approve(user: User, api_client: APIClient, email: str, expected_status: str):
+def test_user_edu_no_auto_approve(
+    user: User,
+    api_client: APIClient,
+    email: str,
+    expected_status: str
+):
     user.email = email
     user.save(update_fields=['email'])
     user_metadata: UserMetadata = user.metadata

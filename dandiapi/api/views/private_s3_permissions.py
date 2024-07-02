@@ -46,14 +46,14 @@ def construct_neuroglancer_url(source, layer_name):
 
 
 def _replace_unsupported_chars(some_str):
-    """Replace unsupported chars: '+=/' with '-_~'."""
+    "Replace unsupported chars: '+=/' with '-_~'."
     return some_str.replace("+", "-") \
         .replace("=", "_") \
         .replace("/", "~")
 
 
 def _in_a_month():
-    """Returns a UTC POSIX timestamp for one month in the future."""
+    "Returns a UTC POSIX timestamp for one month in the future."  # noqa: D401
     one_month_later = datetime.datetime.now(datetime.UTC) + datetime.timedelta(days=30)
     return int(one_month_later.timestamp())
 
@@ -74,13 +74,13 @@ def rsa_signer(message, key):
     return private_key.sign(
         message,
         padding.PKCS1v15(),
-        hashes.SHA1()
+        hashes.SHA1()  # noqa: S303
     )
 
 
 
 def generate_policy_cookie(url):
-    """Returns a tuple: (policy json, policy base64)."""
+    """Returns a tuple: (policy json, policy base64)."""  # noqa: D401
     policy_dict = {
         "Statement": [
             {
@@ -94,7 +94,7 @@ def generate_policy_cookie(url):
         ]
     }
 
-    # Using separators=(',', ':') removes seperator whitespace
+    # Using separators=(',', ':') removes separator whitespace
     policy_json = json.dumps(policy_dict, separators=(",", ":"))
 
     policy_64 = str(base64.b64encode(policy_json.encode("utf-8")), "utf-8")
@@ -103,13 +103,13 @@ def generate_policy_cookie(url):
 
 
 def generate_signature(policy, key):
-    """Creates a signature for the policy from the key, returning a string."""
+    "Creates a signature for the policy from the key, returning a string."  # noqa: D401
     sig_bytes = rsa_signer(policy.encode("utf-8"), key)
     return _replace_unsupported_chars(str(base64.b64encode(sig_bytes), "utf-8"))
 
 
 def generate_cookies(policy, signature):
-    """Returns a dictionary for cookie values in the form 'COOKIE NAME': 'COOKIE VALUE'."""
+    "Returns a dictionary for cookie values in the form 'COOKIE NAME': 'COOKIE VALUE'."  # noqa: D401
     return {
         "CloudFront-Policy": policy,
         "CloudFront-Signature": signature,
