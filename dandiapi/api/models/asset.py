@@ -1,11 +1,11 @@
 from __future__ import annotations
 
 import datetime
+import os
 import re
 from typing import TYPE_CHECKING
 from urllib.parse import urlparse, urlunparse
 import uuid
-import os
 
 from django.conf import settings
 from django.contrib.postgres.indexes import HashIndex
@@ -220,8 +220,7 @@ class Asset(PublishableMetadataMixin, TimeStampedModel):
         if not path.startswith("/"):
             path = "/" + path
 
-        s3_uri = f"s3://{bucket_name}{path}"
-        return s3_uri
+        return f"s3://{bucket_name}{path}"
 
 
     def is_different_from(
@@ -250,10 +249,7 @@ class Asset(PublishableMetadataMixin, TimeStampedModel):
         if self.path != path:
             return True
 
-        if self.metadata != metadata:
-            return True
-
-        return False
+        return self.metadata != metadata
 
     @staticmethod
     def dandi_asset_id(asset_id: str | uuid.UUID):

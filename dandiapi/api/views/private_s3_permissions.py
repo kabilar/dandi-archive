@@ -1,26 +1,24 @@
 from __future__ import annotations
 
+import base64
+import datetime
+import io
+import json
+import os
 from typing import TYPE_CHECKING
+import urllib
 
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.asymmetric import padding
+from cryptography.hazmat.primitives.serialization import load_pem_private_key
+from django.conf import settings
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.decorators import api_view, parser_classes, permission_classes
 from rest_framework.parsers import JSONParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-import datetime
-import json
-import base64
-import io
-import os
-import urllib
-
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.asymmetric import padding
-from cryptography.hazmat.primitives.serialization import load_pem_private_key
-
 from dandiapi.api.storage import get_boto_client, get_storage
-from django.conf import settings
 
 
 def construct_neuroglancer_url(source, layer_name):
@@ -44,12 +42,11 @@ def construct_neuroglancer_url(source, layer_name):
 
     json_str = json.dumps(json_object)
     encoded_json = urllib.parse.quote(json_str)
-    full_url = f"{base_url}{encoded_json}"
+    return f"{base_url}{encoded_json}"
 
-    return full_url
 
 def _replace_unsupported_chars(some_str):
-    """Replace unsupported chars: '+=/' with '-_~'"""
+    """Replace unsupported chars: '+=/' with '-_~'."""
     return some_str.replace("+", "-") \
         .replace("=", "_") \
         .replace("/", "~")
@@ -57,7 +54,7 @@ def _replace_unsupported_chars(some_str):
 
 def _in_a_month():
     """Returns a UTC POSIX timestamp for one month in the future."""
-    one_month_later = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=30)
+    one_month_later = datetime.datetime.now(datetime.UTC) + datetime.timedelta(days=30)
     return int(one_month_later.timestamp())
 
 def rsa_signer(message, key):
@@ -74,18 +71,16 @@ def rsa_signer(message, key):
     )
 
     # Updated signing process
-    signature = private_key.sign(
+    return private_key.sign(
         message,
         padding.PKCS1v15(),
         hashes.SHA1()
     )
 
-    return signature
 
 
 def generate_policy_cookie(url):
-    """Returns a tuple: (policy json, policy base64)"""
-
+    """Returns a tuple: (policy json, policy base64)."""
     policy_dict = {
         "Statement": [
             {
@@ -108,14 +103,13 @@ def generate_policy_cookie(url):
 
 
 def generate_signature(policy, key):
-    """Creates a signature for the policy from the key, returning a string"""
+    """Creates a signature for the policy from the key, returning a string."""
     sig_bytes = rsa_signer(policy.encode("utf-8"), key)
-    sig_64 = _replace_unsupported_chars(str(base64.b64encode(sig_bytes), "utf-8"))
-    return sig_64
+    return _replace_unsupported_chars(str(base64.b64encode(sig_bytes), "utf-8"))
 
 
 def generate_cookies(policy, signature):
-    """Returns a dictionary for cookie values in the form 'COOKIE NAME': 'COOKIE VALUE'"""
+    """Returns a dictionary for cookie values in the form 'COOKIE NAME': 'COOKIE VALUE'."""
     return {
         "CloudFront-Policy": policy,
         "CloudFront-Signature": signature,

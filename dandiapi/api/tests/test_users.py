@@ -19,9 +19,7 @@ from dandiapi.api.views.auth import COLLECT_USER_NAME_QUESTIONS, NEW_USER_QUESTI
 from dandiapi.api.views.users import user_to_dict
 
 if TYPE_CHECKING:
-    from allauth.socialaccount.models import SocialAccount
     from django.contrib.auth.models import User
-    from django.core.mail.message import EmailMessage
     from django.test.client import Client
     from rest_framework.response import Response
     from rest_framework.test import APIClient
@@ -348,7 +346,7 @@ def test_user_questionnaire_view(
         ('test@test.edu', UserMetadata.Status.APPROVED),
     ],
 )
-def test_user_edu_auto_approve(user: User, api_client: APIClient, email: str, expected_status: str):
+def test_user_edu_no_auto_approve(user: User, api_client: APIClient, email: str, expected_status: str):
     user.email = email
     user.save(update_fields=['email'])
     user_metadata: UserMetadata = user.metadata
@@ -359,4 +357,5 @@ def test_user_edu_auto_approve(user: User, api_client: APIClient, email: str, ex
     resp = api_client.post(reverse('user-questionnaire'))
     assert resp.status_code == 302
 
-    assert user_metadata.status == expected_status
+    # User should remain PENDING, as LINC project does not auto-approve .edu accounts unlike DANDI
+    assert user_metadata.status == UserMetadata.Status.PENDING
