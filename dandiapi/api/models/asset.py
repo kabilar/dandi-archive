@@ -37,8 +37,11 @@ ASSET_COMPUTED_FIELDS = [
 
 logging.basicConfig(level=logging.ERROR)
 
-def construct_neuroglancer_url(asset_path: str):
+def construct_neuroglancer_url(asset_path: str) -> str:
     replacement_url = os.getenv('CLOUDFRONT_NEUROGLANCER_URL')
+    if not replacement_url:
+        raise ValueError("CLOUDFRONT_NEUROGLANCER_URL environment variable is not set")
+
     parts = asset_path.split('/')
     file_type_prefix = parts[3]
     cloudfront_s3_location = replacement_url + '/' + '/'.join(parts[3:])
@@ -209,12 +212,17 @@ class Asset(PublishableMetadataMixin, TimeStampedModel):
 
     @property
     def s3_uri(self) -> str:
+        if self.s3_url is None:
+            raise ValueError("s3_url cannot be None")
 
         s3_url_substring = None
         if self.s3_url.startswith("https://"):
             s3_url_substring = self.s3_url[len("https://"):]
         elif self.s3_url.startswith("http://"):
             s3_url_substring = self.s3_url[len("http://"):]
+
+        if s3_url_substring is None:
+            raise ValueError("s3_url must start with 'https://' or 'http://'")
 
         bucket_name_end_index = s3_url_substring.find(".s3.amazonaws.com")
         bucket_name = s3_url_substring[:bucket_name_end_index]
