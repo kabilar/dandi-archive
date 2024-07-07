@@ -105,7 +105,11 @@ urlpatterns = [
     re_path(
         r'^api/users/questionnaire-form/$', user_questionnaire_form_view, name='user-questionnaire'
     ),
-    path('api/permissions/s3/', presigned_cookie_s3_cloudfront_view, name='presigned_cookie_s3_cloudfront'),
+    path(
+        'api/permissions/s3/',
+        presigned_cookie_s3_cloudfront_view,
+        name='presigned_cookie_s3_cloudfront'
+    ),
     re_path(
         r'^api/permissions/s3/(?P<asset_path>.*)$',
         presigned_cookie_s3_cloudfront_view,

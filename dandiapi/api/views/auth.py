@@ -23,15 +23,12 @@ from dandiapi.api.mail import (
     send_new_user_message_email,
     send_registered_notice_email,
 )
-
 from dandiapi.api.models import UserMetadata
 from dandiapi.api.permissions import IsApproved
-
-from dandiapi.api.views.users import social_account_to_dict, user_to_dict
 from dandiapi.api.views.serializers import UserDetailSerializer
+from dandiapi.api.views.users import social_account_to_dict, user_to_dict
 
 if TYPE_CHECKING:
-    from django.contrib.auth.models import User
     from django.http import HttpRequest, HttpResponse
     from rest_framework.request import Request
 
@@ -69,23 +66,9 @@ def auth_webknossos_view(request: Request) -> HttpResponseBase:
     approved_user_email = user_detail_serializer.data["username"]
 
     # Identify User, UserMetadata object
-    current_user = User.objects.get(email=approved_user_email)
-
-
-
-
-
-
-
-
-
-
-
-
-
+    User.objects.get(email=approved_user_email)
 
     # Ensure user's request is coming from a specific host/domain
-    # curl -X POST -H "Content-Type: application/json" -d '{"email":"akanzer@mit.edu","password":"<some-password>"}' https://webknossos-staging.lincbrain.org/api/auth/login -v
     # return Response()
 
 
@@ -117,7 +100,7 @@ def authorize_view(request: HttpRequest) -> HttpResponse:
             f'{reverse("user-questionnaire")}'
             f'?{request.META["QUERY_STRING"]}&QUESTIONS={json.dumps(NEW_USER_QUESTIONS)}'
         )
-    elif not user.is_anonymous and (not user.first_name or not user.last_name):
+    elif not user.is_anonymous and (not user.first_name or not user.last_name):  # noqa: RET505
         # if this user doesn't have a first/last name available, redirect them to a
         # form to provide those before they can log in.
         return HttpResponseRedirect(

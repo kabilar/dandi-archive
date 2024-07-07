@@ -242,7 +242,7 @@
                           AWS S3 URI <span v-if="copied" style="color: green; padding-left: 8px; padding-right: 8px; margin-left: 16px;">Copied!</span>
                         </v-list-item-title>
                         <v-spacer></v-spacer>
-                        <v-icon @click.stop="copyToClipboard(item.asset.s3_uri)">mdi-content-copy</v-icon>
+                        <v-icon @click.stop="copyToClipboard(item.asset?.s3_uri)">mdi-content-copy</v-icon>
                       </v-list-item>
                     </v-list>
                   </v-menu>
@@ -341,7 +341,7 @@ interface AssetService {
 interface ExtendedAssetPath extends AssetPath {
   services?: AssetService[];
   name: string;
-  s3Uri?: string;
+  s3_uri?: string;
 }
 
 const sortByFolderThenName = (a: ExtendedAssetPath, b: ExtendedAssetPath) => {
@@ -440,8 +440,7 @@ const pages = ref(0);
 const updating = ref(false);
 const copied = ref(false);
 
-const menuOpen = ref({});
-
+const menuOpen = ref<Record<string, boolean>>({});
 // Computed
 const owners = computed(() => store.owners?.map((u) => u.username) || null);
 const currentDandiset = computed(() => store.dandiset);
@@ -485,16 +484,21 @@ async function redirectToNeuroglancerUrl(item: any) {
   }
 }
 
-function copyToClipboard(s3Uri: string) {
-  navigator.clipboard.writeText(s3Uri).then(() => {
-    copied.value = true;
-    setTimeout(() => {
-      copied.value = false;
-    }, 2000);
-  }).catch(err => {
-    console.error('Failed to copy text: ', err)
-  });
+function copyToClipboard(s3Uri?: string) {
+  if (s3Uri) {
+    navigator.clipboard.writeText(s3Uri).then(() => {
+      copied.value = true;
+      setTimeout(() => {
+        copied.value = false;
+      }, 2000);
+    }).catch(err => {
+      console.error('Failed to copy text: ', err)
+    });
+  } else {
+    console.error('No S3 URI found')
+  }
 }
+
 
 
 function getExternalServices(path: AssetPath, info: {dandisetId: string, dandisetVersion: string}) {
