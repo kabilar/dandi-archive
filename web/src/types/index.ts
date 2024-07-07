@@ -89,6 +89,7 @@ export interface DandisetStats {
 export interface AssetFile {
   asset_id: string;
   url: string;
+  s3_uri: string;
 }
 
 export interface AssetPath {
