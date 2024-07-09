@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import requests
+
+from celery import Task
 from celery import shared_task
 from celery.utils.log import get_task_logger
 
@@ -74,3 +77,38 @@ def publish_dandiset_task(dandiset_id: int):
     from dandiapi.api.services.publish import _publish_dandiset
 
     _publish_dandiset(dandiset_id=dandiset_id)
+
+
+def sanitize_payload(payload):
+    if 'password' in payload:
+        payload['password'] = '******'
+    return payload
+
+class BaseTaskWithSanitization(Task):
+    def apply_async(self, args=None, kwargs=None, **options):
+        if kwargs and 'post_payload' in kwargs:
+            kwargs['post_payload'] = sanitize_payload(kwargs['post_payload'])
+        return super().apply_async(args, kwargs, **options)
+@shared_task(base=BaseTaskWithSanitization)  # Sanitization used to not output passwords into logs
+def register_post_external_api_task(external_endpoint: str, post_payload: any) -> None:
+    """
+    Helper function to register celery task that calls POST upon an external API service
+
+    :param external_endpoint: URL of the external API endpoint
+    :param post_payload: Dictionary payload to send in the POST request
+
+    """
+
+    headers = {
+        'Content-Type': 'application/json',
+    }
+    try:
+        requests.post(external_endpoint, json=post_payload, headers=headers)
+    except requests.exceptions.HTTPError as http_err:
+        logger.error(f"HTTP error occurred: {http_err}")
+    except requests.exceptions.RequestException as req_err:
+        logger.error(f"Request exception occurred: {req_err}")
+    except Exception as err:
+        logger.error(f"An unexpected error occurred: {err}")
+
+
