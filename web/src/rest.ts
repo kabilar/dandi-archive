@@ -74,8 +74,6 @@ const dandiRest = {
   async login() {
     if (oauthClient) {
       await oauthClient.redirectToLogin();
-
-      
     }
   },
   async logout() {

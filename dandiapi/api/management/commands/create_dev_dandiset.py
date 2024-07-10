@@ -1,6 +1,6 @@
 from __future__ import annotations
-
 import hashlib
+
 from uuid import uuid4
 
 from django.conf import settings
@@ -36,16 +36,13 @@ def create_dev_dandiset(name: str, email: str, first_name: str, last_name: str):
 
     files_names_and_etags = [
         {"etag": '76d36e98f312e98ff908c8c82c8dd623-0', "file_name": "foo/bar.txt"},
-        {"etag": '86d36e98f312e98ff908c8c82c8dd623-0', "file_name": "foo/buzz.ome.zarr"},
+        {"etag": '86d36e98f312e98ff908c8c82c8dd623-0', "file_name": "foo/buzz.txt"},
     ]
 
     for file_name_and_etag in files_names_and_etags:
         file_size = 20
         file_content = b'A' * file_size
-        uploaded_file = SimpleUploadedFile(
-            name=file_name_and_etag["file_name"],
-            content=file_content
-        )
+        uploaded_file = SimpleUploadedFile(name=file_name_and_etag["file_name"], content=file_content)
         etag = file_name_and_etag["etag"]
 
         try:
