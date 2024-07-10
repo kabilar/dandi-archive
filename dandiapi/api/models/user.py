@@ -3,10 +3,9 @@ from __future__ import annotations
 import os
 
 from django.contrib.auth.models import User
-from django.db import models, transaction
-from django_extensions.db.models import TimeStampedModel
+from django.db import models
 from django.utils.crypto import get_random_string
-
+from django_extensions.db.models import TimeStampedModel
 
 
 class UserMetadata(TimeStampedModel):
@@ -20,25 +19,22 @@ class UserMetadata(TimeStampedModel):
     status = models.CharField(choices=Status.choices, default=Status.INCOMPLETE, max_length=10)
     questionnaire_form = models.JSONField(blank=True, null=True)
     rejection_reason = models.TextField(blank=True, default='', max_length=1000)
-    webknossos_credential = models.CharField(max_length=128, blank=True, null=True)
+    webknossos_credential = models.CharField(max_length=128, blank=True, null=True)  # noqa: DJ001
 
     def should_register_webknossos_account(self, previous_status, api_url=None) -> bool:
-        return (self.status == self.Status.APPROVED and (
-                previous_status != self.Status.APPROVED)
-                and not self.webknossos_credential
-                and api_url
-            )
+
+        return (self.status == self.Status.APPROVED and
+                previous_status != self.Status.APPROVED and
+                not self.webknossos_credential and
+                api_url)
 
     def register_webknossos_account(self, webknossos_api_url: str) -> None:
-
         random_password = get_random_string(length=12)
         self.webknossos_credential = random_password
 
         webknossos_organization_name = os.getenv('WEBKNOSSOS_ORGANIZATION_NAME', None)
-        webknossos_organization_display_name = os.getenv(
-            'WEBKNOSSOS_ORGANIZATION_DISPLAY_NAME',
-            None
-        )
+        webknossos_organization_display_name = os.getenv('WEBKNOSSOS_ORGANIZATION_DISPLAY_NAME',
+                                                         None)
 
         # Offset to celery task to call /register in WebKNOSSOS
         from dandiapi.api.tasks import register_post_external_api_task
@@ -55,28 +51,18 @@ class UserMetadata(TimeStampedModel):
                     "password1": self.webknossos_credential,
                     "password2": self.webknossos_credential
                 }
-            })
-
+            }
+        )
 
     def save(self, *args, **kwargs):
-        """
-        Overrides the default save method to register a new user with a WebKNOSSOS account
-        if appropriate via an asynchronous celery function
-
-        """
         is_new_instance = self.pk is None
 
         if not is_new_instance:
             previous_status = UserMetadata.objects.get(pk=self.pk).status
-
             webknossos_api_url = os.getenv('WEBKNOSSOS_API_URL', None)
-            # Register user for WebKNOSSOS if not yet registered
-            if self.should_register_webknossos_account(
-                previous_status=previous_status,
-                api_url=webknossos_api_url
-            ):
+            if self.should_register_webknossos_account(previous_status, api_url=webknossos_api_url):
                 self.register_webknossos_account(webknossos_api_url=webknossos_api_url)
 
-        super().save(*args, **kwargs)
+        super().save(*args, **kwargs)  # Save again if registered
 
 
