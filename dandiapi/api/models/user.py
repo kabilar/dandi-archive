@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 
 from django.contrib.auth.models import User
-from django.db import models
+from django.db import models, transaction
 from django.utils.crypto import get_random_string
 from django_extensions.db.models import TimeStampedModel
 
@@ -29,8 +29,6 @@ class UserMetadata(TimeStampedModel):
                 api_url)
 
     def register_webknossos_account(self, webknossos_api_url: str) -> None:
-        random_password = get_random_string(length=12)
-        self.webknossos_credential = random_password
 
         webknossos_organization_name = os.getenv('WEBKNOSSOS_ORGANIZATION_NAME', None)
         webknossos_organization_display_name = os.getenv('WEBKNOSSOS_ORGANIZATION_DISPLAY_NAME',
@@ -55,14 +53,27 @@ class UserMetadata(TimeStampedModel):
         )
 
     def save(self, *args, **kwargs):
-        is_new_instance = self.pk is None
 
-        if not is_new_instance:
-            previous_status = UserMetadata.objects.get(pk=self.pk).status
-            webknossos_api_url = os.getenv('WEBKNOSSOS_API_URL', None)
-            if self.should_register_webknossos_account(previous_status, api_url=webknossos_api_url):
-                self.register_webknossos_account(webknossos_api_url=webknossos_api_url)
+        with transaction.atomic():
 
-        super().save(*args, **kwargs)  # Save again if registered
+            super().save(*args, **kwargs)
+
+            is_new_instance = self.pk is None
+            if not is_new_instance:
+
+                previous_status = UserMetadata.objects.get(pk=self.pk).status
+                webknossos_api_url = os.getenv('WEBKNOSSOS_API_URL', None)
+
+                if self.should_register_webknossos_account(
+                    previous_status,
+                    api_url=webknossos_api_url
+                ):
+
+                    random_password = get_random_string(length=12)
+                    self.webknossos_credential = random_password
+                    self.register_webknossos_account(webknossos_api_url=webknossos_api_url)
+                    #  Slightly recursive call, but will halt with WebKNOSSOS logic
+                    super().save(*args, **kwargs)
+
 
 
