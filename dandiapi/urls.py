@@ -15,6 +15,7 @@ from dandiapi.api.views import (
     NestedAssetViewSet,
     VersionViewSet,
     auth_token_view,
+    auth_webknossos_view,
     authorize_view,
     blob_read_view,
     info_view,
@@ -84,6 +85,7 @@ urlpatterns = [
     path('', root_content_view),
     path('api/', include(router.urls)),
     path('api/auth/token/', auth_token_view, name='auth-token'),
+    path('api/auth/webknossos', auth_webknossos_view, name='auth-webknossos'),
     path('api/stats/', stats_view),
     path('api/info/', info_view),
     path('api/blobs/digest/', blob_read_view, name='blob-read'),
@@ -103,7 +105,11 @@ urlpatterns = [
     re_path(
         r'^api/users/questionnaire-form/$', user_questionnaire_form_view, name='user-questionnaire'
     ),
-    path('api/permissions/s3/', presigned_cookie_s3_cloudfront_view, name='presigned_cookie_s3_cloudfront'),
+    path(
+        'api/permissions/s3/',
+        presigned_cookie_s3_cloudfront_view,
+        name='presigned_cookie_s3_cloudfront'
+    ),
     re_path(
         r'^api/permissions/s3/(?P<asset_path>.*)$',
         presigned_cookie_s3_cloudfront_view,

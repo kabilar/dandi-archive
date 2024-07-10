@@ -42,7 +42,10 @@ def create_dev_dandiset(name: str, email: str, first_name: str, last_name: str):
     for file_name_and_etag in files_names_and_etags:
         file_size = 20
         file_content = b'A' * file_size
-        uploaded_file = SimpleUploadedFile(name=file_name_and_etag["file_name"], content=file_content)
+        uploaded_file = SimpleUploadedFile(
+            name=file_name_and_etag["file_name"],
+            content=file_content
+        )
         etag = file_name_and_etag["etag"]
 
         try:

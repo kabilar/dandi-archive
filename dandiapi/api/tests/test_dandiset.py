@@ -882,9 +882,9 @@ def test_dandiset_rest_change_owner(
     assert list(dandiset.owners) == [user2]
 
     assert len(mailoutbox) == 2
-    assert mailoutbox[0].subject == f'Removed from Dandiset "{dandiset.draft_version.name}"'
+    assert mailoutbox[0].subject == f'Removed from dataset "{dandiset.draft_version.name}"'
     assert mailoutbox[0].to == [user1.email]
-    assert mailoutbox[1].subject == f'Added to Dandiset "{dandiset.draft_version.name}"'
+    assert mailoutbox[1].subject == f'Added to dataset "{dandiset.draft_version.name}"'
     assert mailoutbox[1].to == [user2.email]
 
 
@@ -958,7 +958,7 @@ def test_dandiset_rest_add_owner(
     assert list(dandiset.owners) == [user1, user2]
 
     assert len(mailoutbox) == 1
-    assert mailoutbox[0].subject == f'Added to Dandiset "{dandiset.draft_version.name}"'
+    assert mailoutbox[0].subject == f'Added to dataset "{dandiset.draft_version.name}"'
     assert mailoutbox[0].to == [user2.email]
 
 
@@ -994,7 +994,7 @@ def test_dandiset_rest_remove_owner(
     assert list(dandiset.owners) == [user1]
 
     assert len(mailoutbox) == 1
-    assert mailoutbox[0].subject == f'Removed from Dandiset "{dandiset.draft_version.name}"'
+    assert mailoutbox[0].subject == f'Removed from dataset "{dandiset.draft_version.name}"'
     assert mailoutbox[0].to == [user2.email]
 
 

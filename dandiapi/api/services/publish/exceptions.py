@@ -12,7 +12,7 @@ class DandisetAlreadyPublishedError(DandiError):
 
 class DandisetAlreadyPublishingError(DandiError):
     http_status_code = status.HTTP_423_LOCKED
-    message = 'Dandiset is currently being published'
+    message = 'Dataset is currently being published'
 
 
 class DandisetBeingValidatedError(DandiError):

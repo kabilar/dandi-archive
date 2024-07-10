@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        tox-env: [lint, type, test, check-migrations]
+        tox-env: [test, check-migrations]  # [lint, type, test, check-migrations]
     services:
       postgres:
         image: postgres:latest

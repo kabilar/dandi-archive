@@ -4,7 +4,8 @@ import pytest
 
 
 @pytest.mark.django_db()
-def test_asset_pagination(api_client, version, asset_factory):
+def test_asset_pagination(api_client, version, asset_factory, user):
+    api_client.force_authenticate(user=user)
     endpoint = f'/api/dandisets/{version.dandiset.identifier}/versions/{version.version}/assets/'
 
     # Create assets and set their created time artificially apart

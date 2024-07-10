@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from celery import shared_task
 from celery.utils.log import get_task_logger
+import requests
 
 from dandiapi.api.doi import delete_doi
 from dandiapi.api.manifests import (
@@ -74,3 +75,25 @@ def publish_dandiset_task(dandiset_id: int):
     from dandiapi.api.services.publish import _publish_dandiset
 
     _publish_dandiset(dandiset_id=dandiset_id)
+
+
+@shared_task
+def register_post_external_api_task(external_endpoint: str, post_payload: any) -> None:
+    """
+    Register a celery task that posts data to an external API service.
+
+    :param external_endpoint: URL of the external API endpoint
+    :param post_payload: Dictionary payload to send in the POST request
+    """
+    headers = {
+        'Content-Type': 'application/json',
+    }
+    try:
+        requests.post(external_endpoint, json=post_payload, headers=headers, timeout=10)
+    except requests.exceptions.HTTPError:
+        logger.exception("HTTP error occurred")
+    except requests.exceptions.RequestException:
+        logger.exception("Request exception occurred")
+    except Exception:
+        logger.exception("An unexpected error occurred")
+
