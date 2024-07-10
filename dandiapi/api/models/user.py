@@ -56,12 +56,12 @@ class UserMetadata(TimeStampedModel):
 
         with transaction.atomic():
 
+            previous_status = UserMetadata.objects.get(pk=self.pk).status
             super().save(*args, **kwargs)
 
             is_new_instance = self.pk is None
             if not is_new_instance:
 
-                previous_status = UserMetadata.objects.get(pk=self.pk).status
                 webknossos_api_url = os.getenv('WEBKNOSSOS_API_URL', None)
 
                 if self.should_register_webknossos_account(
