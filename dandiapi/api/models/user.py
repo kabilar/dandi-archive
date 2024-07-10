@@ -21,10 +21,9 @@ class UserMetadata(TimeStampedModel):
     rejection_reason = models.TextField(blank=True, default='', max_length=1000)
     webknossos_credential = models.CharField(max_length=128, blank=True, null=True)  # noqa: DJ001
 
-    def should_register_webknossos_account(self, previous_status, api_url=None) -> bool:
+    def should_register_webknossos_account(self, api_url=None) -> bool:
 
         return (self.status == self.Status.APPROVED and
-                previous_status != self.Status.APPROVED and
                 not self.webknossos_credential and
                 api_url)
 
@@ -56,7 +55,6 @@ class UserMetadata(TimeStampedModel):
 
         with transaction.atomic():
 
-            previous_status = UserMetadata.objects.get(pk=self.pk).status
             super().save(*args, **kwargs)
 
             is_new_instance = self.pk is None
@@ -64,10 +62,7 @@ class UserMetadata(TimeStampedModel):
 
                 webknossos_api_url = os.getenv('WEBKNOSSOS_API_URL', None)
 
-                if self.should_register_webknossos_account(
-                    previous_status,
-                    api_url=webknossos_api_url
-                ):
+                if self.should_register_webknossos_account(api_url=webknossos_api_url):
 
                     random_password = get_random_string(length=12)
                     self.webknossos_credential = random_password
