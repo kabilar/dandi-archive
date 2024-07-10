@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import requests
 
-from celery import Task
 from celery import shared_task
 from celery.utils.log import get_task_logger
 
@@ -15,6 +14,7 @@ from dandiapi.api.manifests import (
     write_dandiset_yaml,
 )
 from dandiapi.api.models import Asset, AssetBlob, Version
+
 
 logger = get_task_logger(__name__)
 
@@ -79,18 +79,7 @@ def publish_dandiset_task(dandiset_id: int):
     _publish_dandiset(dandiset_id=dandiset_id)
 
 
-def sanitize_payload(payload):
-    if 'password' in payload:
-        payload['password'] = '******'
-    return payload
-
-class BaseTaskWithSanitization(Task):
-    def apply_async(self, args=None, kwargs=None, **options):
-        if kwargs and 'post_payload' in kwargs:
-            kwargs['post_payload'] = sanitize_payload(kwargs['post_payload'])
-        return super().apply_async(args, kwargs, **options)
-
-@shared_task(base=BaseTaskWithSanitization)  # Sanitization used to not output passwords into logs
+@shared_task
 def register_post_external_api_task(external_endpoint: str, post_payload: any) -> None:
     """
     Helper function to register celery task that calls POST upon an external API service
