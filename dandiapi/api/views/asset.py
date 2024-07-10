@@ -43,7 +43,6 @@ from dandiapi.api.models import Asset, AssetBlob, Dandiset, Version
 from dandiapi.api.models.asset import validate_asset_path
 from dandiapi.api.models.dandiset import DandisetUserObjectPermission
 from dandiapi.api.permissions import IsApproved
-
 from dandiapi.api.views.common import (
     ASSET_ID_PARAM,
     VERSIONS_DANDISET_PK_PARAM,

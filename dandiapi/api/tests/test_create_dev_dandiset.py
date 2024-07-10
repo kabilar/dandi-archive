@@ -20,10 +20,12 @@ def test_create_dev_dandiset(user):
     assert version.version == 'draft'
     assert version.status == Version.Status.VALID
 
-    assert Asset.objects.count() == 1
-    asset = Asset.objects.get()
-    assert asset in version.assets.all()
+    assert Asset.objects.count() == 2
+    assets = Asset.objects.all()
+    for asset in assets:
+        assert asset in version.assets.all()
 
-    assert AssetBlob.objects.count() == 1
-    asset_blob = AssetBlob.objects.get()
-    assert AssetBlob.blob.field.storage.exists(asset_blob.blob.name)
+    assert AssetBlob.objects.count() == 2
+    asset_blobs = AssetBlob.objects.all()
+    for asset_blob in asset_blobs:
+        assert AssetBlob.blob.field.storage.exists(asset_blob.blob.name)
