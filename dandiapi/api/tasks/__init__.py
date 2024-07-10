@@ -89,6 +89,7 @@ class BaseTaskWithSanitization(Task):
         if kwargs and 'post_payload' in kwargs:
             kwargs['post_payload'] = sanitize_payload(kwargs['post_payload'])
         return super().apply_async(args, kwargs, **options)
+
 @shared_task(base=BaseTaskWithSanitization)  # Sanitization used to not output passwords into logs
 def register_post_external_api_task(external_endpoint: str, post_payload: any) -> None:
     """

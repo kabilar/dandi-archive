@@ -24,7 +24,19 @@ class UserMetadata(TimeStampedModel):
     webknossos_credential = models.CharField(max_length=128, blank=True, null=True)
 
     def save(self, *args, **kwargs):
-        with transaction.atomic():
+
+        is_new_instance = self.pk is None
+        previous_status = None
+
+        if not is_new_instance:
+            previous_status = UserMetadata.objects.get(pk=self.pk).status
+
+        super().save(*args, **kwargs)
+
+        if (self.status == self.Status.APPROVED and (
+            is_new_instance or previous_status != self.Status.APPROVED)
+            and os.getenv('WEBKNOSSOS_API_URL', None)
+        ):
 
             # Register user for WebKNOSSOS if not yet registered
             # if not self.webknossos_credential and os.getenv('WEBKNOSSOS_API_URL', None):
