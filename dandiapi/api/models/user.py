@@ -34,11 +34,12 @@ class UserMetadata(TimeStampedModel):
                                                          None)
 
         # Offset to celery task to call /register in WebKNOSSOS
-        from dandiapi.api.tasks import register_post_external_api_task
+        from dandiapi.api.tasks import register_external_api_request_task
 
-        register_post_external_api_task.delay(
+        register_external_api_request_task.delay(
+            method='POST',
             external_endpoint=f'{webknossos_api_url}/api/auth/register',
-            post_payload={
+            payload={
                 "firstName": self.user.first_name,
                 "lastName": self.user.last_name,
                 "email": self.user.email,

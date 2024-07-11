@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from json.decoder import JSONDecodeError
+import os
 from typing import TYPE_CHECKING
 
 from django.conf import settings
@@ -14,19 +15,22 @@ from django.views.decorators.http import require_http_methods
 from drf_yasg.utils import swagger_auto_schema
 from oauth2_provider.views.base import AuthorizationView
 from rest_framework.authtoken.models import Token
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework import viewsets
+from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_500_INTERNAL_SERVER_ERROR
 
 from dandiapi.api.mail import (
     send_approved_user_message,
     send_new_user_message_email,
     send_registered_notice_email,
 )
-from dandiapi.api.models import UserMetadata
 from dandiapi.api.permissions import IsApproved
 from dandiapi.api.views.serializers import UserDetailSerializer
 from dandiapi.api.views.users import social_account_to_dict, user_to_dict
+from dandiapi.api.models.user import UserMetadata
+from dandiapi.api.tasks import register_external_api_request_task
 
 if TYPE_CHECKING:
     from django.http import HttpRequest, HttpResponse
@@ -48,28 +52,59 @@ def auth_token_view(request: Request) -> HttpResponseBase:
     return Response(token.key)
 
 
-@swagger_auto_schema(
-    methods=['POST'],
-    responses={200: 'The token necessary for WebKNOSSOS'},
-)
-@api_view(['POST'])
-@permission_classes([IsApproved])
-def auth_webknossos_view(request: Request) -> HttpResponseBase:
+class ExternalAPIViewset(viewsets.ViewSet):
+    permission_classes = [IsAuthenticated]
 
-    if request.user.socialaccount_set.count() == 1:
-        social_account = request.user.socialaccount_set.get()
-        user_dict = social_account_to_dict(social_account)
-    else:
-        user_dict = user_to_dict(request.user)
+    @swagger_auto_schema(
+        methods=['GET'],
+        responses={200: 'Login worked for given external API service'},
+    )
+    @action(
+        detail=False,
+        methods=['GET'],
+        permission_classes=[IsApproved],
+        url_path=r'login/(?P<service>[^/.]+)'
+    )
+    def login(self, request: Request, service: str) -> HttpResponseBase:
+        if request.user.socialaccount_set.count() == 1:
+            social_account = request.user.socialaccount_set.get()
+            user_dict = social_account_to_dict(social_account)
+        else:
+            user_dict = user_to_dict(request.user)
 
-    user_detail_serializer = UserDetailSerializer(user_dict)
-    approved_user_email = user_detail_serializer.data["username"]
+        user_detail_serializer = UserDetailSerializer(user_dict)
+        approved_user_email = user_detail_serializer.data["username"]
 
-    # Identify User, UserMetadata object
-    User.objects.get(email=approved_user_email)
+        user = User.objects.get(email=approved_user_email)
 
-    # Ensure user's request is coming from a specific host/domain
-    # return Response()
+        if service == 'webknossos':
+            webknossos_credential = user.metadata.webknossos_credential
+            webknossos_api_url = os.getenv('WEBKNOSSOS_API_URL', None)
+            external_endpoint = f'{webknossos_api_url}/api/auth/login'
+            query_params = {
+                "username": approved_user_email,
+                "password": webknossos_credential
+            }
+        else:
+            return Response(status=400, data={"detail": "Unsupported service"})
+
+        task_result = register_external_api_request_task.delay(
+            method='GET',
+            external_endpoint=external_endpoint,
+            query_params=query_params
+        )
+
+        status_code = task_result.get('status_code', HTTP_500_INTERNAL_SERVER_ERROR)
+        headers = task_result.get('headers', {})
+
+        response = Response(status=status_code)
+
+        # Set cookies in the response
+        if 'Set-Cookie' in headers:
+            response['Set-Cookie'] = headers['Set-Cookie']
+
+        return response
+
 
 
 QUESTIONS = [
