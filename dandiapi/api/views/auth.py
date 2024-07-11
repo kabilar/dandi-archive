@@ -5,6 +5,8 @@ from json.decoder import JSONDecodeError
 import os
 from typing import TYPE_CHECKING
 
+from celery.result import AsyncResult
+
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import transaction
@@ -80,28 +82,35 @@ class ExternalAPIViewset(viewsets.ViewSet):
         if service == 'webknossos':
             webknossos_credential = user.metadata.webknossos_credential
             webknossos_api_url = os.getenv('WEBKNOSSOS_API_URL', None)
-            external_endpoint = f'{webknossos_api_url}/api/auth/login'
+            # external_endpoint = f'{webknossos_api_url}/api/auth/login'
+
+            external_endpoint = 'https://webknossos-staging.lincbrain.org/api/auth/login'
             query_params = {
-                "username": approved_user_email,
+                "email": approved_user_email,
                 "password": webknossos_credential
             }
         else:
             return Response(status=400, data={"detail": "Unsupported service"})
 
+        print(external_endpoint)
+        print(query_params)
         task_result = register_external_api_request_task.delay(
             method='GET',
             external_endpoint=external_endpoint,
             query_params=query_params
         )
 
-        status_code = task_result.get('status_code', HTTP_500_INTERNAL_SERVER_ERROR)
-        headers = task_result.get('headers', {})
+        result = AsyncResult(task_result.id).get(timeout=10)
+        print(dir(result))
 
-        response = Response(status=status_code)
+        # status_code = task_result.get('status_code', HTTP_500_INTERNAL_SERVER_ERROR)
+        # headers = task_result.get('headers', {})
 
-        # Set cookies in the response
-        if 'Set-Cookie' in headers:
-            response['Set-Cookie'] = headers['Set-Cookie']
+        response = Response()
+        print(dir(response))
+
+        # if 'Set-Cookie' in headers:
+        #     response['Set-Cookie'] = headers['Set-Cookie']
 
         return response
 
