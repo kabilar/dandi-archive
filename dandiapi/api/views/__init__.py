@@ -3,7 +3,6 @@ from __future__ import annotations
 from .asset import AssetViewSet, NestedAssetViewSet
 from .auth import (
     auth_token_view,
-    auth_webknossos_view,
     authorize_view,
     user_questionnaire_form_view,
 )
@@ -30,7 +29,6 @@ __all__ = [
     'VersionViewSet',
     'authorize_view',
     'auth_token_view',
-    'auth_webknossos_view',
     'blob_read_view',
     'upload_initialize_view',
     'upload_complete_view',
