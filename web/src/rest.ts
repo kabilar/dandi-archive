@@ -35,9 +35,13 @@ const webKnossosApiRoot = import.meta.env.VITE_APP_WEBKNOSSOS_API_ROOT.endsWith(
   ? import.meta.env.VITE_APP_WEBKNOSSOS_API_ROOT
   : `${import.meta.env.VITE_APP_WEBKNOSSOS_API_ROOT}/`;
 
-const webKnossosClient = axios.create({ baseURL: webKnossosApiRoot });
+const webKnossosClient = axios.create(
+  { baseURL: webKnossosApiRoot, withCredentials: true, }
+);
 
-const client = axios.create({ baseURL: dandiApiRoot });
+const client = axios.create(
+  { baseURL: dandiApiRoot }
+);
 
 
 let oauthClient: OAuthClient | null = null;
@@ -310,17 +314,17 @@ client.interceptors.request.use((config) => ({
 }));
 
 function getIdCookieValue() {
-  const name = 'id='; // This is used to identify the "id" cookie
-  const decodedCookie = decodeURIComponent(document.cookie); // Decode the cookie string
-  const ca = decodedCookie.split(';'); // Split the cookies into an array
+  const name = 'id=';
+  const decodedCookie = decodeURIComponent(document.cookie);
+  const ca = decodedCookie.split(';');
 
-  for(let i = 0; i < ca.length; i++) {
-    const c = ca[i].trim(); // Remove leading whitespace
-    if (c.indexOf(name) === 0) { // Check if this cookie starts with "id="
-      return c.substring(name.length); // Extract the value of the "id" cookie
+  for (let i = 0; i < ca.length; i++) {
+    const c = ca[i].trim();
+    if (c.indexOf(name) === 0) {
+      return c.substring(name.length);
     }
   }
-  return ''; // Return an empty string if the "id" cookie is not found
+  return '';
 }
 
 webKnossosClient.interceptors.request.use((config) => {
