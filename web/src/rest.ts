@@ -35,9 +35,10 @@ const webKnossosApiRoot = import.meta.env.VITE_APP_WEBKNOSSOS_API_ROOT.endsWith(
   ? import.meta.env.VITE_APP_WEBKNOSSOS_API_ROOT
   : `${import.meta.env.VITE_APP_WEBKNOSSOS_API_ROOT}/`;
 
+const webKnossosClient = axios.create({ baseURL: webKnossosApiRoot });
+
 const client = axios.create({ baseURL: dandiApiRoot });
 
-const webKnossosClient = axios.create({ baseURL: webKnossosApiRoot });
 
 let oauthClient: OAuthClient | null = null;
 try {
@@ -56,7 +57,7 @@ const user = ref<User | null>(null);
 
 const webknossosRest = {
   async datasets(params?: any): Promise<any> {
-    const response = await client.get('api/datasets/', { params });
+    const response = await webKnossosClient.get('api/datasets/', { params });
     return response;
   },
 }
@@ -325,6 +326,8 @@ function getIdCookieValue() {
 webKnossosClient.interceptors.request.use((config) => {
   const idCookieValue = getIdCookieValue(); // Retrieve the value of the "id" cookie
   const idCookie = `id=${idCookieValue}`; // Construct the "id" cookie string
+
+  console.log(config)
 
   return {
     ...config,
