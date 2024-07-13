@@ -74,9 +74,9 @@ class ExternalAPIViewset(viewsets.ViewSet):
             user_dict = user_to_dict(request.user)
 
         user_detail_serializer = UserDetailSerializer(user_dict)
-        user = User.objects.get(email=user_detail_serializer.data["email"])
 
         if service == 'webknossos':
+            user = User.objects.get(email=user_detail_serializer.data["email"])
             webknossos_credential = user.metadata.webknossos_credential
             webknossos_api_url = os.getenv('WEBKNOSSOS_API_URL', None)
             external_endpoint = f'{webknossos_api_url}/api/auth/login'
@@ -85,6 +85,7 @@ class ExternalAPIViewset(viewsets.ViewSet):
                 "email": user.email,
                 "password": webknossos_credential
             }
+
             headers = {'Content-Type': 'application/json',}
             response = requests.post(external_endpoint, json=payload, headers=headers, timeout=10)
             django_response = JsonResponse({

@@ -60,7 +60,6 @@ class UserMetadata(TimeStampedModel):
 
             is_new_instance = self.pk is None
             if not is_new_instance:
-
                 webknossos_api_url = os.getenv('WEBKNOSSOS_API_URL', None)
 
                 if self.should_register_webknossos_account(api_url=webknossos_api_url):
