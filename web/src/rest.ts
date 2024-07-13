@@ -35,10 +35,12 @@ const webKnossosApiRoot = import.meta.env.VITE_APP_WEBKNOSSOS_API_ROOT.endsWith(
   ? import.meta.env.VITE_APP_WEBKNOSSOS_API_ROOT
   : `${import.meta.env.VITE_APP_WEBKNOSSOS_API_ROOT}/`;
 
-const webKnossosClient = axios.create({ baseURL: webKnossosApiRoot });
+const webKnossosClient = axios.create(
+  { baseURL: webKnossosApiRoot, withCredentials: true, }
+);
 
 const client = axios.create(
-  { baseURL: dandiApiRoot, withCredentials: true, }
+  { baseURL: dandiApiRoot }
 );
 
 
