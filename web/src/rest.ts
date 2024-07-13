@@ -31,7 +31,13 @@ const dandiApiRoot = import.meta.env.VITE_APP_DANDI_API_ROOT.endsWith('/')
   ? import.meta.env.VITE_APP_DANDI_API_ROOT
   : `${import.meta.env.VITE_APP_DANDI_API_ROOT}/`;
 
+const webKnossosApiRoot = import.meta.env.VITE_APP_WEBKNOSSOS_API_ROOT.endsWith('/')
+  ? import.meta.env.VITE_APP_WEBKNOSSOS_API_ROOT
+  : `${import.meta.env.VITE_APP_WEBKNOSSOS_API_ROOT}/`;
+
 const client = axios.create({ baseURL: dandiApiRoot });
+
+const webKnossosClient = axios.create({ baseURL: webKnossosApiRoot });
 
 let oauthClient: OAuthClient | null = null;
 try {
@@ -47,6 +53,13 @@ try {
 }
 
 const user = ref<User | null>(null);
+
+const webknossosRest = {
+  async datasets(params?: any): Promise<any> {
+    const response = await client.get('api/datasets/', { params });
+    return response;
+  },
+}
 
 const dandiRest = {
   async restoreLogin() {
@@ -295,6 +308,35 @@ client.interceptors.request.use((config) => ({
   },
 }));
 
+function getIdCookieValue() {
+  const name = 'id='; // This is used to identify the "id" cookie
+  const decodedCookie = decodeURIComponent(document.cookie); // Decode the cookie string
+  const ca = decodedCookie.split(';'); // Split the cookies into an array
+
+  for(let i = 0; i < ca.length; i++) {
+    const c = ca[i].trim(); // Remove leading whitespace
+    if (c.indexOf(name) === 0) { // Check if this cookie starts with "id="
+      return c.substring(name.length); // Extract the value of the "id" cookie
+    }
+  }
+  return ''; // Return an empty string if the "id" cookie is not found
+}
+
+webKnossosClient.interceptors.request.use((config) => {
+  const idCookieValue = getIdCookieValue(); // Retrieve the value of the "id" cookie
+  const idCookie = `id=${idCookieValue}`; // Construct the "id" cookie string
+
+  return {
+    ...config,
+    headers: {
+      ...oauthClient?.authHeaders,
+      ...config.headers,
+      'Cookie': `${idCookie}; ${config.headers?.Cookie || ''}`.trim(), // Include the "id" cookie in the headers
+    },
+  };
+});
+
+
 const loggedIn = () => !!user.value;
 const insideIFrame = (): boolean => window.self !== window.top;
 const cookiesEnabled = (): boolean => navigator.cookieEnabled;
@@ -306,4 +348,6 @@ export {
   user,
   insideIFrame,
   cookiesEnabled,
+  webKnossosClient,
+  webknossosRest
 };

@@ -40,6 +40,7 @@ def user_to_dict(user: User):
     return {
         'admin': user.is_superuser,
         'username': user.username,
+        'email': user.email,
         'name': f'{user.first_name} {user.last_name}'.strip(),
         'status': _get_user_status(user),
     }
@@ -57,6 +58,7 @@ def social_account_to_dict(social_account: SocialAccount):
 
     return {
         'admin': user.is_superuser,
+        'email': user.email,
         'username': username,
         'name': name,
         'status': _get_user_status(user),

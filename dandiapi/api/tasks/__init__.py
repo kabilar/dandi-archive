@@ -78,18 +78,34 @@ def publish_dandiset_task(dandiset_id: int):
 
 
 @shared_task
-def register_post_external_api_task(external_endpoint: str, post_payload: any) -> None:
+def register_external_api_request_task(method: str, external_endpoint: str, payload: dict = None,
+                             query_params: dict = None):
     """
-    Register a celery task that posts data to an external API service.
+    Register a celery task that performs an API request to an external service.
 
+    :param method: HTTP method to use for the request ('GET' or 'POST')
     :param external_endpoint: URL of the external API endpoint
-    :param post_payload: Dictionary payload to send in the POST request
+    :param payload: Dictionary payload to send in the POST request (for 'POST' method)
+    :param query_params: Dictionary of query parameters to send in the GET request
+        (for 'GET' method)
     """
     headers = {
         'Content-Type': 'application/json',
     }
     try:
-        requests.post(external_endpoint, json=post_payload, headers=headers, timeout=10)
+        if method.upper() == 'POST':
+            requests.post(external_endpoint, json=payload, headers=headers, timeout=10)
+        elif method.upper() == 'GET':
+            response = requests.get(external_endpoint, params=query_params, headers=headers,
+                                    timeout=10)
+            try:
+                return {'status_code': response.status_code, 'headers': response.headers}
+            except Exception:
+                logger.warning("Issue with GET response to %s", external_endpoint)
+        else:
+            logger.error("Unsupported HTTP method: %s", method)
+            return
+
     except requests.exceptions.HTTPError:
         logger.exception("HTTP error occurred")
     except requests.exceptions.RequestException:

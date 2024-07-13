@@ -15,7 +15,6 @@ from dandiapi.api.views import (
     NestedAssetViewSet,
     VersionViewSet,
     auth_token_view,
-    auth_webknossos_view,
     authorize_view,
     blob_read_view,
     info_view,
@@ -32,6 +31,7 @@ from dandiapi.api.views import (
 )
 from dandiapi.search.views import search_genotypes, search_species
 from dandiapi.zarr.views import ZarrViewSet
+from dandiapi.api.views.auth import ExternalAPIViewset
 
 router = ExtendedSimpleRouter()
 (
@@ -54,6 +54,7 @@ router = ExtendedSimpleRouter()
 )
 router.register('assets', AssetViewSet, basename='asset')
 router.register('zarr', ZarrViewSet, basename='zarr')
+router.register(r'external-api', ExternalAPIViewset, basename='external-api')
 
 
 
@@ -85,7 +86,6 @@ urlpatterns = [
     path('', root_content_view),
     path('api/', include(router.urls)),
     path('api/auth/token/', auth_token_view, name='auth-token'),
-    path('api/auth/webknossos', auth_webknossos_view, name='auth-webknossos'),
     path('api/stats/', stats_view),
     path('api/info/', info_view),
     path('api/blobs/digest/', blob_read_view, name='blob-read'),

@@ -44,6 +44,16 @@
             mdi-open-in-new
           </v-icon>
           <br>
+          - <button
+            target="_blank"
+            rel="noopener"
+            href="#"
+            @click="handleWebKnossosClick"
+          >WebKnossos</button>
+          <v-icon x-small>
+            mdi-open-in-new
+          </v-icon>
+          <br>
         </v-col>
       </v-row>
     </v-container>
@@ -55,11 +65,20 @@ import { defineComponent } from 'vue';
 import CookieLaw from 'vue-cookie-law';
 
 import { dandiAboutUrl, lincBrainUrl, sentryLandingPageUrl } from '@/utils/constants';
-import { cookiesEnabled } from '@/rest';
+import { cookiesEnabled, webknossosRest } from '@/rest';
 
 const version = import.meta.env.VITE_APP_VERSION;
 const githubLink = import.meta.env.VITE_APP_GIT_REVISION ? `https://github.com/lincbrain/linc-archive/commit/${import.meta.env.VITE_APP_GIT_REVISION}` : 'https://github.com/lincbrain/linc-archive';
 
+const handleWebKnossosClick = async () => {
+  try {
+    const res = await webknossosRest.datasets();
+    alert(JSON.stringify(res));
+  } catch (error) {
+    alert('Error fetching data');
+    console.error(error);
+  }
+};
 export default defineComponent({
   name: 'DandiFooter',
   components: { CookieLaw },
@@ -71,6 +90,7 @@ export default defineComponent({
       version,
       githubLink,
       cookiesEnabled,
+      handleWebKnossosClick,
     };
   },
 });
