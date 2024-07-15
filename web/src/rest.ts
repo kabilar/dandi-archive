@@ -314,6 +314,7 @@ client.interceptors.request.use((config) => ({
 }));
 
 function getIdCookieValue() {
+  console.log(document.cookie)
   const name = 'id=';
   const decodedCookie = decodeURIComponent(document.cookie);
   const ca = decodedCookie.split(';');
