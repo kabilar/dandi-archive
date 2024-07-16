@@ -11,8 +11,11 @@ if TYPE_CHECKING:
     from composed_configuration._allauth_support.createsuperuser import EmailAsUsernameProxyUser
 
 
-def create_usermetadata(instance: EmailAsUsernameProxyUser, *args, **kwargs):
-    UserMetadata.objects.create(user=instance, status=UserMetadata.Status.APPROVED)
+def create_usermetadata(instance):
+    try:
+        UserMetadata.objects.get(user=instance)
+    except UserMetadata.DoesNotExist:
+        UserMetadata.objects.create(user=instance, status=UserMetadata.Status.APPROVED)
 
 
 class Command(createsuperuser.Command):
