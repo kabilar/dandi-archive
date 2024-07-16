@@ -329,8 +329,7 @@ function getIdCookieValue() {
 
 webKnossosClient.interceptors.request.use((config) => {
   const idCookieValue = getIdCookieValue(); // Retrieve the value of the "id" cookie
-  const idCookie = `id=${idCookieValue}`; // Construct the "id" cookie string
-
+  console.log(idCookieValue)
   console.log(config)
 
   return {
@@ -338,7 +337,6 @@ webKnossosClient.interceptors.request.use((config) => {
     headers: {
       ...oauthClient?.authHeaders,
       ...config.headers,
-      'Cookie': `${idCookie}; ${config.headers?.Cookie || ''}`.trim(), // Include the "id" cookie in the headers
     },
   };
 });
