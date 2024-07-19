@@ -20,13 +20,13 @@ jobs:
       - name: Build Docker image
         run: |
           docker build \
-            -t dandiarchive/dandiarchive-api \
+            -t lincbrain/dandiarchive-api \
             -f dev/django-public.Dockerfile \
             .
 
       - name: Export Docker image
         run: |
-          docker image save -o dandiarchive-api.tgz dandiarchive/dandiarchive-api
+          docker image save -o dandiarchive-api.tgz lincbrain/dandiarchive-api
 
       - name: Upload Docker image tarball
         uses: actions/upload-artifact@v4
@@ -72,7 +72,7 @@ jobs:
 
       - name: Install dev dandi
         if: matrix.dandi-version == 'master'
-        run: pip install "lincbrain_cli[test] @ git+https://github.com/lincbrain/linc-cli"
+        run: pip install "lincbrain-cli[test] @ git+https://github.com/lincbrain/linc-cli"
 
       - name: Install dev dandi
         if: matrix.dandi-version == 'master'
