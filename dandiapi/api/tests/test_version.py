@@ -613,7 +613,7 @@ def test_version_rest_update(api_client, user, draft_version):
 
 
 @pytest.mark.django_db()
-def test_version_rest_update_unembargoing(api_client, user, draft_version_factory):
+def test_version_rest_update_unembargo_in_progress(api_client, user, draft_version_factory):
     draft_version = draft_version_factory(
         dandiset__embargo_status=Dandiset.EmbargoStatus.UNEMBARGOING
     )
@@ -809,7 +809,7 @@ def test_version_rest_publish_embargo(api_client: APIClient, user: User, draft_v
 
 
 @pytest.mark.django_db()
-def test_version_rest_publish_unembargoing(
+def test_version_rest_publish_unembargo_in_progress(
     api_client: APIClient, user: User, draft_version_factory
 ):
     draft_version = draft_version_factory(

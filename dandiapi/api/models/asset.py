@@ -38,9 +38,9 @@ ASSET_COMPUTED_FIELDS = [
 logging.basicConfig(level=logging.ERROR)
 
 def construct_neuroglancer_url(asset_path: str) -> str:
-    replacement_url = os.getenv('CLOUDFRONT_NEUROGLANCER_URL')
+    replacement_url = os.getenv('CLOUDFRONT_NEUROGLANCER_URL', None)
     if not replacement_url:
-        raise ValueError("CLOUDFRONT_NEUROGLANCER_URL environment variable is not set")
+        return "Neuroglancer not supported"
 
     parts = asset_path.split('/')
     file_type_prefix = parts[3]

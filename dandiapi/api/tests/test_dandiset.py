@@ -738,16 +738,28 @@ def test_dandiset_rest_create_with_invalid_identifier(api_client, admin_user):
     assert response.data == f'Invalid Identifier {identifier}'
 
 
-@pytest.mark.django_db()
-def test_dandiset_rest_delete(api_client, draft_version_factory, user):
+@pytest.mark.parametrize(
+    ('embargo_status', 'success'),
+    [
+        (Dandiset.EmbargoStatus.OPEN, True),
+        (Dandiset.EmbargoStatus.EMBARGOED, True),
+        (Dandiset.EmbargoStatus.UNEMBARGOING, False),
+    ],
+)
+def test_dandiset_rest_delete(api_client, draft_version_factory, user, embargo_status, success):
     api_client.force_authenticate(user=user)
 
     # Ensure that open or embargoed dandisets can be deleted
-    draft_version = draft_version_factory(dandiset__embargo_status=Dandiset.EmbargoStatus.OPEN)
+    draft_version = draft_version_factory(dandiset__embargo_status=embargo_status)
     assign_perm('owner', user, draft_version.dandiset)
     response = api_client.delete(f'/api/dandisets/{draft_version.dandiset.identifier}/')
-    assert response.status_code == 204
-    assert not Dandiset.objects.all()
+
+    if success:
+        assert response.status_code == 204
+        assert not Dandiset.objects.all()
+    else:
+        assert response.status_code >= 400
+        assert Dandiset.objects.count() == 1
 
     draft_version = draft_version_factory(dandiset__embargo_status=Dandiset.EmbargoStatus.EMBARGOED)
     assign_perm('owner', user, draft_version.dandiset)
@@ -889,13 +901,13 @@ def test_dandiset_rest_change_owner(
 
 
 @pytest.mark.django_db()
-def test_dandiset_rest_change_owners_unembargoing(
+def test_dandiset_rest_change_owners_unembargo_in_progress(
     api_client,
     draft_version_factory,
     user_factory,
     social_account_factory,
 ):
-    """Test that unembargoing a dandiset prevents user modification."""
+    """Test that a dandiset undergoing unembargo prevents user modification."""
     draft_version = draft_version_factory(
         dandiset__embargo_status=Dandiset.EmbargoStatus.UNEMBARGOING
     )
