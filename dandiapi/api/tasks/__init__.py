@@ -5,6 +5,7 @@ from celery.utils.log import get_task_logger
 import requests
 
 from dandiapi.api.doi import delete_doi
+from dandiapi.api.mail import send_dandiset_unembargo_failed_message
 from dandiapi.api.manifests import (
     write_assets_jsonld,
     write_assets_yaml,
@@ -13,6 +14,7 @@ from dandiapi.api.manifests import (
     write_dandiset_yaml,
 )
 from dandiapi.api.models import Asset, AssetBlob, Version
+from dandiapi.api.models.dandiset import Dandiset
 
 logger = get_task_logger(__name__)
 
@@ -113,3 +115,15 @@ def register_external_api_request_task(method: str, external_endpoint: str, payl
     except Exception:
         logger.exception("An unexpected error occurred")
 
+@shared_task(soft_time_limit=1200)
+def unembargo_dandiset_task(dandiset_id: int):
+    from dandiapi.api.services.embargo import unembargo_dandiset
+
+    ds = Dandiset.objects.get(pk=dandiset_id)
+
+    # If the unembargo fails for any reason, send an email, but continue the error propagation
+    try:
+        unembargo_dandiset(ds)
+    except Exception:
+        send_dandiset_unembargo_failed_message(ds)
+        raise

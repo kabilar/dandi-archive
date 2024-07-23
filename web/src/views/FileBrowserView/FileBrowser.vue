@@ -1,5 +1,5 @@
 <template>
-  <div v-if="currentDandiset && currentDandiset.dandiset.embargo_status !== 'UNEMBARGOING'">
+  <div v-if="!unembargo_in_progress">
     <v-progress-linear
       v-if="!currentDandiset"
       indeterminate
@@ -410,7 +410,7 @@ const EXTERNAL_SERVICES = [
     regex: /\.(nwb|txt|nii(\.gz)?|ome\.zarr)$/,  // TODO: .txt for testing purposes
     maxsize: Infinity,
     endpoint: 'value-defaults-to-endpoint-logic'
-  }
+  },
 ];
 type Service = typeof EXTERNAL_SERVICES[0];
 
@@ -445,6 +445,7 @@ const menuOpen = ref<Record<string, boolean>>({});
 const owners = computed(() => store.owners?.map((u) => u.username) || null);
 const currentDandiset = computed(() => store.dandiset);
 const embargoed = computed(() => currentDandiset.value?.dandiset.embargo_status === 'EMBARGOED');
+const unembargo_in_progress = computed(() => currentDandiset.value?.dandiset.embargo_status === 'UNEMBARGOING')
 const splitLocation = computed(() => location.value.split('/'));
 const isAdmin = computed(() => user.value?.admin || false);
 const isOwner = computed(() => !!(

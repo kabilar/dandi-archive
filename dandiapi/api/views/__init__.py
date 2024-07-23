@@ -7,7 +7,7 @@ from .auth import (
     user_questionnaire_form_view,
 )
 from .dandiset import DandisetViewSet
-from .dashboard import DashboardView, user_approval_view
+from .dashboard import DashboardView, mailchimp_csv_view, user_approval_view
 from .info import info_view
 from .private_s3_permissions import presigned_cookie_s3_cloudfront_view
 from .root import root_content_view
@@ -30,6 +30,7 @@ __all__ = [
     'authorize_view',
     'auth_token_view',
     'blob_read_view',
+    'mailchimp_csv_view',
     'upload_initialize_view',
     'upload_complete_view',
     'upload_validate_view',
