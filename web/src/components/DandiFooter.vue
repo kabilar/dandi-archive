@@ -76,6 +76,7 @@ const handleWebKnossosClick = async () => {
     alert(JSON.stringify(res));
   } catch (error) {
     alert('Error fetching data');
+    console.log(error)
     console.error(error);
   }
 };
