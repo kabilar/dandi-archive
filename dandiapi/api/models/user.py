@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import os
 
-from django.db.utils import IntegrityError
 from django.contrib.auth.models import User
 from django.db import models, transaction
 from django.utils.crypto import get_random_string
@@ -54,23 +53,22 @@ class UserMetadata(TimeStampedModel):
         )
 
     def save(self, *args, **kwargs):
+
         with transaction.atomic():
-            is_new_instance = self.pk is None
+
             super().save(*args, **kwargs)
 
+            is_new_instance = self.pk is None
             if not is_new_instance:
                 webknossos_api_url = os.getenv('WEBKNOSSOS_API_URL', None)
 
                 if self.should_register_webknossos_account(api_url=webknossos_api_url):
+
                     random_password = get_random_string(length=12)
                     self.webknossos_credential = random_password
                     self.register_webknossos_account(webknossos_api_url=webknossos_api_url)
-                    # Slightly recursive call, but will halt with WebKNOSSOS logic
-                    try:
-                        super().save(*args, **kwargs)
-                    except IntegrityError as e:
-                        # Handle the integrity error if necessary
-                        raise e
+                    #  Slightly recursive call, but will halt with WebKNOSSOS logic
+                    super().save(*args, **kwargs)
 
 
 

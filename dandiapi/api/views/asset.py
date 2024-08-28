@@ -328,7 +328,7 @@ class NestedAssetViewSet(NestedViewSetMixin, AssetViewSet, ReadOnlyModelViewSet)
             version=versions__version,
         )
 
-        if version.dandiset.embargo_status == Dandiset.EmbargoStatus.UNEMBARGOING:
+        if version.dandiset.unembargo_in_progress:
             raise DandisetUnembargoInProgressError
 
         serializer = AssetRequestSerializer(data=self.request.data)
@@ -365,7 +365,7 @@ class NestedAssetViewSet(NestedViewSetMixin, AssetViewSet, ReadOnlyModelViewSet)
         )
         if version.version != 'draft':
             raise DraftDandisetNotModifiableError
-        if version.dandiset.embargo_status == Dandiset.EmbargoStatus.UNEMBARGOING:
+        if version.dandiset.unembargo_in_progress:
             raise DandisetUnembargoInProgressError
 
         serializer = AssetRequestSerializer(data=self.request.data)
@@ -403,7 +403,7 @@ class NestedAssetViewSet(NestedViewSetMixin, AssetViewSet, ReadOnlyModelViewSet)
             dandiset__pk=versions__dandiset__pk,
             version=versions__version,
         )
-        if version.dandiset.embargo_status == Dandiset.EmbargoStatus.UNEMBARGOING:
+        if version.dandiset.unembargo_in_progress:
             raise DandisetUnembargoInProgressError
 
         # Lock asset for delete
