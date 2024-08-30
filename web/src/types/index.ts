@@ -86,10 +86,16 @@ export interface DandisetStats {
   size: number,
 }
 
+export interface WebknossosDataset {
+  name: string
+  url: string;
+}
+
 export interface AssetFile {
   asset_id: string;
   url: string;
   s3_uri: string;
+  webknossosDatasets?: WebknossosDataset[];
 }
 
 export interface AssetPath {

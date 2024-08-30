@@ -7,6 +7,7 @@ from .oauth import StagingApplication
 from .upload import Upload
 from .user import UserMetadata
 from .version import Version
+from .webknossos import WebKnossosAnnotation, WebKnossosDataset
 
 __all__ = [
     'Asset',
@@ -18,4 +19,6 @@ __all__ = [
     'Upload',
     'UserMetadata',
     'Version',
+    'WebKnossosAnnotation',
+    'WebKnossosDataset'
 ]

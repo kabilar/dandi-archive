@@ -289,6 +289,48 @@
                   </v-menu>
                 </v-list-item-action>
 
+                <v-list-item-action v-if="item.asset" class="px-2">
+                  <v-menu
+                    bottom
+                    left
+                  >
+                    <template #activator="{ on, attrs }">
+                      <v-btn
+                        color="success"
+                        x-small
+                        :disabled="!item.services || !item.services.length"
+                        v-bind="attrs"
+                        v-on="on"
+                      >
+                        WebKNOSSOS <v-icon small>mdi-menu-down</v-icon>
+                      </v-btn>
+                    </template>
+                    <v-list
+                      v-if="item && item.services"
+                      dense
+                    >
+                      <v-subheader
+                        v-if="item.services.length"
+                        class="font-weight-medium"
+                      >
+                        WEBKNOSSOS DATASETS CONTAINING ASSET
+                      </v-subheader>
+                      <v-list-item
+                        v-for="el in item.asset.webknossosDatasets"
+                        :key="el.name"
+                        @click="el.url ? el.url : null"
+                        :href="el.url ? el.url : null"
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        <v-list-item-title class="font-weight-light">
+                          {{ el.name ? el.name : "No datasets associated" }}
+                        </v-list-item-title>
+                      </v-list-item>
+                    </v-list>
+                  </v-menu>
+                </v-list-item-action>
+
                 <v-list-item-action
                   v-if="item.aggregate_size"
                   class="justify-end"
@@ -404,13 +446,7 @@ const EXTERNAL_SERVICES = [
     regex: /\.(nwb|txt|nii(\.gz)?|ome\.zarr)$/,  // TODO: .txt for testing purposes
     maxsize: Infinity,
     endpoint: 'value-defaults-to-endpoint-logic'
-  },
-  {
-    name: 'WebKNOSSOS',
-    regex: /\.(nwb|txt|nii(\.gz)?|ome\.zarr)$/,  // TODO: .txt for testing purposes
-    maxsize: Infinity,
-    endpoint: 'value-defaults-to-endpoint-logic'
-  },
+  }
 ];
 type Service = typeof EXTERNAL_SERVICES[0];
 
