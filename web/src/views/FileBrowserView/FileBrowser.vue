@@ -322,7 +322,7 @@
                         v-for="el in item.asset.webknossos_datasets"
                         :key="item.asset.s3_uri"
                         @click="el ? el : null"
-                        :href="el.webknossos_url ? el.webknossos_url : null"
+                        :href="el.webknossos_url ? el : null"
                         target="_blank"
                         rel="noreferrer"
                       >

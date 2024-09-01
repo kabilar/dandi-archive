@@ -495,6 +495,9 @@ class NestedAssetViewSet(NestedViewSetMixin, AssetViewSet, ReadOnlyModelViewSet)
         )
 
         # Aaron -- add query to table to get WebKNOSSOS URLs
+
+
+
         # Fetch child paths
         path: str = query_serializer.validated_data['path_prefix']
         children_paths = search_asset_paths(path, version)

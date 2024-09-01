@@ -13,8 +13,8 @@ WEBKNOSSOS_DATASOURCE_PROPERTIES_FILE_NAME = "datasource-properties.json"
 
 class WebKnossosDataset(models.Model):  # noqa: DJ008
     webknossos_dataset_id = models.UUIDField(unique=True, default=uuid4, db_index=True)
-    webknossos_dataset_name = models.CharField(max_length=100)
-    webknossos_organization_name = models.CharField(max_length=100)
+    webknossos_dataset_name = models.CharField(max_length=100, null=True, blank=True)
+    webknossos_organization_name = models.CharField(max_length=100, null=True, blank=True)
 
     # ForeignKeys
     asset = models.ForeignKey(Asset, related_name='webknossos_datasets', on_delete=models.PROTECT)
@@ -41,10 +41,10 @@ class WebKnossosDataset(models.Model):  # noqa: DJ008
 
 class WebKnossosAnnotation(models.Model):  # noqa: DJ008
     webknossos_annotation_id = models.UUIDField(unique=True, default=uuid4, db_index=True)
-    webknossos_annotation_name = models.CharField(max_length=100)
-    webknossos_organization = models.CharField(max_length=100)
-    webknossos_annotation_owner_first_name = models.CharField(max_length=100)
-    webknossos_annotation_owner_last_name = models.CharField(max_length=100)
+    webknossos_annotation_name = models.CharField(max_length=100, null=True, blank=True)
+    webknossos_organization = models.CharField(max_length=100, null=True, blank=True)
+    webknossos_annotation_owner_first_name = models.CharField(max_length=100, null=True, blank=True)
+    webknossos_annotation_owner_last_name = models.CharField(max_length=100, null=True, blank=True)
 
     # ForeignKeys
     asset = models.ForeignKey(Asset, related_name='webknossos_annotations', on_delete=models.PROTECT)
