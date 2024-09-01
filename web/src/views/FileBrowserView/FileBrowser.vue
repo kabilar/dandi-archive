@@ -289,7 +289,10 @@
                   </v-menu>
                 </v-list-item-action>
 
-                <v-list-item-action v-if="item.asset" class="px-2">
+                <v-list-item-action
+                  v-if="item.asset"
+                  class="px-2"
+                >
                   <v-menu
                     bottom
                     left
@@ -298,7 +301,7 @@
                       <v-btn
                         color="success"
                         x-small
-                        :disabled="!item.services || !item.services.length"
+                        :disabled="!item.asset.webknossos_datasets || !item.asset.webknossos_datasets?.length"
                         v-bind="attrs"
                         v-on="on"
                       >
@@ -306,25 +309,25 @@
                       </v-btn>
                     </template>
                     <v-list
-                      v-if="item && item.services"
+                      v-if="item && item.asset.webknossos_datasets"
                       dense
                     >
                       <v-subheader
-                        v-if="item.services.length"
+                        v-if="item.asset.webknossos_datasets"
                         class="font-weight-medium"
                       >
                         WEBKNOSSOS DATASETS CONTAINING ASSET
                       </v-subheader>
                       <v-list-item
-                        v-for="el in item.asset.webknossosDatasets"
-                        :key="el.name"
-                        @click="el.url ? el.url : null"
-                        :href="el.url ? el.url : null"
+                        v-for="el in item.asset.webknossos_datasets"
+                        :key="item.asset.s3_uri"
+                        @click="el ? el : null"
+                        :href="el.webknossos_url ? el.webknossos_url : null"
                         target="_blank"
                         rel="noreferrer"
                       >
                         <v-list-item-title class="font-weight-light">
-                          {{ el.name ? el.name : "No datasets associated" }}
+                          {{ el.webknossos_name ? el.webknossos_name : "No datasets associated" }}
                         </v-list-item-title>
                       </v-list-item>
                     </v-list>
@@ -488,6 +491,8 @@ const isOwner = computed(() => !!(
   user.value && owners.value?.includes(user.value?.username)
 ));
 const itemsNotFound = computed(() => items.value && !items.value.length);
+
+console.log(items)
 
 function serviceURL(endpoint: string, data: {
   dandisetId: string,

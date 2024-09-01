@@ -465,7 +465,6 @@ class NestedAssetViewSet(NestedViewSetMixin, AssetViewSet, ReadOnlyModelViewSet)
         include_metadata = serializer.validated_data['metadata']
         if not include_metadata:
             queryset = queryset.defer('metadata')
-
         # Paginate and return
         serializer = self.get_serializer(queryset, many=True, metadata=include_metadata)
         return paginator.get_paginated_response(serializer.data)
@@ -496,7 +495,6 @@ class NestedAssetViewSet(NestedViewSetMixin, AssetViewSet, ReadOnlyModelViewSet)
         )
 
         # Aaron -- add query to table to get WebKNOSSOS URLs
-
         # Fetch child paths
         path: str = query_serializer.validated_data['path_prefix']
         children_paths = search_asset_paths(path, version)
@@ -507,9 +505,11 @@ class NestedAssetViewSet(NestedViewSetMixin, AssetViewSet, ReadOnlyModelViewSet)
         page = self.paginate_queryset(children_paths)
         if page is not None:
             serializer = AssetPathsSerializer(page, many=True)
+            print(serializer.data)
             return self.get_paginated_response(serializer.data)
 
         serializer = AssetPathsSerializer(children_paths, many=True)
+        print(serializer)
         return Response(serializer.data)
 
     # TODO: add create to forge an asset from a validation

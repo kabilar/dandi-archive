@@ -87,15 +87,15 @@ export interface DandisetStats {
 }
 
 export interface WebknossosDataset {
-  name: string
-  url: string;
+  webknossos_name: string
+  webknossos_url: string;
 }
 
 export interface AssetFile {
   asset_id: string;
   url: string;
   s3_uri: string;
-  webknossosDatasets?: WebknossosDataset[];
+  webknossos_datasets?: WebknossosDataset[];
 }
 
 export interface AssetPath {

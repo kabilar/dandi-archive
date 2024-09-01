@@ -8,7 +8,7 @@ from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
 import djclick as click
 
-from dandiapi.api.models import AssetBlob
+from dandiapi.api.models import AssetBlob, WebKnossosDataset, WebKnossosAnnotation
 from dandiapi.api.services.asset import add_asset_to_version
 from dandiapi.api.services.dandiset import create_dandiset
 from dandiapi.api.services.metadata import validate_asset_metadata, validate_version_metadata
@@ -25,6 +25,7 @@ def create_dev_dandiset(name: str, email: str, first_name: str, last_name: str):
     owner.first_name = first_name
     owner.last_name = last_name
     owner.save()
+
 
     version_metadata = {
         'description': 'An informative description',
@@ -88,7 +89,7 @@ def create_dev_dandiset(name: str, email: str, first_name: str, last_name: str):
         {"etag": "m6d36e98f312e98ff908c8c82c8dd623-0", "file_name": "foo/file50.txt"},
     ]
 
-    for file_name_and_etag in files_names_and_etags:
+    for index, file_name_and_etag in enumerate(files_names_and_etags):
         file_size = 20
         file_content = b'A' * file_size
         uploaded_file = SimpleUploadedFile(
@@ -107,6 +108,7 @@ def create_dev_dandiset(name: str, email: str, first_name: str, last_name: str):
                 blob_id=uuid4(), blob=uploaded_file, etag=etag, size=file_size, sha256=sha256_hash
             )
             asset_blob.save()
+
         asset_metadata = {
             'schemaVersion': settings.DANDI_SCHEMA_VERSION,
             'encodingFormat': 'text/plain',
@@ -116,6 +118,14 @@ def create_dev_dandiset(name: str, email: str, first_name: str, last_name: str):
         asset = add_asset_to_version(
             user=owner, version=draft_version, asset_blob=asset_blob, metadata=asset_metadata
         )
+
+        # Create WebKnossosDataset for every other asset (e.g., even indices)
+        if index % 2 == 0:
+            WebKnossosDataset.objects.create(
+                asset=asset,
+                webknossos_dataset_name=file_name_and_etag["file_name"],
+                webknossos_organization_name="LINC"
+            )
 
         calculate_sha256(blob_id=asset_blob.blob_id)
         validate_asset_metadata(asset=asset)

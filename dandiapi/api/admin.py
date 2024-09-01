@@ -23,6 +23,8 @@ from dandiapi.api.models import (
     Upload,
     UserMetadata,
     Version,
+    WebKnossosAnnotation,
+    WebKnossosDataset
 )
 from dandiapi.api.views.users import social_account_to_dict
 from dandiapi.zarr.tasks import ingest_dandiset_zarrs
@@ -38,9 +40,15 @@ class UserMetadataInline(TabularInline):
     model = UserMetadata
     fields = ['status', 'questionnaire_form', 'rejection_reason']
 
-
 class SocialAccountInline(TabularInline):
     model = SocialAccount
+
+@admin.register(WebKnossosAnnotation)
+class WebKnossosAnnotationAdmin(admin.ModelAdmin):
+    model = WebKnossosAnnotation
+@admin.register(WebKnossosDataset)
+class WebKnossosDatasetAdmin(admin.ModelAdmin):
+    model = WebKnossosDataset
 
 
 class UserAdmin(BaseUserAdmin):
