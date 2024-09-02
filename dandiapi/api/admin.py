@@ -38,7 +38,7 @@ admin.site.site_title = 'DANDI Admin'
 
 class UserMetadataInline(TabularInline):
     model = UserMetadata
-    fields = ['status', 'questionnaire_form', 'rejection_reason']
+    fields = ['status', 'webknossos_credential', 'questionnaire_form', 'rejection_reason']
 
 class SocialAccountInline(TabularInline):
     model = SocialAccount

@@ -39,6 +39,10 @@ class WebKnossosDataset(models.Model):  # noqa: DJ008
                     f'/{self.webknossos_dataset_name}')
         raise Exception("WEBKNOSSOS_API_URL is not set")
 
+
+class WebKnossosDataLayer(models.Model):
+    webknossos_dataset = models.ForeignKey(WebKnossosDataset, related_name='webknossos_datalayers', on_delete=models.PROTECT)
+
 class WebKnossosAnnotation(models.Model):  # noqa: DJ008
     webknossos_annotation_id = models.UUIDField(unique=True, default=uuid4, db_index=True)
     webknossos_annotation_name = models.CharField(max_length=100, null=True, blank=True)

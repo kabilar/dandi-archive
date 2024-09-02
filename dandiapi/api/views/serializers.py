@@ -2,6 +2,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
+import requests
+import json
+
 from django.conf import settings
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.db.models.query_utils import Q
