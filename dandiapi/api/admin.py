@@ -24,7 +24,8 @@ from dandiapi.api.models import (
     UserMetadata,
     Version,
     WebKnossosAnnotation,
-    WebKnossosDataset
+    WebKnossosDataset,
+    WebKnossosDataLayer
 )
 from dandiapi.api.views.users import social_account_to_dict
 from dandiapi.zarr.tasks import ingest_dandiset_zarrs
@@ -46,9 +47,14 @@ class SocialAccountInline(TabularInline):
 @admin.register(WebKnossosAnnotation)
 class WebKnossosAnnotationAdmin(admin.ModelAdmin):
     model = WebKnossosAnnotation
+
 @admin.register(WebKnossosDataset)
 class WebKnossosDatasetAdmin(admin.ModelAdmin):
     model = WebKnossosDataset
+
+@admin.register(WebKnossosDataLayer)
+class WebKnossosDataLayerAdmin(admin.ModelAdmin):
+    model = WebKnossosDataLayer
 
 
 class UserAdmin(BaseUserAdmin):

@@ -177,14 +177,17 @@ class ExternalAPIViewset(viewsets.ViewSet):
                             unique_paths.add(path)  # S3 URI
 
                     for unique_path in unique_paths:
+                        print(asset_dict)
+                        # print(asset_dict[unique_path])
                         try:
+                            print(asset_dict[unique_path])
                             asset = Asset.objects.get(asset_id=asset_dict[unique_path])
                             WebKnossosDataLayer.objects.get_or_create(
                                 webknossos_dataset=webknossos_dataset,
                                 asset=asset
                             )
                         except Exception as e:
-                            print(e)
+                            print("S3 Asset Not found")
 
                 except JSONDecodeError:
                     continue
