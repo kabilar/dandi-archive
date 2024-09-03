@@ -290,6 +290,51 @@
                 </v-list-item-action>
 
                 <v-list-item-action
+                  v-if="item.asset"
+                  class="px-2"
+                >
+                  <v-menu
+                    bottom
+                    left
+                  >
+                    <template #activator="{ on, attrs }">
+                      <v-btn
+                        color="success"
+                        x-small
+                        :disabled="!item.asset.webknossos_datasets || !item.asset.webknossos_datasets?.length"
+                        v-bind="attrs"
+                        v-on="on"
+                      >
+                        WebKNOSSOS <v-icon small>mdi-menu-down</v-icon>
+                      </v-btn>
+                    </template>
+                    <v-list
+                      v-if="item && item.asset.webknossos_datasets"
+                      dense
+                    >
+                      <v-subheader
+                        v-if="item.asset.webknossos_datasets"
+                        class="font-weight-medium"
+                      >
+                        WEBKNOSSOS DATASETS CONTAINING ASSET
+                      </v-subheader>
+                      <v-list-item
+                        v-for="el in item.asset.webknossos_datasets"
+                        :key="item.asset.s3_uri"
+                        @click="el ? el : null"
+                        :href="el.webknossos_url ? el : null"
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        <v-list-item-title class="font-weight-light">
+                          {{ el.webknossos_name ? el.webknossos_name : "No datasets associated" }}
+                        </v-list-item-title>
+                      </v-list-item>
+                    </v-list>
+                  </v-menu>
+                </v-list-item-action>
+
+                <v-list-item-action
                   v-if="item.aggregate_size"
                   class="justify-end"
                   :style="{width: '4.5em'}"
@@ -404,13 +449,7 @@ const EXTERNAL_SERVICES = [
     regex: /\.(nwb|txt|nii(\.gz)?|ome\.zarr)$/,  // TODO: .txt for testing purposes
     maxsize: Infinity,
     endpoint: 'value-defaults-to-endpoint-logic'
-  },
-  {
-    name: 'WebKNOSSOS',
-    regex: /\.(nwb|txt|nii(\.gz)?|ome\.zarr)$/,  // TODO: .txt for testing purposes
-    maxsize: Infinity,
-    endpoint: 'value-defaults-to-endpoint-logic'
-  },
+  }
 ];
 type Service = typeof EXTERNAL_SERVICES[0];
 
@@ -452,6 +491,8 @@ const isOwner = computed(() => !!(
   user.value && owners.value?.includes(user.value?.username)
 ));
 const itemsNotFound = computed(() => items.value && !items.value.length);
+
+console.log(items)
 
 function serviceURL(endpoint: string, data: {
   dandisetId: string,

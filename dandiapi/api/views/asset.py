@@ -465,7 +465,6 @@ class NestedAssetViewSet(NestedViewSetMixin, AssetViewSet, ReadOnlyModelViewSet)
         include_metadata = serializer.validated_data['metadata']
         if not include_metadata:
             queryset = queryset.defer('metadata')
-
         # Paginate and return
         serializer = self.get_serializer(queryset, many=True, metadata=include_metadata)
         return paginator.get_paginated_response(serializer.data)

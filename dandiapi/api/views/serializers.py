@@ -2,6 +2,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
+import requests
+import json
+
 from django.conf import settings
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.db.models.query_utils import Q
@@ -363,10 +366,20 @@ class AssetPathsQueryParameterSerializer(serializers.Serializer):
 
 
 class AssetFileSerializer(AssetSerializer):
+    webknossos_datasets = serializers.SerializerMethodField()
+
     class Meta(AssetSerializer.Meta):
-        fields = ['asset_id', 'url', 's3_uri']
+        fields = ['asset_id', 'url', 's3_uri', 'webknossos_datasets']
 
     url = serializers.URLField(source='s3_url')
+
+    def get_webknossos_datasets(self, obj):
+        return [
+            {"webknossos_url": dataset.get_webknossos_url(),
+             "webknossos_name": dataset.webknossos_dataset_name
+             }
+            for dataset in obj.webknossos_datasets.all()
+        ]
 
 
 class AssetPathsSerializer(serializers.ModelSerializer):

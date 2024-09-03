@@ -61,16 +61,10 @@ const user = ref<User | null>(null);
 
 const webknossosRest = {
   async datasets(params?: any): Promise<any> {
-    // If no params are provided, initialize an empty object
     if (!params) {
       params = {};
     }
 
-    // Ensure isActive is set to true
-    params.isActive = true;
-
-    console.log(params); // This should now show { isActive: true }
-    console.log("Aaron");
     const response = await webKnossosClient.get('api/datasets', { params });
     return response;
   },
