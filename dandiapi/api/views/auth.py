@@ -23,6 +23,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import viewsets
 
+from dandiapi.api.models.asset import Asset
 from dandiapi.api.mail import (
     send_approved_user_message,
     send_new_user_message_email,
@@ -32,6 +33,7 @@ from dandiapi.api.permissions import IsApproved
 from dandiapi.api.views.serializers import UserDetailSerializer
 from dandiapi.api.views.users import social_account_to_dict, user_to_dict
 from dandiapi.api.models.user import UserMetadata
+from dandiapi.api.models.webknossos import WebKnossosAnnotation, WebKnossosDataset, WebKnossosDataLayer
 
 if TYPE_CHECKING:
     from django.http import HttpRequest, HttpResponse
@@ -51,6 +53,23 @@ def auth_token_view(request: Request) -> HttpResponseBase:
         Token.objects.filter(user=request.user).delete()
         token = Token.objects.create(user=request.user)
     return Response(token.key)
+
+
+def extract_cookie_from_set_cookie(set_cookie_header):
+    """
+    Extracts the name=value pair from a Set-Cookie header string.
+
+    :param set_cookie_header: The Set-Cookie header string.
+    :return: A dictionary with the cookie name and value.
+    """
+    # Split the Set-Cookie header string to get the name=value part
+    name_value = set_cookie_header.split(';')[0]  # Take only the first part, which is name=value
+
+    # Split into name and value
+    name, value = name_value.split('=', 1)
+
+    # Return as a dictionary
+    return {name: value}
 
 
 class ExternalAPIViewset(viewsets.ViewSet):
@@ -78,8 +97,8 @@ class ExternalAPIViewset(viewsets.ViewSet):
         if service == 'webknossos':
             user = User.objects.get(email=user_detail_serializer.data["email"])
             webknossos_credential = user.metadata.webknossos_credential
-            webknossos_api_url = os.getenv('WEBKNOSSOS_API_URL', None)
-            external_endpoint = f'{webknossos_api_url}/api/auth/login'
+            webknossos_api_url = os.getenv('WEBKNOSSOS_API_URL', "webknossos-r5.lincbrain.org")
+            external_endpoint = f'https://{webknossos_api_url}/api/auth/login'
 
             payload = {
                 "email": user.email,
@@ -97,6 +116,87 @@ class ExternalAPIViewset(viewsets.ViewSet):
 
         else:
             return Response(status=400, data={"detail": "Unsupported service"})
+
+    @swagger_auto_schema(
+        methods=['GET'],
+        responses={200: 'Login worked for given external API service'},
+    )
+    @action(
+        detail=False,
+        methods=['GET'],
+        permission_classes=[IsApproved],
+        url_path=r'refresh_external_data/(?P<service>[^/.]+)'
+    )
+    def refresh_external_data(self, request: Request, service: str) -> None:
+        if request.user.socialaccount_set.count() == 1:
+            social_account = request.user.socialaccount_set.get()
+            user_dict = social_account_to_dict(social_account)
+        else:
+            user_dict = user_to_dict(request.user)
+
+        user_detail_serializer = UserDetailSerializer(user_dict)
+
+        if service == 'webknossos':
+            user = User.objects.get(email=user_detail_serializer.data["email"])
+            webknossos_credential = user.metadata.webknossos_credential
+            webknossos_api_url = os.getenv('WEBKNOSSOS_API_URL', "webknossos-r5.lincbrain.org")
+            external_endpoint = f'https://{webknossos_api_url}/api/auth/login'
+
+            payload = {
+                "email": "akanzer@mit.edu",
+                "password": "LINC2024!"
+            }
+
+            headers = {'Content-Type': 'application/json'}
+            response = requests.post("https://webknossos-r5.lincbrain.org/api/auth/login", json=payload, headers=headers, timeout=10)
+            set_cookie_value = response.headers.get('Set-Cookie')
+            cookies = extract_cookie_from_set_cookie(set_cookie_value)
+
+            webknossos_datasets_url = f'https://{webknossos_api_url}/api/datasets'
+            webknossos_datasets = requests.get("https://webknossos-r5.lincbrain.org/api/datasets", cookies=cookies)
+
+            # TODO: make the s3_uri a field in the Asset model
+            asset_dict = {}
+            for asset in Asset.objects.all():
+                asset_dict[asset.s3_uri] = asset.asset_id
+
+            for webknossos_dataset in webknossos_datasets.json():
+                try:
+                    webknossos_dataset_data = requests.get(f'http://webknossos-r5.lincbrain.org:8080/binaryData/LINC/'
+                                     f'{webknossos_dataset["name"]}/datasource-properties.json'
+                                     ).json()
+                    webknossos_dataset = WebKnossosDataset.objects.get_or_create(
+                        webknossos_dataset_name=webknossos_dataset_data['id']['name'],
+                        webknossos_organization_name=webknossos_dataset_data['id']['team']
+                    )
+
+                    unique_paths = set()
+                    for data_layers in webknossos_dataset_data['dataLayers']:
+                        for mag in data_layers['mags']:
+                            path = mag['path'].rsplit('/', 1)[0]
+                            unique_paths.add(path)  # S3 URI
+
+                    for unique_path in unique_paths:
+                        print(asset_dict)
+                        # print(asset_dict[unique_path])
+                        try:
+                            print(asset_dict[unique_path])
+                            asset = Asset.objects.get(asset_id=asset_dict[unique_path])
+                            WebKnossosDataLayer.objects.get_or_create(
+                                webknossos_dataset=webknossos_dataset,
+                                asset=asset
+                            )
+                        except Exception as e:
+                            print("S3 Asset Not found")
+
+                except JSONDecodeError:
+                    continue
+
+            return Response(asset_dict)
+        else:
+            return Response(status=400, data={"detail": "Unsupported service"})
+
+
 
 
 

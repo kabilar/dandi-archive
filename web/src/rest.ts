@@ -61,6 +61,10 @@ const user = ref<User | null>(null);
 
 const webknossosRest = {
   async datasets(params?: any): Promise<any> {
+    if (!params) {
+      params = {};
+    }
+
     const response = await webKnossosClient.get('api/datasets', { params });
     return response;
   },
