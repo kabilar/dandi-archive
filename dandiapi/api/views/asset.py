@@ -43,7 +43,6 @@ from dandiapi.api.models import Asset, AssetBlob, Dandiset, Version
 from dandiapi.api.models.asset import validate_asset_path
 from dandiapi.api.models.dandiset import DandisetUserObjectPermission
 from dandiapi.api.permissions import IsApproved
-
 from dandiapi.api.views.common import (
     ASSET_ID_PARAM,
     VERSIONS_DANDISET_PK_PARAM,
@@ -329,7 +328,7 @@ class NestedAssetViewSet(NestedViewSetMixin, AssetViewSet, ReadOnlyModelViewSet)
             version=versions__version,
         )
 
-        if version.dandiset.embargo_status == Dandiset.EmbargoStatus.UNEMBARGOING:
+        if version.dandiset.unembargo_in_progress:
             raise DandisetUnembargoInProgressError
 
         serializer = AssetRequestSerializer(data=self.request.data)
@@ -366,7 +365,7 @@ class NestedAssetViewSet(NestedViewSetMixin, AssetViewSet, ReadOnlyModelViewSet)
         )
         if version.version != 'draft':
             raise DraftDandisetNotModifiableError
-        if version.dandiset.embargo_status == Dandiset.EmbargoStatus.UNEMBARGOING:
+        if version.dandiset.unembargo_in_progress:
             raise DandisetUnembargoInProgressError
 
         serializer = AssetRequestSerializer(data=self.request.data)
@@ -404,7 +403,7 @@ class NestedAssetViewSet(NestedViewSetMixin, AssetViewSet, ReadOnlyModelViewSet)
             dandiset__pk=versions__dandiset__pk,
             version=versions__version,
         )
-        if version.dandiset.embargo_status == Dandiset.EmbargoStatus.UNEMBARGOING:
+        if version.dandiset.unembargo_in_progress:
             raise DandisetUnembargoInProgressError
 
         # Lock asset for delete
@@ -466,7 +465,6 @@ class NestedAssetViewSet(NestedViewSetMixin, AssetViewSet, ReadOnlyModelViewSet)
         include_metadata = serializer.validated_data['metadata']
         if not include_metadata:
             queryset = queryset.defer('metadata')
-
         # Paginate and return
         serializer = self.get_serializer(queryset, many=True, metadata=include_metadata)
         return paginator.get_paginated_response(serializer.data)

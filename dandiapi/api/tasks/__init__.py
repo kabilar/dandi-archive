@@ -2,8 +2,10 @@ from __future__ import annotations
 
 from celery import shared_task
 from celery.utils.log import get_task_logger
+import requests
 
 from dandiapi.api.doi import delete_doi
+from dandiapi.api.mail import send_dandiset_unembargo_failed_message
 from dandiapi.api.manifests import (
     write_assets_jsonld,
     write_assets_yaml,
@@ -12,6 +14,7 @@ from dandiapi.api.manifests import (
     write_dandiset_yaml,
 )
 from dandiapi.api.models import Asset, AssetBlob, Version
+from dandiapi.api.models.dandiset import Dandiset
 
 logger = get_task_logger(__name__)
 
@@ -74,3 +77,53 @@ def publish_dandiset_task(dandiset_id: int):
     from dandiapi.api.services.publish import _publish_dandiset
 
     _publish_dandiset(dandiset_id=dandiset_id)
+
+
+@shared_task
+def register_external_api_request_task(method: str, external_endpoint: str, payload: dict = None,
+                             query_params: dict = None):
+    """
+    Register a celery task that performs an API request to an external service.
+
+    :param method: HTTP method to use for the request ('GET' or 'POST')
+    :param external_endpoint: URL of the external API endpoint
+    :param payload: Dictionary payload to send in the POST request (for 'POST' method)
+    :param query_params: Dictionary of query parameters to send in the GET request
+        (for 'GET' method)
+    """
+    headers = {
+        'Content-Type': 'application/json',
+    }
+    try:
+        if method.upper() == 'POST':
+            requests.post(external_endpoint, json=payload, headers=headers, timeout=10)
+        elif method.upper() == 'GET':
+            response = requests.get(external_endpoint, params=query_params, headers=headers,
+                                    timeout=10)
+            try:
+                return {'status_code': response.status_code, 'headers': response.headers}
+            except Exception:
+                logger.warning("Issue with GET response to %s", external_endpoint)
+        else:
+            logger.error("Unsupported HTTP method: %s", method)
+            return
+
+    except requests.exceptions.HTTPError:
+        logger.exception("HTTP error occurred")
+    except requests.exceptions.RequestException:
+        logger.exception("Request exception occurred")
+    except Exception:
+        logger.exception("An unexpected error occurred")
+
+@shared_task(soft_time_limit=1200)
+def unembargo_dandiset_task(dandiset_id: int):
+    from dandiapi.api.services.embargo import unembargo_dandiset
+
+    ds = Dandiset.objects.get(pk=dandiset_id)
+
+    # If the unembargo fails for any reason, send an email, but continue the error propagation
+    try:
+        unembargo_dandiset(ds)
+    except Exception:
+        send_dandiset_unembargo_failed_message(ds)
+        raise

@@ -31,7 +31,18 @@ const dandiApiRoot = import.meta.env.VITE_APP_DANDI_API_ROOT.endsWith('/')
   ? import.meta.env.VITE_APP_DANDI_API_ROOT
   : `${import.meta.env.VITE_APP_DANDI_API_ROOT}/`;
 
-const client = axios.create({ baseURL: dandiApiRoot });
+const webKnossosApiRoot = import.meta.env.VITE_APP_WEBKNOSSOS_API_ROOT.endsWith('/')
+  ? import.meta.env.VITE_APP_WEBKNOSSOS_API_ROOT
+  : `${import.meta.env.VITE_APP_WEBKNOSSOS_API_ROOT}/`;
+
+const webKnossosClient = axios.create(
+  { baseURL: webKnossosApiRoot, withCredentials: true, }
+);
+
+const client = axios.create(
+  { baseURL: dandiApiRoot }
+);
+
 
 let oauthClient: OAuthClient | null = null;
 try {
@@ -47,6 +58,17 @@ try {
 }
 
 const user = ref<User | null>(null);
+
+const webknossosRest = {
+  async datasets(params?: any): Promise<any> {
+    if (!params) {
+      params = {};
+    }
+
+    const response = await webKnossosClient.get('api/datasets', { params });
+    return response;
+  },
+}
 
 const dandiRest = {
   async restoreLogin() {
@@ -295,6 +317,36 @@ client.interceptors.request.use((config) => ({
   },
 }));
 
+function getIdCookieValue() {
+  console.log(document.cookie)
+  const name = 'id=';
+  const decodedCookie = decodeURIComponent(document.cookie);
+  const ca = decodedCookie.split(';');
+
+  for (let i = 0; i < ca.length; i++) {
+    const c = ca[i].trim();
+    if (c.indexOf(name) === 0) {
+      return c.substring(name.length);
+    }
+  }
+  return '';
+}
+
+webKnossosClient.interceptors.request.use((config) => {
+  const idCookieValue = getIdCookieValue(); // Retrieve the value of the "id" cookie
+  console.log(idCookieValue)
+  console.log(config)
+
+  return {
+    ...config,
+    headers: {
+      ...oauthClient?.authHeaders,
+      ...config.headers,
+    },
+  };
+});
+
+
 const loggedIn = () => !!user.value;
 const insideIFrame = (): boolean => window.self !== window.top;
 const cookiesEnabled = (): boolean => navigator.cookieEnabled;
@@ -306,4 +358,6 @@ export {
   user,
   insideIFrame,
   cookiesEnabled,
+  webKnossosClient,
+  webknossosRest
 };

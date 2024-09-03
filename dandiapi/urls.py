@@ -19,6 +19,7 @@ from dandiapi.api.views import (
     blob_read_view,
     info_view,
     presigned_cookie_s3_cloudfront_view,
+    mailchimp_csv_view,
     root_content_view,
     stats_view,
     upload_complete_view,
@@ -31,6 +32,7 @@ from dandiapi.api.views import (
 )
 from dandiapi.search.views import search_genotypes, search_species
 from dandiapi.zarr.views import ZarrViewSet
+from dandiapi.api.views.auth import ExternalAPIViewset
 
 router = ExtendedSimpleRouter()
 (
@@ -53,6 +55,7 @@ router = ExtendedSimpleRouter()
 )
 router.register('assets', AssetViewSet, basename='asset')
 router.register('zarr', ZarrViewSet, basename='zarr')
+router.register(r'external-api', ExternalAPIViewset, basename='external-api')
 
 
 
@@ -103,7 +106,11 @@ urlpatterns = [
     re_path(
         r'^api/users/questionnaire-form/$', user_questionnaire_form_view, name='user-questionnaire'
     ),
-    path('api/permissions/s3/', presigned_cookie_s3_cloudfront_view, name='presigned_cookie_s3_cloudfront'),
+    path(
+        'api/permissions/s3/',
+        presigned_cookie_s3_cloudfront_view,
+        name='presigned_cookie_s3_cloudfront'
+    ),
     re_path(
         r'^api/permissions/s3/(?P<asset_path>.*)$',
         presigned_cookie_s3_cloudfront_view,
@@ -115,6 +122,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('dashboard/', DashboardView.as_view(), name='dashboard-index'),
     path('dashboard/user/<str:username>/', user_approval_view, name='user-approval'),
+    path('dashboard/mailchimp/', mailchimp_csv_view, name='mailchimp-csv'),
     # this url overrides the authorize url in oauth2_provider.urls to
     # support our user signup workflow
     re_path(r'^oauth/authorize/$', authorize_view, name='authorize'),

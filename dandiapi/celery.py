@@ -7,7 +7,7 @@ import celery.app.trace
 import configurations.importer
 
 celery.app.trace.LOG_RECEIVED = """\
-Task %(name)s[%(id)s] received: (%(args)s, %(kwargs)s)\
+Task %(name)s[%(id)s] received: (%(args)s)\
 """
 
 os.environ['DJANGO_SETTINGS_MODULE'] = 'dandiapi.settings'

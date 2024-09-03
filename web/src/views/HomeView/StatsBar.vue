@@ -38,8 +38,8 @@ const stats = computed(() => [
   {
     name: 'datasets',
     value: dandisets.value,
-    // description: 'A DANDI dataset including files and dataset-level metadata',
-    // href: '/dandiset',
+    description: 'A dataset including files and dataset-level metadata',
+    href: '/dandiset',
   },
   { name: 'users', value: users.value },
   { name: 'total data size', value: filesize(size.value, { round: 0, base: 10, standard: 'iec' }) },

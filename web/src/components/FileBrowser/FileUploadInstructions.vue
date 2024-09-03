@@ -56,7 +56,7 @@ const dandisetIdentifier = computed(() => store.dandiset?.dandiset.identifier);
 
 const downloadCommand = computed(() => {
   const baseUrl = import.meta.env.VITE_APP_DANDI_API_ROOT === 'https://staging-api.lincbrain.org/api/'
-    ? 'https://staging--lincbrain-org.netlify.app/dandiset/'
+    ? 'https://staging.lincbrain.org/dandiset/'
     : 'https://lincbrain.org/dandiset/';
 
   return dandisetIdentifier.value

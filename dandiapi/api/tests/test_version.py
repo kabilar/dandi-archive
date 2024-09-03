@@ -613,7 +613,7 @@ def test_version_rest_update(api_client, user, draft_version):
 
 
 @pytest.mark.django_db()
-def test_version_rest_update_unembargoing(api_client, user, draft_version_factory):
+def test_version_rest_update_unembargo_in_progress(api_client, user, draft_version_factory):
     draft_version = draft_version_factory(
         dandiset__embargo_status=Dandiset.EmbargoStatus.UNEMBARGOING
     )
@@ -809,7 +809,7 @@ def test_version_rest_publish_embargo(api_client: APIClient, user: User, draft_v
 
 
 @pytest.mark.django_db()
-def test_version_rest_publish_unembargoing(
+def test_version_rest_publish_unembargo_in_progress(
     api_client: APIClient, user: User, draft_version_factory
 ):
     draft_version = draft_version_factory(
@@ -893,17 +893,17 @@ def test_version_rest_publish_not_a_draft(api_client, user, published_version, a
     [
         (
             Version.Status.PENDING,
-            'Metadata validation is pending for this dandiset, please try again later.',
+            'Metadata validation is pending for this dataset, please try again later.',
             409,
         ),
-        (Version.Status.VALIDATING, 'Dandiset is currently being validated', 409),
-        (Version.Status.INVALID, 'Dandiset metadata or asset metadata is not valid', 400),
+        (Version.Status.VALIDATING, 'Dataset is currently being validated', 409),
+        (Version.Status.INVALID, 'Dataset metadata or asset metadata is not valid', 400),
         (
             Version.Status.PUBLISHED,
             'There have been no changes to the draft version since the last publish.',
             400,
         ),
-        (Version.Status.PUBLISHING, 'Dandiset is currently being published', 423),
+        (Version.Status.PUBLISHING, 'Dataset is currently being published', 423),
     ],
 )
 def test_version_rest_publish_invalid(

@@ -1,5 +1,5 @@
 <template>
-  <div v-if="currentDandiset && currentDandiset.dandiset.embargo_status !== 'UNEMBARGOING'">
+  <div v-if="!unembargo_in_progress">
     <v-progress-linear
       v-if="!currentDandiset"
       indeterminate
@@ -242,7 +242,7 @@
                           AWS S3 URI <span v-if="copied" style="color: green; padding-left: 8px; padding-right: 8px; margin-left: 16px;">Copied!</span>
                         </v-list-item-title>
                         <v-spacer></v-spacer>
-                        <v-icon @click.stop="copyToClipboard(item.asset.s3_uri)">mdi-content-copy</v-icon>
+                        <v-icon @click.stop="copyToClipboard(item.asset?.s3_uri)">mdi-content-copy</v-icon>
                       </v-list-item>
                     </v-list>
                   </v-menu>
@@ -283,6 +283,51 @@
                       >
                         <v-list-item-title class="font-weight-light">
                           {{ el.name }}
+                        </v-list-item-title>
+                      </v-list-item>
+                    </v-list>
+                  </v-menu>
+                </v-list-item-action>
+
+                <v-list-item-action
+                  v-if="item.asset"
+                  class="px-2"
+                >
+                  <v-menu
+                    bottom
+                    left
+                  >
+                    <template #activator="{ on, attrs }">
+                      <v-btn
+                        color="success"
+                        x-small
+                        :disabled="!item.asset.webknossos_datasets || !item.asset.webknossos_datasets?.length"
+                        v-bind="attrs"
+                        v-on="on"
+                      >
+                        WebKNOSSOS <v-icon small>mdi-menu-down</v-icon>
+                      </v-btn>
+                    </template>
+                    <v-list
+                      v-if="item && item.asset.webknossos_datasets"
+                      dense
+                    >
+                      <v-subheader
+                        v-if="item.asset.webknossos_datasets"
+                        class="font-weight-medium"
+                      >
+                        WEBKNOSSOS DATASETS CONTAINING ASSET
+                      </v-subheader>
+                      <v-list-item
+                        v-for="el in item.asset.webknossos_datasets"
+                        :key="item.asset.s3_uri"
+                        @click="el ? el : null"
+                        :href="el.webknossos_url ? el : null"
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        <v-list-item-title class="font-weight-light">
+                          {{ el.webknossos_name ? el.webknossos_name : "No datasets associated" }}
                         </v-list-item-title>
                       </v-list-item>
                     </v-list>
@@ -341,7 +386,7 @@ interface AssetService {
 interface ExtendedAssetPath extends AssetPath {
   services?: AssetService[];
   name: string;
-  s3Uri?: string;
+  s3_uri?: string;
 }
 
 const sortByFolderThenName = (a: ExtendedAssetPath, b: ExtendedAssetPath) => {
@@ -401,7 +446,7 @@ const EXTERNAL_SERVICES = [
   // },
   {
     name: 'Neuroglancer',
-    regex: /\.(nwb|txt|nii(\.gz)?|ome\.zarr)$/,
+    regex: /\.(nwb|txt|nii(\.gz)?|ome\.zarr)$/,  // TODO: .txt for testing purposes
     maxsize: Infinity,
     endpoint: 'value-defaults-to-endpoint-logic'
   }
@@ -434,18 +479,20 @@ const pages = ref(0);
 const updating = ref(false);
 const copied = ref(false);
 
-const menuOpen = ref({});
-
+const menuOpen = ref<Record<string, boolean>>({});
 // Computed
 const owners = computed(() => store.owners?.map((u) => u.username) || null);
 const currentDandiset = computed(() => store.dandiset);
 const embargoed = computed(() => currentDandiset.value?.dandiset.embargo_status === 'EMBARGOED');
+const unembargo_in_progress = computed(() => currentDandiset.value?.dandiset.embargo_status === 'UNEMBARGOING')
 const splitLocation = computed(() => location.value.split('/'));
 const isAdmin = computed(() => user.value?.admin || false);
 const isOwner = computed(() => !!(
   user.value && owners.value?.includes(user.value?.username)
 ));
 const itemsNotFound = computed(() => items.value && !items.value.length);
+
+console.log(items)
 
 function serviceURL(endpoint: string, data: {
   dandisetId: string,
@@ -479,16 +526,21 @@ async function redirectToNeuroglancerUrl(item: any) {
   }
 }
 
-function copyToClipboard(s3Uri: string) {
-  navigator.clipboard.writeText(s3Uri).then(() => {
-    copied.value = true;
-    setTimeout(() => {
-      copied.value = false;
-    }, 2000);
-  }).catch(err => {
-    console.error('Failed to copy text: ', err)
-  });
+function copyToClipboard(s3Uri?: string) {
+  if (s3Uri) {
+    navigator.clipboard.writeText(s3Uri).then(() => {
+      copied.value = true;
+      setTimeout(() => {
+        copied.value = false;
+      }, 2000);
+    }).catch(err => {
+      console.error('Failed to copy text: ', err)
+    });
+  } else {
+    console.error('No S3 URI found')
+  }
 }
+
 
 
 function getExternalServices(path: AssetPath, info: {dandisetId: string, dandisetVersion: string}) {

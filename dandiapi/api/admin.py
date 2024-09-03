@@ -23,6 +23,9 @@ from dandiapi.api.models import (
     Upload,
     UserMetadata,
     Version,
+    WebKnossosAnnotation,
+    WebKnossosDataset,
+    WebKnossosDataLayer
 )
 from dandiapi.api.views.users import social_account_to_dict
 from dandiapi.zarr.tasks import ingest_dandiset_zarrs
@@ -36,11 +39,22 @@ admin.site.site_title = 'DANDI Admin'
 
 class UserMetadataInline(TabularInline):
     model = UserMetadata
-    fields = ['status', 'questionnaire_form', 'rejection_reason']
-
+    fields = ['status', 'webknossos_credential', 'questionnaire_form', 'rejection_reason']
 
 class SocialAccountInline(TabularInline):
     model = SocialAccount
+
+@admin.register(WebKnossosAnnotation)
+class WebKnossosAnnotationAdmin(admin.ModelAdmin):
+    model = WebKnossosAnnotation
+
+@admin.register(WebKnossosDataset)
+class WebKnossosDatasetAdmin(admin.ModelAdmin):
+    model = WebKnossosDataset
+
+@admin.register(WebKnossosDataLayer)
+class WebKnossosDataLayerAdmin(admin.ModelAdmin):
+    model = WebKnossosDataLayer
 
 
 class UserAdmin(BaseUserAdmin):
