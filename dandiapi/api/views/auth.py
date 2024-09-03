@@ -23,6 +23,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import viewsets
 
+from dandiapi.api.models.asset import Asset
 from dandiapi.api.mail import (
     send_approved_user_message,
     send_new_user_message_email,
@@ -32,6 +33,7 @@ from dandiapi.api.permissions import IsApproved
 from dandiapi.api.views.serializers import UserDetailSerializer
 from dandiapi.api.views.users import social_account_to_dict, user_to_dict
 from dandiapi.api.models.user import UserMetadata
+from dandiapi.api.models.webknossos import WebKnossosAnnotation, WebKnossosDataset, WebKnossosDataLayer
 
 if TYPE_CHECKING:
     from django.http import HttpRequest, HttpResponse
@@ -146,28 +148,48 @@ class ExternalAPIViewset(viewsets.ViewSet):
             }
 
             headers = {'Content-Type': 'application/json'}
-            response = requests.post(external_endpoint, json=payload, headers=headers, timeout=10)
-
-            print(response.headers)
+            response = requests.post("https://webknossos-r5.lincbrain.org/api/auth/login", json=payload, headers=headers, timeout=10)
             set_cookie_value = response.headers.get('Set-Cookie')
             cookies = extract_cookie_from_set_cookie(set_cookie_value)
 
-            webknossos_datasets_url = f'{webknossos_api_url}/api/datasets'
+            webknossos_datasets_url = f'https://{webknossos_api_url}/api/datasets'
+            webknossos_datasets = requests.get("https://webknossos-r5.lincbrain.org/api/datasets", cookies=cookies)
 
-            webknossos_datasets = requests.get(webknossos_datasets_url, cookies=cookies)
+            # TODO: make the s3_uri a field in the Asset model
+            asset_dict = {}
+            for asset in Asset.objects.all():
+                asset_dict[asset.s3_uri] = asset.asset_id
 
             for webknossos_dataset in webknossos_datasets.json():
-                a = requests.get(f'http://webknossos-r5.lincbrain.org:8080/binaryData/LINC/{webknossos_dataset["name"]}/datasource-properties.json').json()
-                for layers in a['dataLayers']:
-                    for mag in layers['mags']:
-                        print(mag['path'].rsplit('/', 1)[0])
+                try:
+                    webknossos_dataset_data = requests.get(f'http://webknossos-r5.lincbrain.org:8080/binaryData/LINC/'
+                                     f'{webknossos_dataset["name"]}/datasource-properties.json'
+                                     ).json()
+                    webknossos_dataset = WebKnossosDataset.objects.get_or_create(
+                        webknossos_dataset_name=webknossos_dataset_data['id']['name'],
+                        webknossos_organization_name=webknossos_dataset_data['id']['team']
+                    )
 
+                    unique_paths = set()
+                    for data_layers in webknossos_dataset_data['dataLayers']:
+                        for mag in data_layers['mags']:
+                            path = mag['path'].rsplit('/', 1)[0]
+                            unique_paths.add(path)  # S3 URI
 
-            # print(datasets.json())
-            #
-            # for webknossos_dataset in datasets.json():
-            #     dataset_name = webknossos_dataset['name']
+                    for unique_path in unique_paths:
+                        try:
+                            asset = Asset.objects.get(asset_id=asset_dict[unique_path])
+                            WebKnossosDataLayer.objects.get_or_create(
+                                webknossos_dataset=webknossos_dataset,
+                                asset=asset
+                            )
+                        except Exception as e:
+                            print(e)
 
+                except JSONDecodeError:
+                    continue
+
+            return Response(asset_dict)
         else:
             return Response(status=400, data={"detail": "Unsupported service"})
 

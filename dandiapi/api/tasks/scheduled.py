@@ -139,7 +139,7 @@ def populate_webknossos_datasets_and_annotations() -> None:
     user = User.objects.get(email="akanzer@mit.edu")
     webknossos_credential = user.metadata.webknossos_credential
     webknossos_api_url = os.getenv('WEBKNOSSOS_API_URL', None)
-    webknossos_login_endpoint = f'{webknossos_api_url}/api/auth/login'
+    webknossos_login_endpoint = f'https://{webknossos_api_url}/api/auth/login'
 
     payload = {
         "email": user.email,

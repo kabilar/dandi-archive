@@ -12,12 +12,9 @@ WEBKNOSSOS_BINARY_DATA_PORT = "8080"
 WEBKNOSSOS_DATASOURCE_PROPERTIES_FILE_NAME = "datasource-properties.json"
 
 class WebKnossosDataset(models.Model):  # noqa: DJ008
-    webknossos_dataset_id = models.UUIDField(unique=True, default=uuid4, db_index=True)
+    id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
     webknossos_dataset_name = models.CharField(max_length=100, null=True, blank=True)
     webknossos_organization_name = models.CharField(max_length=100, null=True, blank=True)
-
-    # ForeignKeys
-    asset = models.ForeignKey(Asset, related_name='webknossos_datasets', on_delete=models.PROTECT)
 
     def get_datasource_properties_url(self) -> str:
         webknossos_api_url = os.getenv('WEBKNOSSOS_API_URL', "webknossos-r5.lincbrain.org")
@@ -41,10 +38,12 @@ class WebKnossosDataset(models.Model):  # noqa: DJ008
 
 
 class WebKnossosDataLayer(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
     webknossos_dataset = models.ForeignKey(WebKnossosDataset, related_name='webknossos_datalayers', on_delete=models.PROTECT)
+    asset = models.ForeignKey(Asset, related_name='webknossos_datasets', on_delete=models.PROTECT)
 
 class WebKnossosAnnotation(models.Model):  # noqa: DJ008
-    webknossos_annotation_id = models.UUIDField(unique=True, default=uuid4, db_index=True)
+    id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
     webknossos_annotation_name = models.CharField(max_length=100, null=True, blank=True)
     webknossos_organization = models.CharField(max_length=100, null=True, blank=True)
     webknossos_annotation_owner_first_name = models.CharField(max_length=100, null=True, blank=True)

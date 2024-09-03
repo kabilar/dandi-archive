@@ -504,11 +504,9 @@ class NestedAssetViewSet(NestedViewSetMixin, AssetViewSet, ReadOnlyModelViewSet)
         page = self.paginate_queryset(children_paths)
         if page is not None:
             serializer = AssetPathsSerializer(page, many=True)
-            print(serializer.data)
             return self.get_paginated_response(serializer.data)
 
         serializer = AssetPathsSerializer(children_paths, many=True)
-        print(serializer)
         return Response(serializer.data)
 
     # TODO: add create to forge an asset from a validation
