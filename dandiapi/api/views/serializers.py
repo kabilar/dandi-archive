@@ -376,7 +376,7 @@ class AssetFileSerializer(AssetSerializer):
     def get_webknossos_datasets(self, obj):
         return [
             {"webknossos_url": dataset.get_webknossos_url(),
-             "webknossos_name": dataset.webknossos_dataset_name
+             "webknossos_name": dataset.webknossos_dataset.webknossos_dataset_name
              }
             for dataset in obj.webknossos_datasets.all()
         ]

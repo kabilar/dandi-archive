@@ -134,7 +134,7 @@ def refresh_materialized_view_search() -> None:
         cursor.execute('REFRESH MATERIALIZED VIEW CONCURRENTLY asset_search;')
 
 
-@shared_task(soft_time_limit=100)
+# @shared_task(soft_time_limit=100)
 def populate_webknossos_datasets_and_annotations() -> None:
     user = User.objects.get(email="akanzer@mit.edu")
     webknossos_credential = user.metadata.webknossos_credential
@@ -198,4 +198,4 @@ def register_scheduled_tasks(sender: Celery, **kwargs):
     # Process new S3 logs every hour
     sender.add_periodic_task(timedelta(hours=1), collect_s3_log_records_task.s())
 
-    sender.add_periodic_task(crontab(minute='*/5'), populate_webknossos_datasets_and_annotations.s())
+    # sender.add_periodic_task(crontab(minute='*/5'), populate_webknossos_datasets_and_annotations.s())
