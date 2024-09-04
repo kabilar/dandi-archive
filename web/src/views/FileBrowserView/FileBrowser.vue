@@ -321,8 +321,8 @@
                       <v-list-item
                         v-for="el in item.asset.webknossos_datasets"
                         :key="item.asset.s3_uri"
-                        @click="el ? el : null"
-                        :href="el.webknossos_url ? el : null"
+                        @click="el ? window.open(el.webknossos_url, `_blank`) : null"
+                        :href="el.webknossos_url ? el.webknossos_url : null"
                         target="_blank"
                         rel="noreferrer"
                       >
