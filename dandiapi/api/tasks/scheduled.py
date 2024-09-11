@@ -150,8 +150,8 @@ def populate_webknossos_datasets_and_annotations() -> None:
     response = requests.post(webknossos_login_endpoint, json=payload, headers=headers, timeout=10)
     cookies = response.cookies.get_dict()
 
-    # Fetch payload from https://webknossos-r5.lincbrain.org/api/datasets
-    webknossos_api_url = os.getenv('WEBKNOSSOS_API_URL', "webknossos-r5.lincbrain.org")
+    # Fetch payload from https://webknossos.lincbrain.org/api/datasets
+    webknossos_api_url = os.getenv('WEBKNOSSOS_API_URL', "webknossos.lincbrain.org")
     webknossos_datasets_url = f'https://{webknossos_api_url}/api/datasets'
 
     datasets = requests.get(webknossos_datasets_url, cookies=cookies)
@@ -166,7 +166,7 @@ def populate_webknossos_datasets_and_annotations() -> None:
 
         # Add row in WebKNOSSOS Datasets
 
-        # Fetch payload from https://webknossos-r5.lincbrain.org/api/annotations/readable
+        # Fetch payload from https://webknossos.lincbrain.org/api/annotations/readable
 
         # Store each annotation's id as "name"
 
