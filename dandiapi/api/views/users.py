@@ -80,6 +80,7 @@ def serialize_user(user: User):
         'username': username,
         'name': name,
         'status': _get_user_status(user),
+        'email': user.email
     }
 
 
