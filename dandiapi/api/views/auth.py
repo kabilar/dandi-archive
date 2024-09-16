@@ -108,7 +108,7 @@ class ExternalAPIViewset(viewsets.ViewSet):
         if service == 'webknossos':
             user = User.objects.get(email=user_detail_serializer.data["email"])
             webknossos_credential = user.metadata.webknossos_credential
-            webknossos_api_url = os.getenv('WEBKNOSSOS_API_URL', "webknossos-r5.lincbrain.org")
+            webknossos_api_url = os.getenv('WEBKNOSSOS_API_URL', "webknossos.lincbrain.org")
             external_endpoint = f'https://{webknossos_api_url}/api/auth/login'
 
             payload = {
@@ -150,7 +150,7 @@ class ExternalAPIViewset(viewsets.ViewSet):
         if service == 'webknossos':
             user = User.objects.get(email=user_detail_serializer.data["email"])
             webknossos_credential = user.metadata.webknossos_credential
-            webknossos_api_url = os.getenv('WEBKNOSSOS_API_URL', "webknossos-r5.lincbrain.org")
+            webknossos_api_url = os.getenv('WEBKNOSSOS_API_URL', "webknossos.lincbrain.org")
             external_endpoint = f'https://{webknossos_api_url}/api/auth/login'
 
             payload = {
@@ -159,11 +159,11 @@ class ExternalAPIViewset(viewsets.ViewSet):
             }
 
             headers = {'Content-Type': 'application/json'}
-            response = requests.post("https://webknossos-r5.lincbrain.org/api/auth/login", json=payload, headers=headers, timeout=10)
+            response = requests.post("https://webknossos.lincbrain.org/api/auth/login", json=payload, headers=headers, timeout=10)
             set_cookie_value = response.headers.get('Set-Cookie')
             cookies = extract_cookie_from_set_cookie(set_cookie_value)
 
-            webknossos_datasets_url = f'https://webknossos-r5.lincbrain.org/api/datasets'
+            webknossos_datasets_url = f'https://webknossos.lincbrain.org/api/datasets'
             # webknossos_datasets = requests.get("https://webknossos-r5.lincbrain.org/api/datasets", cookies=cookies)
 
             # TODO: make the s3_uri a field in the Asset model
@@ -175,7 +175,7 @@ class ExternalAPIViewset(viewsets.ViewSet):
                 for webknossos_dataset in webknossos_dataset_entry:
                     try:
                         webknossos_dataset_data = requests.get(
-                            f'http://webknossos-r5.lincbrain.org:8080/binaryData/LINC/'
+                            f'http://webknossos.lincbrain.org:8080/binaryData/LINC/'
                             f'{webknossos_dataset["name"]}/datasource-properties.json',
                             stream=True
                         ).json()
