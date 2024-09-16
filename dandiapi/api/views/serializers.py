@@ -38,7 +38,7 @@ class UserSerializer(serializers.Serializer):
 
 class UserDetailSerializer(serializers.Serializer):
     username = serializers.CharField(validators=[UnicodeUsernameValidator()])
-    email = serializers.CharField()
+    email = serializers.CharField(required=False, allow_blank=True)
     name = serializers.CharField(validators=[UnicodeUsernameValidator()])
     admin = serializers.BooleanField()
     status = serializers.CharField()

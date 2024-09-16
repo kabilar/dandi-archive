@@ -79,7 +79,7 @@ def serialize_user(user: User):
         'admin': user.is_superuser,
         'username': username,
         'name': name,
-        'status': _get_user_status(user),
+        'status': _get_user_status(user)
     }
 
 
