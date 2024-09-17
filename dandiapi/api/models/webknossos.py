@@ -64,7 +64,7 @@ class WebKnossosAnnotation(models.Model):  # noqa: DJ008
     def get_asset_s3_uri(self) -> str:
         return self.asset.s3_uri
 
-    def get_full_name(self) -> str:
+    def get_author_full_name(self) -> str:
         return (f'{self.webknossos_annotation_owner_first_name}'
                 f' {self.webknossos_annotation_owner_last_name}')
 

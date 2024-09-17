@@ -331,6 +331,29 @@
                         </v-list-item-title>
                       </v-list-item>
                     </v-list>
+                    <v-list
+                      v-if="item && item.asset.webknossos_datasets"
+                      dense
+                    >
+                      <v-subheader
+                        v-if="item.asset.webknossos_datasets"
+                        class="font-weight-medium"
+                      >
+                        WEBKNOSSOS ANNOTATIONS CONTAINING ASSET
+                      </v-subheader>
+                      <v-list-item
+                        v-for="el in item.asset.webknossos_annotations"
+                        :key="item.asset.asset_id"
+                        @click="el ? window.open(el.webknossos_annotation_url, `_blank`) : null"
+                        :href="el.webknossos_annotation_url ? el.webknossos_annotation_url : null"
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        <v-list-item-title class="font-weight-light">
+                          {{ el.webknossos_annotation_name ? el.webknossos_annotation_name : "No annotations associated" }}
+                        </v-list-item-title>
+                      </v-list-item>
+                    </v-list>
                   </v-menu>
                 </v-list-item-action>
 

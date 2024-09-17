@@ -92,8 +92,9 @@ export interface WebknossosDataset {
 }
 
 export interface WebknossosAnnotation {
-  webknossos_name: string
-  webknossos_url: string;
+  webknossos_annotation_name: string
+  webknossos_annotation_url: string;
+  webknossos_annotation_author: string;
 }
 
 export interface AssetFile {

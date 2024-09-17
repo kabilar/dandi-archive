@@ -385,7 +385,8 @@ class AssetFileSerializer(AssetSerializer):
     def get_webknossos_annotations(self, obj):
         return [
             {"webknossos_annotation_url": annotation.get_webknossos_url(),
-             "webknossos_annotation_name": annotation.get_webknossos_annotation_name()
+             "webknossos_annotation_name": annotation.get_webknossos_annotation_name(),
+             "webknossos_annotation_author": annotation.get_author_full_name()
              }
             for annotation in obj.webknossos_annotations.all()
         ]

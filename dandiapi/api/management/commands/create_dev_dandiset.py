@@ -132,10 +132,11 @@ def create_dev_dandiset(name: str, email: str, first_name: str, last_name: str):
 
             for annotation_num in range(2):
                 WebKnossosAnnotation.objects.create(
-                    webknossos_annotation_name=f"Annotation {annotation_num + 1}",
+                    webknossos_annotation_id=f"Annotation ID: {annotation_num + 1}",
+                    webknossos_annotation_name=f"Annotation Name: {annotation_num + 1}",
                     webknossos_organization="LINC",
-                    webknossos_annotation_owner_first_name="OwnerFirst",
-                    webknossos_annotation_owner_last_name="OwnerLast",
+                    webknossos_annotation_owner_first_name="Randi",
+                    webknossos_annotation_owner_last_name="Dandi",
                     asset=asset,
                     webknossos_dataset=webknossos_dataset
                 )
