@@ -91,11 +91,18 @@ export interface WebknossosDataset {
   webknossos_url: string;
 }
 
+export interface WebknossosAnnotation {
+  webknossos_annotation_name: string
+  webknossos_annotation_url: string;
+  webknossos_annotation_author: string;
+}
+
 export interface AssetFile {
   asset_id: string;
   url: string;
   s3_uri: string;
   webknossos_datasets?: WebknossosDataset[];
+  webknossos_annotations?: WebknossosAnnotation[];
 }
 
 export interface AssetPath {
