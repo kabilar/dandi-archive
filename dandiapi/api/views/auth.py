@@ -195,7 +195,6 @@ class ExternalAPIViewset(viewsets.ViewSet):
                             try:
                                 print(f"Processing unique path: {unique_path}")
                                 # Print the entire asset_dict for context
-                                print(f"Asset Dictionary: {asset_dict}")
 
                                 # Attempt to get the asset_id from the dictionary using the unique path
                                 unique_path = unique_path + '/'
@@ -233,7 +232,7 @@ class ExternalAPIViewset(viewsets.ViewSet):
                     except JSONDecodeError as e:
                         print(e)
 
-            webknossos_annotations_url = f'https://{webknossos_api_url}/api/annotations/readable'
+            webknossos_annotations_url = 'https://webknossos.lincbrain.org/api/annotations/readable'
             for annotations_page in stream_json(webknossos_annotations_url, cookies):
                 for annotation in annotations_page:
                     try:
@@ -244,26 +243,25 @@ class ExternalAPIViewset(viewsets.ViewSet):
 
                         assets = webknossos_dataset.webknossos_datalayers.all()
                         asset = assets.first().asset if assets.exists() else None
-
-                        print(asset)
-
-                        webknossos_annotation, created = WebKnossosAnnotation.objects.get_or_create(
-                            webknossos_annotation_id=annotation['id'],
-                            defaults={
-                                'webknossos_annotation_name': annotation.get('name', ''),
-                                'webknossos_organization': annotation.get('organization', ''),
-                                'webknossos_annotation_owner_first_name': annotation['owner'][
-                                    'firstName'],
-                                'webknossos_annotation_owner_last_name': annotation['owner'][
-                                    'lastName'],
-                                'webknossos_dataset': webknossos_dataset,
-                                'asset': asset
-                            }
-                        )
-                        if created:
-                            print(f"Created WebKnossosAnnotation: {webknossos_annotation}")
-                        else:
-                            print(f"WebKnossosAnnotation already exists: {webknossos_annotation}")
+                        if asset:
+                            for asset in assets:
+                                webknossos_annotation, created = WebKnossosAnnotation.objects.get_or_create(
+                                    webknossos_annotation_id=annotation['id'],
+                                    defaults={
+                                        'webknossos_annotation_name': annotation.get('name', ''),
+                                        'webknossos_organization': annotation.get('organization', ''),
+                                        'webknossos_annotation_owner_first_name': annotation['owner'][
+                                            'firstName'],
+                                        'webknossos_annotation_owner_last_name': annotation['owner'][
+                                            'lastName'],
+                                        'webknossos_dataset': webknossos_dataset,
+                                        'asset': asset
+                                    }
+                                )
+                                if created:
+                                    print(f"Created WebKnossosAnnotation: {webknossos_annotation}")
+                                else:
+                                    print(f"WebKnossosAnnotation already exists: {webknossos_annotation}")
 
                     except WebKnossosDataset.DoesNotExist:
                         print(f"WebKnossosDataset not found for name: {webknossos_dataset_name}")
