@@ -350,8 +350,7 @@
                         rel="noreferrer"
                       >
                         <v-list-item-title class="font-weight-light">
-                          {{ el.webknossos_annotation_name ? el.webknossos_annotation_name : "No annotations associated" }}
-                        </v-list-item-title>
+                          {{ el.webknossos_annotation_name ? (el.webknossos_annotation_name + (el.webknossos_annotation_author ? ' by ' + el.webknossos_annotation_author : '')) : "No annotations associated" }}                        </v-list-item-title>
                       </v-list-item>
                     </v-list>
                   </v-menu>
