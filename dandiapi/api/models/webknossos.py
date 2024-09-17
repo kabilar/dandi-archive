@@ -52,6 +52,7 @@ class WebKnossosDataLayer(models.Model):
 class WebKnossosAnnotation(models.Model):  # noqa: DJ008
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
     webknossos_annotation_name = models.CharField(max_length=100, null=True, blank=True)
+    webknossos_annotation_id = models.CharField(max_length=100, null=True, blank=True)
     webknossos_organization = models.CharField(max_length=100, null=True, blank=True)
     webknossos_annotation_owner_first_name = models.CharField(max_length=100, null=True, blank=True)
     webknossos_annotation_owner_last_name = models.CharField(max_length=100, null=True, blank=True)
@@ -66,3 +67,16 @@ class WebKnossosAnnotation(models.Model):  # noqa: DJ008
     def get_full_name(self) -> str:
         return (f'{self.webknossos_annotation_owner_first_name}'
                 f' {self.webknossos_annotation_owner_last_name}')
+
+    def get_webknossos_url(self) -> str:
+        webknossos_api_url = os.getenv('WEBKNOSSOS_API_URL', "webknossos.lincbrain.org")
+
+        if webknossos_api_url:
+            return (f'https://webknossos.lincbrain.org/annotations'
+                    f'/{self.webknossos_annotation_id}')
+
+    def get_webknossos_annotation_name(self) -> str:
+        if self.webknossos_annotation_name == '':
+            return "annotation untitled"
+
+        return self.webknossos_annotation_name
