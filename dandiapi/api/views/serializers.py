@@ -366,29 +366,28 @@ class AssetPathsQueryParameterSerializer(serializers.Serializer):
 
 
 class AssetFileSerializer(AssetSerializer):
-    webknossos_datasets = serializers.SerializerMethodField()
-    webknossos_annotations = serializers.SerializerMethodField()
+    webknossos_info = serializers.SerializerMethodField()
 
     class Meta(AssetSerializer.Meta):
-        fields = ['asset_id', 'url', 's3_uri', 'webknossos_datasets', 'webknossos_annotations']
+        fields = ['asset_id', 'url', 's3_uri', 'webknossos_info']
 
     url = serializers.URLField(source='s3_url')
 
-    def get_webknossos_datasets(self, obj):
+    def get_webknossos_info(self, obj):
         return [
-            {"webknossos_url": dataset.get_webknossos_url(),
-             "webknossos_name": dataset.webknossos_dataset.webknossos_dataset_name
-             }
+            {
+                "webknossos_url": dataset.get_webknossos_url(),
+                "webknossos_name": dataset.webknossos_dataset_name,
+                "webknossos_annotations": [
+                    {
+                        "webknossos_annotation_name": annotation.webknossos_annotation_name,
+                        "webknossos_annotation_url": annotation.get_webknossos_url(),
+                        "webknossos_annotation_author": annotation.get_author_full_name()
+                    }
+                    for annotation in dataset.webknossos_annotations.all()
+                ]
+            }
             for dataset in obj.webknossos_datasets.all()
-        ]
-
-    def get_webknossos_annotations(self, obj):
-        return [
-            {"webknossos_annotation_url": annotation.get_webknossos_url(),
-             "webknossos_annotation_name": annotation.get_webknossos_annotation_name(),
-             "webknossos_annotation_author": annotation.get_author_full_name()
-             }
-            for annotation in obj.webknossos_annotations.all()
         ]
 
 
