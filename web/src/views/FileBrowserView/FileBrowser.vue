@@ -336,22 +336,46 @@
                       dense
                     >
                       <v-subheader
-                        v-if="item.asset.webknossos_datasets"
+                        v-if="item.asset.webknossos_datasets.length > 0"
                         class="font-weight-medium"
                       >
                         WEBKNOSSOS ANNOTATIONS CONTAINING ASSET
                       </v-subheader>
-                      <v-list-item
-                        v-for="el in item.asset.webknossos_annotations"
-                        :key="item.asset.asset_id"
-                        @click="el ? window.open(el.webknossos_annotation_url, `_blank`) : null"
-                        :href="el.webknossos_annotation_url ? el.webknossos_annotation_url : null"
-                        target="_blank"
-                        rel="noreferrer"
+
+                      <!-- Iterate over each dataset -->
+                      <v-list-item-group
+                        v-for="dataset in item.asset.webknossos_info"
+                        :key="dataset.webknossos_name"
                       >
-                        <v-list-item-title class="font-weight-light">
-                          {{ el.webknossos_annotation_name ? (el.webknossos_annotation_name + (el.webknossos_annotation_author ? ' by ' + el.webknossos_annotation_author : '')) : "No annotations associated" }}                        </v-list-item-title>
-                      </v-list-item>
+                        <v-list-item>
+                          <v-list-item-title class="font-weight-medium">
+                            {{ dataset.webknossos_name }}
+                          </v-list-item-title>
+                        </v-list-item>
+
+                        <!-- Check if annotations exist and iterate over them -->
+                        <v-list dense v-if="dataset.webknossos_annotations && dataset.webknossos_annotations.length > 0">
+                          <v-list-item
+                            v-for="annotation in dataset.webknossos_annotations"
+                            :key="annotation.webknossos_annotation_url"
+                            @click="annotation ? window.open(annotation.webknossos_annotation_url, '_blank') : null"
+                            :href="annotation.webknossos_annotation_url ? annotation.webknossos_annotation_url : null"
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            <v-list-item-title class="font-weight-light">
+                              {{ annotation.webknossos_annotation_name ? (annotation.webknossos_annotation_name + (annotation.webknossos_annotation_author ? ' by ' + annotation.webknossos_annotation_author : '')) : "No annotation name available" }}
+                            </v-list-item-title>
+                          </v-list-item>
+                        </v-list>
+
+                        <!-- Handle case where there are no annotations for this dataset -->
+                        <v-list-item v-else>
+                          <v-list-item-title class="font-weight-light">
+                            No annotations available for this dataset
+                          </v-list-item-title>
+                        </v-list-item>
+                      </v-list-item-group>
                     </v-list>
                   </v-menu>
                 </v-list-item-action>

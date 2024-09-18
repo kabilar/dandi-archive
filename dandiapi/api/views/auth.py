@@ -240,28 +240,22 @@ class ExternalAPIViewset(viewsets.ViewSet):
                         webknossos_dataset = WebKnossosDataset.objects.get(
                             webknossos_dataset_name=webknossos_dataset_name
                         )
-
-                        assets = webknossos_dataset.webknossos_datalayers.all()
-                        asset = assets.first().asset if assets.exists() else None
-                        if asset:
-                            for asset in assets:
-                                webknossos_annotation, created = WebKnossosAnnotation.objects.get_or_create(
-                                    webknossos_annotation_id=annotation['id'],
-                                    defaults={
-                                        'webknossos_annotation_name': annotation.get('name', ''),
-                                        'webknossos_organization': annotation.get('organization', ''),
-                                        'webknossos_annotation_owner_first_name': annotation['owner'][
-                                            'firstName'],
-                                        'webknossos_annotation_owner_last_name': annotation['owner'][
-                                            'lastName'],
-                                        'webknossos_dataset': webknossos_dataset,
-                                        'asset': asset
-                                    }
-                                )
-                                if created:
-                                    print(f"Created WebKnossosAnnotation: {webknossos_annotation}")
-                                else:
-                                    print(f"WebKnossosAnnotation already exists: {webknossos_annotation}")
+                        webknossos_annotation, created = WebKnossosAnnotation.objects.get_or_create(
+                            webknossos_annotation_id=annotation['id'],
+                            defaults={
+                                'webknossos_annotation_name': annotation.get('name', ''),
+                                'webknossos_organization': annotation.get('organization', ''),
+                                'webknossos_annotation_owner_first_name': annotation['owner'][
+                                    'firstName'],
+                                'webknossos_annotation_owner_last_name': annotation['owner'][
+                                    'lastName'],
+                                'webknossos_dataset': webknossos_dataset,
+                            }
+                        )
+                        if created:
+                            print(f"Created WebKnossosAnnotation: {webknossos_annotation}")
+                        else:
+                            print(f"WebKnossosAnnotation already exists: {webknossos_annotation}")
 
                     except WebKnossosDataset.DoesNotExist:
                         print(f"WebKnossosDataset not found for name: {webknossos_dataset_name}")
@@ -273,9 +267,6 @@ class ExternalAPIViewset(viewsets.ViewSet):
             return Response(asset_dict)
         else:
             return Response(status=400, data={"detail": "Unsupported service"})
-
-
-
 
 
 QUESTIONS = [

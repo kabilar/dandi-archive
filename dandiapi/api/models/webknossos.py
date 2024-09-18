@@ -58,7 +58,6 @@ class WebKnossosAnnotation(models.Model):  # noqa: DJ008
     webknossos_annotation_owner_last_name = models.CharField(max_length=100, null=True, blank=True)
 
     # ForeignKeys
-    asset = models.ForeignKey(Asset, related_name='webknossos_annotations', on_delete=models.PROTECT)
     webknossos_dataset = models.ForeignKey(WebKnossosDataset, related_name='webknossos_annotations', on_delete=models.PROTECT)
 
     def get_asset_s3_uri(self) -> str:
