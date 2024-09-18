@@ -344,7 +344,7 @@
 
                       <!-- Iterate over each dataset -->
                       <v-list-item-group
-                        v-for="dataset in item.asset.webknossos_datasets"
+                        v-for="dataset in item.asset.webknossos_info"
                         :key="dataset.webknossos_name"
                       >
                         <v-list-item>

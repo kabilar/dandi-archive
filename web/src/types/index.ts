@@ -102,7 +102,7 @@ export interface AssetFile {
   asset_id: string;
   url: string;
   s3_uri: string;
-  webknossos_datasets?: WebknossosDataset[];
+  webknossos_info?: WebknossosDataset[];
 }
 
 export interface AssetPath {

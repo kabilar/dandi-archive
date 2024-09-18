@@ -377,14 +377,14 @@ class AssetFileSerializer(AssetSerializer):
         return [
             {
                 "webknossos_url": dataset.get_webknossos_url(),
-                "webknossos_name": dataset.webknossos_dataset_name,
+                "webknossos_name": dataset.webknossos_dataset.webknossos_dataset_name,
                 "webknossos_annotations": [
                     {
                         "webknossos_annotation_name": annotation.webknossos_annotation_name,
                         "webknossos_annotation_url": annotation.get_webknossos_url(),
                         "webknossos_annotation_author": annotation.get_author_full_name()
                     }
-                    for annotation in dataset.webknossos_annotations.all()
+                    for annotation in dataset.webknossos_dataset.webknossos_annotations.all()
                 ]
             }
             for dataset in obj.webknossos_datasets.all()
