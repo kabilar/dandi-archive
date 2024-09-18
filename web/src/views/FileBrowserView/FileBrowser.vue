@@ -301,7 +301,7 @@
                       <v-btn
                         color="success"
                         x-small
-                        :disabled="!item.asset.webknossos_datasets || !item.asset.webknossos_datasets?.length"
+                        :disabled="!item.asset.webknossos_info || !item.asset.webknossos_info?.length"
                         v-bind="attrs"
                         v-on="on"
                       >
@@ -309,17 +309,17 @@
                       </v-btn>
                     </template>
                     <v-list
-                      v-if="item && item.asset.webknossos_datasets"
+                      v-if="item && item.asset.webknossos_info"
                       dense
                     >
                       <v-subheader
-                        v-if="item.asset.webknossos_datasets"
+                        v-if="item.asset.webknossos_info"
                         class="font-weight-medium"
                       >
                         WEBKNOSSOS DATASETS CONTAINING ASSET
                       </v-subheader>
                       <v-list-item
-                        v-for="el in item.asset.webknossos_datasets"
+                        v-for="el in item.asset.webknossos_info"
                         :key="item.asset.s3_uri"
                         @click="el ? window.open(el.webknossos_url, `_blank`) : null"
                         :href="el.webknossos_url ? el.webknossos_url : null"
@@ -332,11 +332,11 @@
                       </v-list-item>
                     </v-list>
                     <v-list
-                      v-if="item && item.asset.webknossos_datasets"
+                      v-if="item && item.asset.webknossos_info"
                       dense
                     >
                       <v-subheader
-                        v-if="item.asset.webknossos_datasets.length > 0"
+                        v-if="item.asset.webknossos_info.length > 0"
                         class="font-weight-medium"
                       >
                         WEBKNOSSOS ANNOTATIONS CONTAINING ASSET
