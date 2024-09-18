@@ -364,7 +364,7 @@
                             rel="noreferrer"
                           >
                             <v-list-item-title class="font-weight-light">
-                              {{ annotation.webknossos_annotation_name ? (annotation.webknossos_annotation_name + (annotation.webknossos_annotation_author ? ' by ' + annotation.webknossos_annotation_author : '')) : "No annotation name available" }}
+                              {{ annotation.webknossos_annotation_name.trim() !== '' ? (annotation.webknossos_annotation_name + (annotation.webknossos_annotation_author ? ' by ' + annotation.webknossos_annotation_author : '')) : 'annotation untitled by ' + annotation.webknossos_annotation_author }}
                             </v-list-item-title>
                           </v-list-item>
                         </v-list>
