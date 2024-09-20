@@ -347,13 +347,7 @@
                         v-for="dataset in item.asset.webknossos_info"
                         :key="dataset.webknossos_name"
                       >
-                        <v-list-item>
-                          <v-list-item-title class="font-weight-medium">
-                            {{ dataset.webknossos_name }}
-                          </v-list-item-title>
-                        </v-list-item>
 
-                        <!-- Check if annotations exist and iterate over them -->
                         <v-list dense v-if="dataset.webknossos_annotations && dataset.webknossos_annotations.length > 0">
                           <v-list-item
                             v-for="annotation in dataset.webknossos_annotations"
@@ -369,12 +363,6 @@
                           </v-list-item>
                         </v-list>
 
-                        <!-- Handle case where there are no annotations for this dataset -->
-                        <v-list-item v-else>
-                          <v-list-item-title class="font-weight-light">
-                            No annotations available for this dataset
-                          </v-list-item-title>
-                        </v-list-item>
                       </v-list-item-group>
                     </v-list>
                   </v-menu>
