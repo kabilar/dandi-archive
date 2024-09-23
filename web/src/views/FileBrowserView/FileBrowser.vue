@@ -333,7 +333,7 @@
                     </v-list>
                     <v-list v-if="item && item.asset.webknossos_info" dense>
                     <v-subheader
-                      v-if="item.asset.webknossos_info.length > 0"
+                      v-if="item.asset.webknossos_info.some(dataset => dataset.webknossos_annotations && dataset.webknossos_annotations.length > 0)"
                       class="font-weight-medium"
                     >
                       WEBKNOSSOS ANNOTATIONS CONTAINING ASSET
