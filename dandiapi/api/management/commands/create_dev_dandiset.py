@@ -137,7 +137,6 @@ def create_dev_dandiset(name: str, email: str, first_name: str, last_name: str):
                     webknossos_organization="LINC",
                     webknossos_annotation_owner_first_name="Randi",
                     webknossos_annotation_owner_last_name="Dandi",
-                    asset=asset,
                     webknossos_dataset=webknossos_dataset
                 )
 
