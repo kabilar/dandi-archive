@@ -321,7 +321,7 @@
                       <v-list-item
                         v-for="el in item.asset.webknossos_info"
                         :key="item.asset.s3_uri"
-                        @click="el ? window.open(el.webknossos_url, `_blank`) : null"
+                        @click="el ? handleWebKnossosClick(el.webknossos_url) : null"
                         :href="el.webknossos_url ? el.webknossos_url : null"
                         target="_blank"
                         rel="noreferrer"
@@ -357,7 +357,7 @@
                         <v-list-item
                           v-for="annotation in dataset.webknossos_annotations"
                           :key="annotation.webknossos_annotation_url"
-                          @click="annotation ? window.open(annotation.webknossos_annotation_url, '_blank') : null"
+                          @click="annotation ? handleWebKnossosClick(annotation.webknossos_annotation_url) : null"
                           :href="annotation.webknossos_annotation_url ? annotation.webknossos_annotation_url : null"
                           target="_blank"
                           rel="noreferrer"
@@ -718,6 +718,36 @@ async function deleteAsset() {
   // Recompute the items to display in the browser.
   getItems();
   itemToDelete.value = null;
+}
+
+function getCookie(name: string): string | null {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+
+  if (parts.length === 2) {
+    const part = parts.pop();
+    if (part) {
+      return part.split(';').shift() || null;
+    }
+  }
+  return null;
+}
+
+async function handleWebKnossosClick(url: string) {
+  // Check if the 'id' cookie is present
+  const idCookie = getCookie('id');
+
+  if (idCookie) {
+    window.open(url, '_blank');
+  } else {
+    // If no cookie, call webKnossosLogin
+    try {
+      await dandiRest.loginWebKnossos(); // Call the login function
+      window.open(url, '_blank'); // After successful login, proceed to the URL
+    } catch (error) {
+      console.error('Login to WebKNOSSOS failed:', error);
+    }
+  }
 }
 
 // Update URL if location changes
