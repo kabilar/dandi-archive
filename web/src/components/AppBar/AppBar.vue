@@ -19,7 +19,7 @@
               :href="navItem.external ? navItem.to : undefined"
               :target="navItem.external ? '_blank' : undefined"
               :rel="navItem.external ? 'noopener' : undefined"
-              @click="navItem.onClick ? navItem.onClick() : null"
+              @click.stop="navItem.onClick ? navItem.onClick() : null"
               exact
               text
             >
