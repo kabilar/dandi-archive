@@ -47,7 +47,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { user, dandiRest } from '@/rest';
+import {user, dandiRest, webknossosRest} from '@/rest';
 import ApiKeyItem from '@/components/AppBar/ApiKeyItem.vue';
 
 const userInitials = computed(() => {
@@ -90,6 +90,7 @@ async function getNeuroglancerCookies() {
 
 
 async function logout() {
+  await webknossosRest.logout()
   await dandiRest.logout();
 }
 </script>

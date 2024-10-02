@@ -81,39 +81,32 @@ def publish_dandiset_task(dandiset_id: int):
 
 @shared_task
 def register_external_api_request_task(method: str, external_endpoint: str, payload: dict = None,
-                             query_params: dict = None):
-    """
-    Register a celery task that performs an API request to an external service.
-
-    :param method: HTTP method to use for the request ('GET' or 'POST')
-    :param external_endpoint: URL of the external API endpoint
-    :param payload: Dictionary payload to send in the POST request (for 'POST' method)
-    :param query_params: Dictionary of query parameters to send in the GET request
-        (for 'GET' method)
-    """
+                                       query_params: dict = None):
     headers = {
         'Content-Type': 'application/json',
     }
     try:
         if method.upper() == 'POST':
-            requests.post(external_endpoint, json=payload, headers=headers, timeout=10)
+            response = requests.post(external_endpoint, json=payload, headers=headers, timeout=10)
+            response.raise_for_status()
+            logger.info(f"POST to {external_endpoint} successful with payload: {payload}")
+            logger.info(f"Response: {response.status_code}, {response.text}")
         elif method.upper() == 'GET':
             response = requests.get(external_endpoint, params=query_params, headers=headers,
                                     timeout=10)
-            try:
-                return {'status_code': response.status_code, 'headers': response.headers}
-            except Exception:
-                logger.warning("Issue with GET response to %s", external_endpoint)
+            logger.info(f"GET to {external_endpoint} successful")
+            logger.info(f"Response: {response.status_code}, {response.headers}")
+            return {'status_code': response.status_code, 'headers': response.headers}
         else:
             logger.error("Unsupported HTTP method: %s", method)
             return
-
-    except requests.exceptions.HTTPError:
-        logger.exception("HTTP error occurred")
-    except requests.exceptions.RequestException:
-        logger.exception("Request exception occurred")
-    except Exception:
-        logger.exception("An unexpected error occurred")
+    except requests.exceptions.HTTPError as http_err:
+        logger.error(f"HTTP error occurred: {http_err}")
+        logger.error(f"Response content: {response.text}")  # Log response in case of error
+    except requests.exceptions.RequestException as req_err:
+        logger.error(f"Request exception occurred: {req_err}")
+    except Exception as err:
+        logger.error(f"An unexpected error occurred: {err}")
 
 @shared_task(soft_time_limit=1200)
 def unembargo_dandiset_task(dandiset_id: int):
