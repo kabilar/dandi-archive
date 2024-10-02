@@ -107,7 +107,11 @@ const dandiRest = {
   },
   async loginWebKnossos(): Promise<void> {
     try {
-      const { data, headers } = await client.get('external-api/login/webknossos/');
+      const { data, headers } = await client.get('external-api/login/webknossos/', {
+        withCredentials: true,  // Ensure credentials (cookies) are sent and handled
+      });
+
+      console.log(headers)
 
       // If the server sends a Set-Cookie header, it may not be automatically handled by the browser
       if (headers['set-cookie']) {
