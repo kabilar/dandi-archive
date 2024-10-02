@@ -209,9 +209,12 @@ function login() {
   dandiRest.login();
 }
 
-function handleWebKNOSSOSClick() {
-  dandiRest.loginWebKnossos();
-  window.open(lincWebKNOSSOSUrl, '_blank');
-  window.location.href = lincWebKNOSSOSUrl;
+async function handleWebKNOSSOSClick() {
+  try {
+    await dandiRest.loginWebKnossos();
+    window.open(lincWebKNOSSOSUrl, '_blank');
+  } catch (error) {
+    console.error('Login to WebKNOSSOS failed:', error);
+  }
 }
 </script>
