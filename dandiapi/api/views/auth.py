@@ -238,7 +238,7 @@ class ExternalAPIViewset(viewsets.ViewSet):
             user = User.objects.get(email=user_detail_serializer.data["email"])
             webknossos_credential = user.metadata.webknossos_credential
             webknossos_api_url = os.getenv('WEBKNOSSOS_API_URL', "webknossos.lincbrain.org")
-            external_endpoint = f'https://{webknossos_api_url}/api/auth/login'
+            external_endpoint = f'https://webknossos.lincbrain.org/api/auth/login'
 
             payload = {
                 "email": user.email,
