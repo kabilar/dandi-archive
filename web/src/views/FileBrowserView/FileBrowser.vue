@@ -357,7 +357,7 @@
                         <v-list-item
                           v-for="annotation in dataset.webknossos_annotations"
                           :key="annotation.webknossos_annotation_url"
-                          @click="annotation ? window.open(annotation.webknossos_annotation_url, '_blank') : null"
+                          @click="annotation ? handleWebKnossosClick(annotation.webknossos_annotation_url) : null"
                           :href="annotation.webknossos_annotation_url ? annotation.webknossos_annotation_url : null"
                           target="_blank"
                           rel="noreferrer"
