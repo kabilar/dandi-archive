@@ -94,17 +94,19 @@
 
     <div v-if="!insideIFrame">
       <template v-if="loggedIn">
-        <v-btn
-          :disabled="!user?.approved"
-          :to="{ name: 'createDandiset' }"
-          exact
-          class="mx-3"
-          color="#c44fc4"
-          rounded
-        >
-          New Dataset
-        </v-btn>
-        <UserMenu />
+        <div class="d-flex align-center">
+          <v-btn
+            :disabled="!user?.approved"
+            :to="{ name: 'createDandiset' }"
+            exact
+            class="mx-3"
+            color="#c44fc4"
+            rounded
+          >
+            New Dataset
+          </v-btn>
+          <UserMenu />
+        </div>
       </template>
       <template v-else>
         <v-tooltip
@@ -210,5 +212,6 @@ function login() {
 function handleWebKNOSSOSClick() {
   dandiRest.loginWebKnossos();
   window.open(lincWebKNOSSOSUrl, '_blank');
+  window.location.href = lincWebKNOSSOSUrl;
 }
 </script>
