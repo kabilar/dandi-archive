@@ -5,6 +5,8 @@ const lincDocumentationUrl = 'https://docs.lincbrain.org/';
 const lincHelpUrl = 'https://docs.lincbrain.org/#support';
 const lincHubUrl = 'https://hub.lincbrain.org/';
 
+const lincWebKNOSSOSUrl = 'https://webknossos.lincbrain.org';
+
 const sentryLandingPageUrl = "https://sentry.io";
 
 const draftVersion = 'draft';
@@ -59,6 +61,7 @@ export {
   draftVersion,
   lincHelpUrl,
   lincBrainUrl,
+  lincWebKNOSSOSUrl,
   VALIDATION_ICONS,
   sortingOptions,
   DANDISETS_PER_PAGE,

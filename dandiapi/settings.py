@@ -135,6 +135,9 @@ class DandiMixin(ConfigMixin):
     # the number of concurrent tasks (default is 8) to keep memory usage down.
     CELERY_WORKER_CONCURRENCY = values.IntegerValue(environ=True, default=8)
 
+    CELERY_TIMEZONE = 'US/Eastern'
+    CELERY_ENABLE_UTC = True
+
     # Automatically approve new users by default
     AUTO_APPROVE_USERS = True
 
