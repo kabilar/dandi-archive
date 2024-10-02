@@ -19,6 +19,7 @@
               :href="navItem.external ? navItem.to : undefined"
               :target="navItem.external ? '_blank' : undefined"
               :rel="navItem.external ? 'noopener' : undefined"
+              @click="navItem.onClick ? navItem.onClick() : null"
               exact
               text
             >
@@ -142,7 +143,7 @@ import {
   user,
 } from '@/rest';
 import {
-  dandiAboutUrl, lincDocumentationUrl, lincHelpUrl, lincHubUrl, lincBrainUrl,
+  dandiAboutUrl, lincDocumentationUrl, lincHelpUrl, lincHubUrl, lincBrainUrl, lincWebKNOSSOSUrl
 } from '@/utils/constants';
 import UserMenu from '@/components/AppBar/UserMenu.vue';
 import logo from '@/assets/linc-logo.svg';
@@ -152,6 +153,7 @@ interface NavigationItem {
   to: string,
   if?(): boolean,
   external: boolean,
+  onClick?: () => void
 }
 
 const cookiesEnabled = computed(cookiesEnabledFunc);
@@ -191,9 +193,22 @@ const navItems: NavigationItem[] = [
     to: lincHubUrl,
     external: true,
   },
+  {
+    text: 'WebKNOSSOS',
+    to: lincWebKNOSSOSUrl,
+    external: true,
+    onClick: () => {
+      handleWebKNOSSOSClick();
+    },
+  },
 ];
 
 function login() {
   dandiRest.login();
+}
+
+function handleWebKNOSSOSClick() {
+  dandiRest.loginWebKnossos();
+  window.location.href = lincWebKNOSSOSUrl;
 }
 </script>
