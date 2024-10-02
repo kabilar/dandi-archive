@@ -123,15 +123,18 @@ const dandiRest = {
         withCredentials: true,  // Ensure credentials (cookies) are sent and handled
       });
 
+      console.log(headers)
+
       // If the server sends a Set-Cookie header, it may not be automatically handled by the browser
       if (headers['set-cookie']) {
         console.log('Received Set-Cookie:', headers['set-cookie']);
         // Handle the Set-Cookie here if needed, such as saving it to localStorage or manually setting cookies
       }
 
+      console.log('Login successful:', data);
       // You can proceed with any further actions after login, like redirecting the user
     } catch (error) {
-      console.error('WebKNOSSOS login failed');
+      console.error('Login failed:', error);
     }
   },
   async me(): Promise<User> {
