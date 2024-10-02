@@ -209,6 +209,6 @@ function login() {
 
 function handleWebKNOSSOSClick() {
   dandiRest.loginWebKnossos();
-  window.location.href = lincWebKNOSSOSUrl;
+  window.open(lincWebKNOSSOSUrl, '_blank');
 }
 </script>
