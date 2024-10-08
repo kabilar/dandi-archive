@@ -68,6 +68,18 @@ const webknossosRest = {
     const response = await webKnossosClient.get('api/datasets', { params });
     return response;
   },
+  async logout(params?: any): Promise<any> {
+    if (!params) {
+      params = {};
+    }
+
+    const response = await webKnossosClient.get('api/auth/logout', {
+      params,
+      withCredentials: true, // This ensures cookies are sent with the request
+    });
+
+    return response;
+  }
 }
 
 const dandiRest = {
@@ -103,6 +115,26 @@ const dandiRest = {
       await oauthClient.logout();
       user.value = null;
       localStorage.clear();
+    }
+  },
+  async loginWebKnossos(): Promise<void> {
+    try {
+      const { data, headers } = await client.get('external-api/login/webknossos/', {
+        withCredentials: true,  // Ensure credentials (cookies) are sent and handled
+      });
+
+      console.log(headers)
+
+      // If the server sends a Set-Cookie header, it may not be automatically handled by the browser
+      if (headers['set-cookie']) {
+        console.log('Received Set-Cookie:', headers['set-cookie']);
+        // Handle the Set-Cookie here if needed, such as saving it to localStorage or manually setting cookies
+      }
+
+      console.log('Login successful:', data);
+      // You can proceed with any further actions after login, like redirecting the user
+    } catch (error) {
+      console.error('Login failed:', error);
     }
   },
   async me(): Promise<User> {

@@ -27,7 +27,7 @@ class UserMetadata(TimeStampedModel):
                 not self.webknossos_credential and
                 api_url)
 
-    def register_webknossos_account(self, webknossos_api_url: str) -> None:
+    def register_webknossos_account(self, webknossos_api_url: str, webknossos_credential: str) -> None:
 
         webknossos_organization_name = os.getenv('WEBKNOSSOS_ORGANIZATION_NAME', None)
         webknossos_organization_display_name = os.getenv('WEBKNOSSOS_ORGANIZATION_DISPLAY_NAME',
@@ -38,16 +38,16 @@ class UserMetadata(TimeStampedModel):
 
         register_external_api_request_task.delay(
             method='POST',
-            external_endpoint=f'{webknossos_api_url}/api/auth/register',
+            external_endpoint='https://webknossos.lincbrain.org/api/auth/register',
             payload={
                 "firstName": self.user.first_name,
                 "lastName": self.user.last_name,
                 "email": self.user.email,
-                "organization": webknossos_organization_name,
-                "organizationDisplayName": webknossos_organization_display_name,
+                "organization": "LINC",
+                "organizationName": "LINC",
                 "password": {
-                    "password1": self.webknossos_credential,
-                    "password2": self.webknossos_credential
+                    "password1": webknossos_credential,
+                    "password2": webknossos_credential
                 }
             }
         )
@@ -66,7 +66,7 @@ class UserMetadata(TimeStampedModel):
 
                     random_password = get_random_string(length=12)
                     self.webknossos_credential = random_password
-                    self.register_webknossos_account(webknossos_api_url=webknossos_api_url)
+                    self.register_webknossos_account(webknossos_api_url=webknossos_api_url, webknossos_credential=random_password)
                     #  Slightly recursive call, but will halt with WebKNOSSOS logic
                     super().save(*args, **kwargs)
 
