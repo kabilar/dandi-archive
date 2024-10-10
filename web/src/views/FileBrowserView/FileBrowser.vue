@@ -737,6 +737,19 @@ function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+async function waitForCookie(cookieName: string, timeout = 5000, interval = 100) {
+  const startTime = Date.now();
+
+  while (Date.now() - startTime < timeout) {
+    if (document.cookie.includes(`${cookieName}=`)) {
+      return true; // Cookie found
+    }
+    await sleep(interval); // Wait and check again
+  }
+
+  return false; // Timeout occurred, cookie not found
+}
+
 async function handleWebKnossosClick(url: string) {
   // Check if the 'id' cookie is present
   const idCookie = getCookie('id');
@@ -747,10 +760,14 @@ async function handleWebKnossosClick(url: string) {
     // If no cookie, call webKnossosLogin
     try {
       await dandiRest.loginWebKnossos(); // Call the login function
+      
+      const cookieSet = await waitForCookie('id');
 
-      await sleep(1000)
-
-      window.open(url, '_blank'); // After successful login, proceed to the URL
+      if (cookieSet) {
+        window.open(url, '_blank');
+      } else {
+        console.error('Login to WebKNOSSOS did not populate the cookie within the timeout.');
+      } // After successful login, proceed to the URL
     } catch (error) {
       console.error('Login to WebKNOSSOS failed:', error);
     }
