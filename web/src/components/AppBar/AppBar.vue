@@ -250,6 +250,7 @@ async function handleWebKNOSSOSClick() {
 
     if (cookieSet) {
       console.log('Cookie confirmed, opening WebKNOSSOS...');
+      await sleep(2000);
       window.open(lincWebKNOSSOSUrl, '_blank');
     } else {
       console.error('Login to WebKNOSSOS did not populate the cookie within the timeout.');
