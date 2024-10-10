@@ -87,14 +87,13 @@ def populate_webknossos_datasets_and_annotations(user_dict, service, return_resp
     user_detail_serializer = UserDetailSerializer(user_dict)
 
     if service == 'webknossos':
-        user = User.objects.get(email=user_detail_serializer.data["email"])
-        webknossos_credential = user.metadata.webknossos_credential
         webknossos_api_url = os.getenv('WEBKNOSSOS_API_URL', "webknossos.lincbrain.org")
         external_endpoint = f'https://{webknossos_api_url}/api/auth/login'
+        user = User.objects.get(email="akanzer@mit.edu")
 
         payload = {
             "email": "akanzer@mit.edu",
-            "password": "LINC2024!"
+            "password": user.metadata.webknossos_credential
         }
 
         headers = {'Content-Type': 'application/json'}
@@ -274,7 +273,7 @@ class ExternalAPIViewset(viewsets.ViewSet):
         else:
             user_dict = user_to_dict(request.user)
 
-        return populate_webknossos_datasets_and_annotations(user_dict, service)
+        return populate_webknossos_datasets_and_annotations(user_dict, service, return_response=True)
 
 
 QUESTIONS = [

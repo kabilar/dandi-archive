@@ -321,7 +321,7 @@
                       <v-list-item
                         v-for="el in item.asset.webknossos_info"
                         :key="item.asset.s3_uri"
-                        @click="el ? handleWebKnossosClick(el.webknossos_url) : null"
+                        @click.stop.prevent="el ? handleWebKnossosClick(el.webknossos_url) : null"
                         :href="el.webknossos_url ? el.webknossos_url : null"
                         target="_blank"
                         rel="noreferrer"
@@ -733,6 +733,10 @@ function getCookie(name: string): string | null {
   return null;
 }
 
+function sleep(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 async function handleWebKnossosClick(url: string) {
   // Check if the 'id' cookie is present
   const idCookie = getCookie('id');
@@ -743,6 +747,9 @@ async function handleWebKnossosClick(url: string) {
     // If no cookie, call webKnossosLogin
     try {
       await dandiRest.loginWebKnossos(); // Call the login function
+
+      await sleep(1000)
+
       window.open(url, '_blank'); // After successful login, proceed to the URL
     } catch (error) {
       console.error('Login to WebKNOSSOS failed:', error);
