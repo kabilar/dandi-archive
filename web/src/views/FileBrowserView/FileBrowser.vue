@@ -760,7 +760,7 @@ async function handleWebKnossosClick(url: string) {
     // If no cookie, call webKnossosLogin
     try {
       await dandiRest.loginWebKnossos(); // Call the login function
-      
+
       const cookieSet = await waitForCookie('id');
 
       if (cookieSet) {

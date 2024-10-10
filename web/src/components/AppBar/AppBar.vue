@@ -217,23 +217,33 @@ async function waitForCookie(cookieName: string, timeout = 5000, interval = 100)
   const startTime = Date.now();
 
   while (Date.now() - startTime < timeout) {
+    // Log current document.cookie state for debugging
+    console.log('Checking for cookie:', document.cookie);
+
     if (document.cookie.includes(`${cookieName}=`)) {
+      console.log('Cookie found:', cookieName);
       return true; // Cookie found
     }
     await sleep(interval); // Wait and check again
   }
 
+  console.log('Timeout: Cookie not found:', cookieName);
   return false; // Timeout occurred, cookie not found
 }
 
 async function handleWebKNOSSOSClick() {
   try {
-    await dandiRest.loginWebKnossos();
+    console.log('Attempting login to WebKNOSSOS...');
+    const loginResponse = await dandiRest.loginWebKnossos();
+
+    // Log login response to ensure it's complete
+    console.log('Login response received:', loginResponse);
 
     // Poll for the cookie named 'id' with a 5-second timeout and 100ms intervals
-    const cookieSet = await waitForCookie('id');
+    const cookieSet = await waitForCookie('id', 10000); // Extend timeout to 10 seconds for robustness
 
     if (cookieSet) {
+      console.log('Opening WebKNOSSOS...');
       window.open(lincWebKNOSSOSUrl, '_blank');
     } else {
       console.error('Login to WebKNOSSOS did not populate the cookie within the timeout.');
