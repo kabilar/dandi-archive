@@ -19,7 +19,7 @@
               :href="navItem.external ? navItem.to : undefined"
               :target="navItem.external ? '_blank' : undefined"
               :rel="navItem.external ? 'noopener' : undefined"
-              @click.stop="navItem.onClick ? navItem.onClick() : null"
+              @click.stop.prevent="navItem.onClick ? navItem.onClick() : null"
               exact
               text
             >
@@ -209,9 +209,16 @@ function login() {
   dandiRest.login();
 }
 
+function sleep(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 async function handleWebKNOSSOSClick() {
   try {
     await dandiRest.loginWebKnossos();
+
+    await sleep(1000);
+
     window.open(lincWebKNOSSOSUrl, '_blank');
   } catch (error) {
     console.error('Login to WebKNOSSOS failed:', error);
