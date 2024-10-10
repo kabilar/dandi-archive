@@ -213,18 +213,25 @@ function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-async function waitForCookie(cookieName: string, timeout = 5000, interval = 100) {
+function sleep(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function waitForCookie(cookieName: string, timeout = 10000, interval = 100) {
   const startTime = Date.now();
 
   while (Date.now() - startTime < timeout) {
     // Log current document.cookie state for debugging
     console.log('Checking for cookie:', document.cookie);
 
+    // Check if the cookie is set
     if (document.cookie.includes(`${cookieName}=`)) {
       console.log('Cookie found:', cookieName);
       return true; // Cookie found
     }
-    await sleep(interval); // Wait and check again
+
+    // Add a sleep to wait between polls
+    await sleep(interval);
   }
 
   console.log('Timeout: Cookie not found:', cookieName);
@@ -236,14 +243,13 @@ async function handleWebKNOSSOSClick() {
     console.log('Attempting login to WebKNOSSOS...');
     const loginResponse = await dandiRest.loginWebKnossos();
 
-    // Log login response to ensure it's complete
     console.log('Login response received:', loginResponse);
 
-    // Poll for the cookie named 'id' with a 5-second timeout and 100ms intervals
-    const cookieSet = await waitForCookie('id', 10000); // Extend timeout to 10 seconds for robustness
+    // Poll for the cookie named 'id' to confirm it's set before opening the window
+    const cookieSet = await waitForCookie('id', 10000, 300); // Increase polling interval to 200ms
 
     if (cookieSet) {
-      console.log('Opening WebKNOSSOS...');
+      console.log('Cookie confirmed, opening WebKNOSSOS...');
       window.open(lincWebKNOSSOSUrl, '_blank');
     } else {
       console.error('Login to WebKNOSSOS did not populate the cookie within the timeout.');
