@@ -213,13 +213,31 @@ function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+async function waitForCookie(cookieName: string, timeout = 5000, interval = 100) {
+  const startTime = Date.now();
+
+  while (Date.now() - startTime < timeout) {
+    if (document.cookie.includes(`${cookieName}=`)) {
+      return true; // Cookie found
+    }
+    await sleep(interval); // Wait and check again
+  }
+
+  return false; // Timeout occurred, cookie not found
+}
+
 async function handleWebKNOSSOSClick() {
   try {
     await dandiRest.loginWebKnossos();
 
-    await sleep(1000);
+    // Poll for the cookie named 'id' with a 5-second timeout and 100ms intervals
+    const cookieSet = await waitForCookie('id');
 
-    window.open(lincWebKNOSSOSUrl, '_blank');
+    if (cookieSet) {
+      window.open(lincWebKNOSSOSUrl, '_blank');
+    } else {
+      console.error('Login to WebKNOSSOS did not populate the cookie within the timeout.');
+    }
   } catch (error) {
     console.error('Login to WebKNOSSOS failed:', error);
   }
