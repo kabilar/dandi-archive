@@ -411,7 +411,6 @@ import { useDandisetStore } from '@/stores/dandiset';
 import type { AssetFile, AssetPath } from '@/types';
 import FileBrowserPagination from '@/components/FileBrowser/FileBrowserPagination.vue';
 import FileUploadInstructions from '@/components/FileBrowser/FileUploadInstructions.vue';
-import {lincWebKNOSSOSUrl} from "@/utils/constants";
 
 const rootDirectory = '';
 const FILES_PER_PAGE = 15;
