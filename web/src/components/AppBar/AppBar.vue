@@ -19,7 +19,6 @@
               :href="navItem.external && navItem.text !== 'WebKNOSSOS' ? navItem.to : undefined"
               :target="navItem.external && navItem.text !== 'WebKNOSSOS' ? '_blank' : undefined"
               :rel="navItem.external && navItem.text !== 'WebKNOSSOS' ? 'noopener' : undefined"
-              @click.stop.prevent="navItem.onClick ? navItem.onClick() : null"
               exact
               text
             >
@@ -48,6 +47,24 @@
               </v-icon>
             </v-list-item>
           </template>
+          <v-list-item
+              @click.stop.prevent="handleWebKNOSSOSClick()"
+              exact
+              text
+            >
+              <v-list-item-content
+                text
+                class="text-md"
+              >
+                WebKNOSSOS
+              </v-list-item-content>
+              <v-icon
+                class="ml-1"
+                small
+              >
+                mdi-open-in-new
+              </v-icon>
+            </v-list-item>
         </v-list-item-group>
       </v-list>
     </v-menu>
@@ -88,6 +105,31 @@
           </v-icon>
         </v-btn>
       </template>
+        <v-btn
+          exact
+          text
+          @click.stop.prevent="handleWebKNOSSOSClick"
+          class="justify-start"
+          style="padding-left: 0;"
+        >
+        <v-list-item
+          exact
+          text
+        >
+          <v-list-item-content
+            text
+            class="text-md"
+          >
+            WebKNOSSOS
+          </v-list-item-content>
+          <v-icon
+            class="ml-1"
+            small
+          >
+            mdi-open-in-new
+          </v-icon>
+        </v-list-item>
+            </v-btn>
     </v-toolbar-items>
 
     <v-spacer />
@@ -194,15 +236,7 @@ const navItems: NavigationItem[] = [
     text: 'JupyterHub',
     to: lincHubUrl,
     external: true,
-  },
-  {
-    text: 'WebKNOSSOS',
-    to: lincWebKNOSSOSUrl,
-    external: true, // window.open is called in the function
-    onClick: () => {
-      handleWebKNOSSOSClick();
-    },
-  },
+  }
 ];
 
 function login() {
@@ -221,7 +255,7 @@ async function handleWebKNOSSOSClick() {
     });
     const data = await response.json();
     console.log(data);
-    await sleep(1000);
+    await sleep(2000);
     window.open(lincWebKNOSSOSUrl, '_blank');
   } catch (error) {
     console.error('Login to WebKNOSSOS failed:', error);
