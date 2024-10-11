@@ -744,7 +744,7 @@ async function handleWebKnossosClick(url: string) {
   });
   const data = await response.json();
   console.log(data);
-  await sleep(2000);
+  await sleep(1000);
   window.open(url, '_blank');
 
 }
