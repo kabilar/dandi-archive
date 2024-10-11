@@ -198,7 +198,7 @@ const navItems: NavigationItem[] = [
   {
     text: 'WebKNOSSOS',
     to: lincWebKNOSSOSUrl,
-    external: true,
+    external: false, // window.open is called in the function
     onClick: () => {
       handleWebKNOSSOSClick();
     },
