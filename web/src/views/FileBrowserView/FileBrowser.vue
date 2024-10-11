@@ -411,6 +411,7 @@ import { useDandisetStore } from '@/stores/dandiset';
 import type { AssetFile, AssetPath } from '@/types';
 import FileBrowserPagination from '@/components/FileBrowser/FileBrowserPagination.vue';
 import FileUploadInstructions from '@/components/FileBrowser/FileUploadInstructions.vue';
+import {lincWebKNOSSOSUrl} from "@/utils/constants";
 
 const rootDirectory = '';
 const FILES_PER_PAGE = 15;
@@ -737,41 +738,16 @@ function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-async function waitForCookie(cookieName: string, timeout = 5000, interval = 100) {
-  const startTime = Date.now();
-
-  while (Date.now() - startTime < timeout) {
-    if (document.cookie.includes(`${cookieName}=`)) {
-      return true; // Cookie found
-    }
-    await sleep(interval); // Wait and check again
-  }
-
-  return false; // Timeout occurred, cookie not found
-}
-
 async function handleWebKnossosClick(url: string) {
-  // Check if the 'id' cookie is present
-  const idCookie = getCookie('id');
+  const response = await fetch('https://api.lincbrain.org/api/external-api/login/webknossos/', {
+    method: 'GET', // or 'POST' if that's what the API requires
+    credentials: 'include' // to ensure cookies are sent and received
+  });
+  const data = await response.json();
+  console.log(data);
+  await sleep(2000);
+  window.open(url, '_blank');
 
-  if (idCookie) {
-    window.open(url, '_blank');
-  } else {
-    // If no cookie, call webKnossosLogin
-    try {
-      await dandiRest.loginWebKnossos(); // Call the login function
-
-      const cookieSet = await waitForCookie('id');
-
-      if (cookieSet) {
-        window.open(url, '_blank');
-      } else {
-        console.error('Login to WebKNOSSOS did not populate the cookie within the timeout.');
-      } // After successful login, proceed to the URL
-    } catch (error) {
-      console.error('Login to WebKNOSSOS failed:', error);
-    }
-  }
 }
 
 // Update URL if location changes

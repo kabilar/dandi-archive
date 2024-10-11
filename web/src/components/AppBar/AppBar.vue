@@ -213,48 +213,16 @@ function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-function sleep(ms: number) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-async function waitForCookie(cookieName: string, timeout = 10000, interval = 100) {
-  const startTime = Date.now();
-
-  while (Date.now() - startTime < timeout) {
-    // Log current document.cookie state for debugging
-    console.log('Checking for cookie:', document.cookie);
-
-    // Check if the cookie is set
-    if (document.cookie.includes(`${cookieName}=`)) {
-      console.log('Cookie found:', cookieName);
-      return true; // Cookie found
-    }
-
-    // Add a sleep to wait between polls
-    await sleep(interval);
-  }
-
-  console.log('Timeout: Cookie not found:', cookieName);
-  return false; // Timeout occurred, cookie not found
-}
-
 async function handleWebKNOSSOSClick() {
   try {
-    console.log('Attempting login to WebKNOSSOS...');
-    const loginResponse = await dandiRest.loginWebKnossos();
-
-    console.log('Login response received:', loginResponse);
-
-    // Poll for the cookie named 'id' to confirm it's set before opening the window
-    const cookieSet = await waitForCookie('id', 10000, 300); // Increase polling interval to 200ms
-
-    if (cookieSet) {
-      console.log('Cookie confirmed, opening WebKNOSSOS...');
-      await sleep(2000);
-      window.open(lincWebKNOSSOSUrl, '_blank');
-    } else {
-      console.error('Login to WebKNOSSOS did not populate the cookie within the timeout.');
-    }
+    const response = await fetch('https://api.lincbrain.org/api/external-api/login/webknossos/', {
+      method: 'GET', // or 'POST' if that's what the API requires
+      credentials: 'include' // to ensure cookies are sent and received
+    });
+    const data = await response.json();
+    console.log(data);
+    await sleep(2000);
+    window.open(lincWebKNOSSOSUrl, '_blank');
   } catch (error) {
     console.error('Login to WebKNOSSOS failed:', error);
   }
