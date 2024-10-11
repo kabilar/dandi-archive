@@ -16,9 +16,9 @@
               v-if="!navItem.if || navItem.if()"
               :key="navItem.text"
               :to="navItem.external ? undefined : {name: navItem.to}"
-              :href="navItem.external ? navItem.to : undefined"
-              :target="navItem.external ? '_blank' : undefined"
-              :rel="navItem.external ? 'noopener' : undefined"
+              :href="navItem.external && navItem.text !== 'WebKNOSSOS' ? navItem.to : undefined"
+              :target="navItem.external && navItem.text !== 'WebKNOSSOS' ? '_blank' : undefined"
+              :rel="navItem.external && navItem.text !== 'WebKNOSSOS' ? 'noopener' : undefined"
               @click.stop.prevent="navItem.onClick ? navItem.onClick() : null"
               exact
               text
@@ -198,7 +198,7 @@ const navItems: NavigationItem[] = [
   {
     text: 'WebKNOSSOS',
     to: lincWebKNOSSOSUrl,
-    external: false, // window.open is called in the function
+    external: true, // window.open is called in the function
     onClick: () => {
       handleWebKNOSSOSClick();
     },
@@ -221,7 +221,7 @@ async function handleWebKNOSSOSClick() {
     });
     const data = await response.json();
     console.log(data);
-    await sleep(2000);
+    await sleep(1000);
     window.open(lincWebKNOSSOSUrl, '_blank');
   } catch (error) {
     console.error('Login to WebKNOSSOS failed:', error);
