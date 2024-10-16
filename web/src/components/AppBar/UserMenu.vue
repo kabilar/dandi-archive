@@ -95,7 +95,7 @@ async function logout() {
   try {
     await Promise.race([
       webknossosRest.logout(),  // Attempt to log out from webknossos -- sometimes webknossos is offline
-      timeout(500) 
+      timeout(500)
     ]);
   } catch (error) {
     if (error === 'timeout') {
