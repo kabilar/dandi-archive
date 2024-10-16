@@ -95,20 +95,20 @@ async function logout() {
   try {
     await Promise.race([
       webknossosRest.logout(),  // Attempt to log out from webknossos -- sometimes webknossos is offline
-      timeout(500)          // Timeout after 500ms
+      timeout(500) 
     ]);
   } catch (error) {
     if (error === 'timeout') {
       console.warn('webknossosRest.logout() timed out after 500ms, proceeding with dandiRest.logout()');
     } else {
-      console.error('Error during webknossosRest.logout():', error);
+      console.error('Error during WebKnossos logout');
     }
   }
 
   try {
     await dandiRest.logout();  // Proceed with dandiRest.logout()
   } catch (error) {
-    console.error('Error during dandiRest.logout():', error);
+    console.error('Error during LINC logout');
   }
 }
 
