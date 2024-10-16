@@ -8,12 +8,6 @@ from dandiapi.api.models import Asset, AssetBlob, Dandiset, Version
 
 @pytest.mark.django_db()
 def test_create_dev_dandiset(user):
-    # Clear all objects in related models before starting the test
-    Dandiset.objects.all().delete()
-    Version.objects.all().delete()
-    Asset.objects.all().delete()
-    AssetBlob.objects.all().delete()
-
     create_dev_dandiset('--name', 'My Test Dandiset', '--owner', user.email)
 
     assert Dandiset.objects.count() == 1
