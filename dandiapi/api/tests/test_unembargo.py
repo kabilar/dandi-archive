@@ -7,8 +7,6 @@ from guardian.shortcuts import assign_perm
 import pytest
 
 from dandiapi.api.models.dandiset import Dandiset
-from dandiapi.api.services.embargo import AssetBlobEmbargoedError, remove_asset_blob_embargoed_tag
-from dandiapi.api.tasks.scheduled import send_dandisets_to_unembargo_email
 
 
 @pytest.mark.django_db()
@@ -20,10 +18,6 @@ def test_remove_asset_blob_embargoed_tag_fails_on_embargod(embargoed_asset_blob,
     remove_asset_blob_embargoed_tag(asset_blob)
 
 
-@pytest.mark.django_db()
-def test_unembargo_dandiset_sends_emails(
-    api_client, user, dandiset, draft_version_factory, mailoutbox
-):
 from dandiapi.api.services.embargo import (
     AssetBlobEmbargoedError,
     _remove_dandiset_asset_blob_embargo_tags,
