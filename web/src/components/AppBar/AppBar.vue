@@ -16,10 +16,9 @@
               v-if="!navItem.if || navItem.if()"
               :key="navItem.text"
               :to="navItem.external ? undefined : {name: navItem.to}"
-              :href="navItem.external ? navItem.to : undefined"
-              :target="navItem.external ? '_blank' : undefined"
-              :rel="navItem.external ? 'noopener' : undefined"
-              @click.stop.prevent="navItem.onClick ? navItem.onClick() : null"
+              :href="navItem.external && navItem.text !== 'WebKNOSSOS' ? navItem.to : undefined"
+              :target="navItem.external && navItem.text !== 'WebKNOSSOS' ? '_blank' : undefined"
+              :rel="navItem.external && navItem.text !== 'WebKNOSSOS' ? 'noopener' : undefined"
               exact
               text
             >
@@ -48,6 +47,24 @@
               </v-icon>
             </v-list-item>
           </template>
+          <v-list-item
+              @click.stop.prevent="handleWebKNOSSOSClick()"
+              exact
+              text
+            >
+              <v-list-item-content
+                text
+                class="text-md"
+              >
+                WebKNOSSOS
+              </v-list-item-content>
+              <v-icon
+                class="ml-1"
+                small
+              >
+                mdi-open-in-new
+              </v-icon>
+            </v-list-item>
         </v-list-item-group>
       </v-list>
     </v-menu>
@@ -88,6 +105,31 @@
           </v-icon>
         </v-btn>
       </template>
+        <v-btn
+          exact
+          text
+          @click.stop.prevent="handleWebKNOSSOSClick"
+          class="justify-start"
+          style="padding-left: 0;"
+        >
+        <v-list-item
+          exact
+          text
+        >
+          <v-list-item-content
+            text
+            class="text-md"
+          >
+            WebKNOSSOS
+          </v-list-item-content>
+          <v-icon
+            class="ml-1"
+            small
+          >
+            mdi-open-in-new
+          </v-icon>
+        </v-list-item>
+            </v-btn>
     </v-toolbar-items>
 
     <v-spacer />
@@ -194,15 +236,7 @@ const navItems: NavigationItem[] = [
     text: 'JupyterHub',
     to: lincHubUrl,
     external: true,
-  },
-  {
-    text: 'WebKNOSSOS',
-    to: lincWebKNOSSOSUrl,
-    external: true,
-    onClick: () => {
-      handleWebKNOSSOSClick();
-    },
-  },
+  }
 ];
 
 function login() {
@@ -213,41 +247,16 @@ function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-async function waitForCookie(cookieName: string, timeout = 5000, interval = 100) {
-  const startTime = Date.now();
-
-  while (Date.now() - startTime < timeout) {
-    // Log current document.cookie state for debugging
-    console.log('Checking for cookie:', document.cookie);
-
-    if (document.cookie.includes(`${cookieName}=`)) {
-      console.log('Cookie found:', cookieName);
-      return true; // Cookie found
-    }
-    await sleep(interval); // Wait and check again
-  }
-
-  console.log('Timeout: Cookie not found:', cookieName);
-  return false; // Timeout occurred, cookie not found
-}
-
 async function handleWebKNOSSOSClick() {
   try {
-    console.log('Attempting login to WebKNOSSOS...');
-    const loginResponse = await dandiRest.loginWebKnossos();
-
-    // Log login response to ensure it's complete
-    console.log('Login response received:', loginResponse);
-
-    // Poll for the cookie named 'id' with a 5-second timeout and 100ms intervals
-    const cookieSet = await waitForCookie('id', 10000); // Extend timeout to 10 seconds for robustness
-
-    if (cookieSet) {
-      console.log('Opening WebKNOSSOS...');
-      window.open(lincWebKNOSSOSUrl, '_blank');
-    } else {
-      console.error('Login to WebKNOSSOS did not populate the cookie within the timeout.');
-    }
+    const response = await fetch('https://api.lincbrain.org/api/external-api/login/webknossos/', {
+      method: 'GET', // or 'POST' if that's what the API requires
+      credentials: 'include' // to ensure cookies are sent and received
+    });
+    const data = await response.json();
+    console.log(data);
+    await sleep(2000);
+    window.open(lincWebKNOSSOSUrl, '_blank');
   } catch (error) {
     console.error('Login to WebKNOSSOS failed:', error);
   }
