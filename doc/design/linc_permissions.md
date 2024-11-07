@@ -60,10 +60,12 @@ Would pass credentials to AWS.  Solves rendering issue, but does not solve acces
 ```mermaid
 %%{init: {"flowchart": {"curve": "linear"}}}%%
 flowchart LR
-    E --> B
-    A(User) -->| If client has CloudFront cookies from prior session, <br/> then proceed. | B(Static Webpage i.e. Neuroglancer)
-    A --> | If client does not have CloudFront cookies, <br/> then GET upon /api/permissions/s3 in LINC Archive API. | E(LINC Archive API)
-    B --> | Upon user activity, <br/> sends presigned cookies | C(AWS CloudFront)
-    C -->| Allows data to be fetched | D(Private AWS S3 Bucket)
-    D -->| 1. Neuroglancer able to access S3 data <br/> 2. Data rendered on screen | B
+    %% E --> B
+    A(User) --> B{Does client have CloudFront cookies from a prior session?}
+    B -- No --> C(LINC Archive API <br/> GET request /api/permissions/s3/)
+    B -- Yes --> D(Static Neuroglancer Webpage)
+    C --> D
+    D -- Send presigned cookies --> E(AWS CloudFront)
+    E --> F(Private AWS S3 Bucket)
+    F -- Neuroglancer able to access S3 data and render on screen. --> D
 ```
