@@ -42,10 +42,6 @@ Render with hosted Neuroglancer
 - Modify the Neuroglancer source code to handle a CloudFront asset path (i.e. `neuroglancer.lincbrain.org` since the domains of the presigned cookie are limited to `*.lincbrain.org` domains due to same-site requirements for cookies) that is similar to any S3 asset path (i.e. `s3://`).
 - Cookies would get passed in request to get asset
 
-Access assets with LINC CLI
-  - Cookies would get passed in request to get asset
-  - Provide LINC CLI option for retrieving asset. Instead of just referencing the asset directly, we would need to provide a helper function that wraps the request with the cookie.
-
 #### AWS Cognito, npm AWS SDK package
 
 TBD
