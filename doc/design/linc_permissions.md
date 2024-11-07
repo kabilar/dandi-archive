@@ -22,7 +22,7 @@ viewer as an additional layer.
 ## Requirements
 
 1. Zarr archives are stored in a private AWS S3 bucket
-2. Provide direct access to the LINC users of the assets on the private S3 bucket using a URI.
+2. Provide LINC users with direct access to the assets that are stored in the private S3 bucket using a URI.
 
 ## Implementation Options
 
