@@ -125,14 +125,14 @@ function formatDownloadCommand(identifier: string, version: string): string {
     const baseUrl = import.meta.env.VITE_APP_DANDI_API_ROOT === 'https://staging-api.lincbrain.org/api/'
       ? 'https://staging.lincbrain.org/dandiset/'
       : 'https://lincbrain.org/dandiset/';
-    return `lincbrain download ${baseUrl}${identifier}/draft`;
+    return `dandi download ${baseUrl}${identifier}/draft`;
   }
 
   if (!version) {
-    return `lincbrain download DANDI:${identifier}`;
+    return `dandi download DANDI:${identifier}`;
   }
 
-  return `lincbrain download DANDI:${identifier}/${version}`;
+  return `dandi download DANDI:${identifier}/${version}`;
 }
 
 
