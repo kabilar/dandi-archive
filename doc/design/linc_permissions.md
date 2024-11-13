@@ -61,7 +61,6 @@ Would pass credentials to AWS.  Solves rendering issue, but does not solve acces
 ```mermaid
 %%{init: {"flowchart": {"curve": "linear"}}}%%
 flowchart LR
-    %% E --> B
     A(User) --> B{Does client have CloudFront cookies from a prior session?}
     B -- No --> C(LINC Archive API <br/> GET request /api/permissions/s3/)
     B -- Yes --> D(Static Neuroglancer Webpage)
