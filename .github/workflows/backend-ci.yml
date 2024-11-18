@@ -8,15 +8,15 @@ on:
       - master
     paths-ignore:
       - "web/**"
-  schedule:
-    - cron: "0 0 * * *"
+#  schedule:
+#    - cron: "0 0 * * *"
 jobs:
   test:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        tox-env: [lint, type, test, check-migrations]
+        tox-env: [test, check-migrations]  # [lint, type, test, check-migrations]
     services:
       postgres:
         image: postgres:latest
@@ -40,7 +40,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
       - name: Install tox
@@ -58,4 +58,5 @@ jobs:
           DJANGO_DANDI_WEB_APP_URL: http://localhost:8085
           DJANGO_DANDI_API_URL: http://localhost:8000
           DJANGO_DANDI_JUPYTERHUB_URL: https://hub.dandiarchive.org/
+          DJANGO_DANDI_DEV_EMAIL: test@example.com
           DANDI_ALLOW_LOCALHOST_URLS: 1

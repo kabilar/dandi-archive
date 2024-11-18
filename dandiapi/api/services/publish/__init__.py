@@ -1,24 +1,29 @@
+from __future__ import annotations
+
 import datetime
+from typing import TYPE_CHECKING
 
 from dandischema.metadata import aggregate_assets_summary, validate
-from django.contrib.auth.models import User
 from django.db import transaction
-from django.db.models import QuerySet
 from more_itertools import ichunked
 
 from dandiapi.api import doi
 from dandiapi.api.asset_paths import add_version_asset_paths
 from dandiapi.api.models import Asset, Dandiset, Version
-from dandiapi.api.services.exceptions import NotAllowed
+from dandiapi.api.services.exceptions import NotAllowedError
 from dandiapi.api.services.publish.exceptions import (
-    DandisetAlreadyPublished,
-    DandisetAlreadyPublishing,
-    DandisetBeingValidated,
-    DandisetInvalidMetadata,
-    DandisetNotLocked,
-    DandisetValidationPending,
+    DandisetAlreadyPublishedError,
+    DandisetAlreadyPublishingError,
+    DandisetBeingValidatedError,
+    DandisetInvalidMetadataError,
+    DandisetNotLockedError,
+    DandisetValidationPendingError,
 )
 from dandiapi.api.tasks import write_manifest_files
+
+if TYPE_CHECKING:
+    from django.contrib.auth.models import User
+    from django.db.models import QuerySet
 
 
 def publish_asset(*, asset: Asset) -> None:
@@ -26,8 +31,10 @@ def publish_asset(*, asset: Asset) -> None:
         # Lock asset to ensure it doesn't change out from under us while publishing
         locked_asset = Asset.objects.select_for_update().get(id=asset.id)
 
-        assert not locked_asset.published, 'asset is already published'
-        assert locked_asset.status == Asset.Status.VALID, 'asset is not VALID'
+        if locked_asset.published:
+            raise RuntimeError('Asset is already published')
+        if locked_asset.status != Asset.Status.VALID:
+            raise RuntimeError('Asset does not have VALID status')
 
         # Publish the asset
         locked_asset.metadata = asset.published_metadata()
@@ -35,37 +42,37 @@ def publish_asset(*, asset: Asset) -> None:
         locked_asset.save()
 
 
-def _lock_dandiset_for_publishing(*, user: User, dandiset: Dandiset) -> None:
+def _lock_dandiset_for_publishing(*, user: User, dandiset: Dandiset) -> None:  # noqa: C901
     """
     Prepare a dandiset to be published by locking it and setting its status to PUBLISHING.
 
     This function MUST be called before _publish_dandiset is called.
     """
-    if (
-        not user.has_perm('owner', dandiset)
-        or dandiset.embargo_status != Dandiset.EmbargoStatus.OPEN
-    ):
-        raise NotAllowed
+    if not user.has_perm('owner', dandiset):
+        raise NotAllowedError
+
+    if dandiset.embargo_status != Dandiset.EmbargoStatus.OPEN:
+        raise NotAllowedError('Operation only allowed on OPEN dandisets', 400)
+
     if dandiset.zarr_archives.exists() or dandiset.embargoed_zarr_archives.exists():
-        # TODO: return a string instead of a list here
-        raise NotAllowed(['Cannot publish dandisets which contain zarrs'], 400)  # type: ignore
+        raise NotAllowedError('Cannot publish dandisets which contain zarrs', 400)
 
     with transaction.atomic():
         draft_version: Version = dandiset.versions.select_for_update().get(version='draft')
         if not draft_version.publishable:
             match draft_version.status:
                 case Version.Status.PUBLISHED:
-                    raise DandisetAlreadyPublished
+                    raise DandisetAlreadyPublishedError
                 case Version.Status.PUBLISHING:
-                    raise DandisetAlreadyPublishing
+                    raise DandisetAlreadyPublishingError
                 case Version.Status.VALIDATING:
-                    raise DandisetBeingValidated
+                    raise DandisetBeingValidatedError
                 case Version.Status.INVALID:
-                    raise DandisetInvalidMetadata
+                    raise DandisetInvalidMetadataError
                 case Version.Status.PENDING:
-                    raise DandisetValidationPending
+                    raise DandisetValidationPendingError
                 case Version.Status.VALID:
-                    raise DandisetInvalidMetadata
+                    raise DandisetInvalidMetadataError
                 case other:
                     raise NotImplementedError(
                         f'Draft version of dandiset {dandiset.identifier} '
@@ -110,7 +117,7 @@ def _publish_dandiset(dandiset_id: int) -> None:
         )
 
         if old_version.status != Version.Status.PUBLISHING:
-            raise DandisetNotLocked(
+            raise DandisetNotLockedError(
                 'Dandiset must be in PUBLISHING state. Call `_lock_dandiset_for_publishing()` '
                 'before this function.'
             )
@@ -119,7 +126,7 @@ def _publish_dandiset(dandiset_id: int) -> None:
         new_version.save()
 
         # Bulk create the join table rows to optimize linking assets to new_version
-        AssetVersions = Version.assets.through
+        AssetVersions = Version.assets.through  # noqa: N806
 
         # Add a new many-to-many association directly to any already published assets
         already_published_assets: QuerySet[Asset] = old_version.assets.filter(published=True)

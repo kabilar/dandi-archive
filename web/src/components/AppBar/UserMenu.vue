@@ -1,13 +1,7 @@
 <template>
-  <!-- maybe...
-    :close-on-content-click="false"
-  -->
-  <v-menu offset-y>
+  <v-menu offset-y :close-on-content-click="false">
     <template #activator="{ on }">
-      <v-btn
-        icon
-        v-on="on"
-      >
+      <v-btn icon v-on="on">
         <v-avatar color="light-blue lighten-4">
           <span class="primary--text">
             {{ userInitials }}
@@ -15,23 +9,30 @@
         </v-avatar>
       </v-btn>
     </template>
-    <v-list
-      id="user-menu"
-      dense
-    >
+    <v-list id="user-menu" dense>
       <v-list-item>
         <v-list-item-content>
-          <span v-if="dandiRest.user">
-            You are logged in as <a
-              :href="`https://github.com/${dandiRest.user.username}`"
-              target="_blank"
-              rel="noopener"
-              v-text="dandiRest.user.username"
-            />.
+          <span v-if="user">
+            You are logged in as
+            <a :href="`https://github.com/${user.username}`" target="_blank" rel="noopener" v-text="user.username" />.
           </span>
         </v-list-item-content>
       </v-list-item>
-      <ApiKeyItem v-if="dandiRest.user?.approved" />
+      <ApiKeyItem v-if="user?.approved" />
+      <v-list-item @click="getNeuroglancerCookies" v-if="user?.approved">
+        <v-list-item-content>
+          Get Neuroglancer Cookies
+        </v-list-item-content>
+        <v-list-item-action>
+          <v-icon>mdi-cookie</v-icon>
+          <span v-if="cookiesRequestSuccess == 1" style="color: green; margin-left: 10px; text-wrap: wrap; max-width: 150px;">
+            Success! Expires in 30 days
+          </span>
+          <span v-if="cookiesRequestSuccess == -1" style="color: red; margin-left: 10px; text-wrap: wrap; max-width: 150px;">
+            Unable to get cookies
+          </span>
+        </v-list-item-action>
+      </v-list-item>
       <v-list-item @click="logout">
         <v-list-item-content>
           Logout
@@ -45,12 +46,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
-
-import { user as userFunc, dandiRest } from '@/rest';
+import { computed, ref } from 'vue';
+import {user, dandiRest, webknossosRest} from '@/rest';
 import ApiKeyItem from '@/components/AppBar/ApiKeyItem.vue';
 
-const user = computed(userFunc);
 const userInitials = computed(() => {
   if (user.value) {
     const { name } = user.value;
@@ -68,8 +67,49 @@ const userInitials = computed(() => {
   return '??';
 });
 
+const cookiesRequestSuccess = ref(0);
+
+async function getNeuroglancerCookies() {
+  try {
+    const response = await fetch('https://api.lincbrain.org/api/permissions/s3/', {
+      method: 'GET', // or 'POST' if that's what the API requires
+      credentials: 'include' // to ensure cookies are sent and received
+    });
+    const data = await response.json();
+    cookiesRequestSuccess.value = 1;
+    // Optionally, reset the success state after a delay
+    setTimeout(() => { cookiesRequestSuccess.value = 0; }, 3000);
+    // Handle the response data here
+  } catch (error) {
+    cookiesRequestSuccess.value = -1;
+    setTimeout(() => { cookiesRequestSuccess.value = 0; }, 3000);
+    console.error('Error fetching data');
+  }
+}
+
+
+
 async function logout() {
-  await dandiRest.logout();
+  const timeout = (ms: number) => new Promise((_, reject) => setTimeout(() => reject('timeout'), ms));
+
+  try {
+    await Promise.race([
+      webknossosRest.logout(),  // Attempt to log out from webknossos -- sometimes webknossos is offline
+      timeout(500)
+    ]);
+  } catch (error) {
+    if (error === 'timeout') {
+      console.warn('webknossosRest.logout() timed out after 500ms, proceeding with dandiRest.logout()');
+    } else {
+      console.error('Error during WebKnossos logout');
+    }
+  }
+
+  try {
+    await dandiRest.logout();  // Proceed with dandiRest.logout()
+  } catch (error) {
+    console.error('Error during LINC logout');
+  }
 }
 
 </script>

@@ -1,5 +1,5 @@
 <template>
-  <div v-if="currentDandiset && currentDandiset.dandiset.embargo_status !== 'UNEMBARGOING'">
+  <div v-if="!unembargo_in_progress">
     <v-progress-linear
       v-if="!currentDandiset"
       indeterminate
@@ -116,7 +116,7 @@
                 v-for="item in items"
                 :key="item.path"
                 color="primary"
-                @click="selectPath(item)"
+                @click.self="openItem(item)"
               >
                 <v-icon
                   class="mr-2"
@@ -145,55 +145,77 @@
                 </v-list-item-action>
 
                 <v-list-item-action v-if="item.asset">
-                  <v-btn
-                    icon
-                    :href="inlineURI(item.asset.asset_id)"
-                    target="_blank"
-                  >
-                    <v-icon color="primary">
-                      mdi-eye
-                    </v-icon>
-                  </v-btn>
+                  <v-tooltip top>
+                    <template v-slot:activator="{ on, attrs }">
+                      <v-btn
+                        icon
+                        :href="inlineURI(item.asset.asset_id)"
+                        v-bind="attrs"
+                        v-on="on"
+                      >
+                        <v-icon color="primary">
+                          mdi-open-in-app
+                        </v-icon>
+                      </v-btn>
+                    </template>
+                    <span>Open asset in browser (you can also click on the item itself)</span>
+                  </v-tooltip>
+                </v-list-item-action>
+                <v-list-item-action v-if="item.asset">
+                  <v-tooltip top>
+                    <template v-slot:activator="{ on, attrs }">
+                      <v-btn
+                        icon
+                        :href="downloadURI(item.asset.asset_id)"
+                        v-bind="attrs"
+                        v-on="on"
+                      >
+                        <v-icon color="primary">
+                          mdi-download
+                        </v-icon>
+                      </v-btn>
+                    </template>
+                    <span>Download asset</span>
+                  </v-tooltip>
                 </v-list-item-action>
 
                 <v-list-item-action v-if="item.asset">
-                  <v-btn
-                    icon
-                    :href="downloadURI(item.asset.asset_id)"
-                  >
-                    <v-icon color="primary">
-                      mdi-download
-                    </v-icon>
-                  </v-btn>
-                </v-list-item-action>
-
-                <v-list-item-action v-if="item.asset">
-                  <v-btn
-                    icon
-                    :href="assetMetadataURI(item.asset.asset_id)"
-                    target="_blank"
-                    rel="noopener"
-                  >
-                    <v-icon color="primary">
-                      mdi-information
-                    </v-icon>
-                  </v-btn>
+                  <v-tooltip top>
+                    <template v-slot:activator="{ on, attrs }">
+                      <v-btn
+                        icon
+                        :href="assetMetadataURI(item.asset.asset_id)"
+                        target="_blank"
+                        rel="noreferrer"
+                        v-bind="attrs"
+                        v-on="on"
+                      >
+                        <v-icon color="primary">
+                          mdi-information
+                        </v-icon>
+                      </v-btn>
+                    </template>
+                    <span>View asset metadata</span>
+                  </v-tooltip>
                 </v-list-item-action>
 
                 <v-list-item-action v-if="item.asset">
                   <v-menu
+                    v-model="menuOpen[item.asset.asset_id]"
                     bottom
                     left
+                    close-on-content-click="false"
                   >
-                    <template #activator="{ on, attrs }">
+                   <template #activator="{ on, attrs }">
                       <v-btn
-                        v-if="item.services && item.services.length"
+                        v-if="item.asset.s3_uri"
                         color="primary"
                         icon
+                        title="Links"
                         v-bind="attrs"
                         v-on="on"
                       >
-                        <v-icon>mdi-dots-vertical</v-icon>
+                        <v-icon>mdi-content-copy</v-icon>
                       </v-btn>
                       <v-btn
                         v-else
@@ -201,7 +223,44 @@
                         disabled
                         icon
                       >
-                        <v-icon>mdi-dots-vertical</v-icon>
+                        <v-icon>mdi-content-copy</v-icon>
+                      </v-btn>
+                    </template>
+                    <v-list
+                      dense
+                    >
+                      <v-subheader
+                        class="font-weight-medium"
+                      >
+                        LINKS
+                      </v-subheader>
+                      <v-list-item
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        <v-list-item-title class="font-weight-light">
+                          AWS S3 URI <span v-if="copied" style="color: green; padding-left: 8px; padding-right: 8px; margin-left: 16px;">Copied!</span>
+                        </v-list-item-title>
+                        <v-spacer></v-spacer>
+                        <v-icon @click.stop="copyToClipboard(item.asset?.s3_uri)">mdi-content-copy</v-icon>
+                      </v-list-item>
+                    </v-list>
+                  </v-menu>
+                </v-list-item-action>
+                <v-list-item-action v-if="item.asset">
+                  <v-menu
+                    bottom
+                    left
+                  >
+                    <template #activator="{ on, attrs }">
+                      <v-btn
+                        color="primary"
+                        x-small
+                        :disabled="!item.services || !item.services.length"
+                        v-bind="attrs"
+                        v-on="on"
+                      >
+                        Open With <v-icon small>mdi-menu-down</v-icon>
                       </v-btn>
                     </template>
                     <v-list
@@ -214,19 +273,103 @@
                       >
                         EXTERNAL SERVICES
                       </v-subheader>
-
                       <v-list-item
                         v-for="el in item.services"
                         :key="el.name"
-                        :href="el.url"
+                        @click="el.isNeuroglancer ? redirectToNeuroglancerUrl(item) : null"
+                        :href="!el.isNeuroglancer ? el.url : null"
                         target="_blank"
-                        rel="noopener"
+                        rel="noreferrer"
                       >
                         <v-list-item-title class="font-weight-light">
                           {{ el.name }}
                         </v-list-item-title>
                       </v-list-item>
                     </v-list>
+                  </v-menu>
+                </v-list-item-action>
+
+                <v-list-item-action
+                  v-if="item.asset"
+                  class="px-2"
+                >
+                  <v-menu
+                    bottom
+                    left
+                  >
+                    <template #activator="{ on, attrs }">
+                      <v-btn
+                        color="success"
+                        x-small
+                        :disabled="!item.asset.webknossos_info || !item.asset.webknossos_info?.length"
+                        v-bind="attrs"
+                        v-on="on"
+                      >
+                        WebKNOSSOS <v-icon small>mdi-menu-down</v-icon>
+                      </v-btn>
+                    </template>
+                    <v-list
+                      v-if="item && item.asset.webknossos_info"
+                      dense
+                    >
+                      <v-subheader
+                        v-if="item.asset.webknossos_info"
+                        class="font-weight-medium"
+                      >
+                        WEBKNOSSOS DATASETS CONTAINING ASSET
+                      </v-subheader>
+                      <v-list-item
+                        v-for="el in item.asset.webknossos_info"
+                        :key="item.asset.s3_uri"
+                        @click.stop.prevent="el ? handleWebKnossosClick(el.webknossos_url) : null"
+                        :href="el.webknossos_url ? el.webknossos_url : null"
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        <v-list-item-title class="font-weight-light">
+                          {{ el.webknossos_name ? el.webknossos_name : "No datasets associated" }}
+                        </v-list-item-title>
+                      </v-list-item>
+                    </v-list>
+                    <v-list v-if="item && item.asset.webknossos_info" dense>
+                    <v-subheader
+                      v-if="item.asset.webknossos_info.some(dataset => dataset.webknossos_annotations && dataset.webknossos_annotations.length > 0)"
+                      class="font-weight-medium"
+                    >
+                      WEBKNOSSOS ANNOTATIONS CONTAINING ASSET
+                    </v-subheader>
+
+                    <!-- Check if the list has no datasets or annotations -->
+                    <v-subheader
+                      v-else
+                      class="font-weight-medium"
+                    >
+                      No annotations associated
+                    </v-subheader>
+
+                    <!-- Iterate over each dataset -->
+                    <v-list-item-group
+                      v-for="dataset in item.asset.webknossos_info"
+                      :key="dataset.webknossos_name"
+                      class="mb-3"
+                    >
+                      <v-list dense v-if="dataset.webknossos_annotations && dataset.webknossos_annotations.length > 0">
+                        <v-list-item
+                          v-for="annotation in dataset.webknossos_annotations"
+                          :key="annotation.webknossos_annotation_url"
+                          @click="annotation ? handleWebKnossosClick(annotation.webknossos_annotation_url) : null"
+                          :href="annotation.webknossos_annotation_url ? annotation.webknossos_annotation_url : null"
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          <v-list-item-title class="font-weight-light">
+                            {{ annotation.webknossos_annotation_name.trim() !== '' ? (annotation.webknossos_annotation_name + (annotation.webknossos_annotation_author ? ' by ' + annotation.webknossos_annotation_author : '')) : 'annotation untitled by ' + annotation.webknossos_annotation_author }}
+                          </v-list-item-title>
+                        </v-list-item>
+                      </v-list>
+                    </v-list-item-group>
+
+                  </v-list>
                   </v-menu>
                 </v-list-item-action>
 
@@ -263,7 +406,7 @@ import filesize from 'filesize';
 import { trimEnd } from 'lodash';
 import axios from 'axios';
 
-import { dandiRest } from '@/rest';
+import { dandiRest, user } from '@/rest';
 import { useDandisetStore } from '@/stores/dandiset';
 import type { AssetFile, AssetPath } from '@/types';
 import FileBrowserPagination from '@/components/FileBrowser/FileBrowserPagination.vue';
@@ -276,11 +419,13 @@ const FILES_PER_PAGE = 15;
 interface AssetService {
   name: string,
   url: string,
+  isNeuroglancer?: boolean
 }
 
 interface ExtendedAssetPath extends AssetPath {
   services?: AssetService[];
   name: string;
+  s3_uri?: string;
 }
 
 const sortByFolderThenName = (a: ExtendedAssetPath, b: ExtendedAssetPath) => {
@@ -305,40 +450,45 @@ const sortByFolderThenName = (a: ExtendedAssetPath, b: ExtendedAssetPath) => {
 };
 
 const EXTERNAL_SERVICES = [
+  // {
+  //   name: 'Bioimagesuite/Viewer',
+  //   regex: /\.nii(\.gz)?$/,
+  //   maxsize: 1e9,
+  //   endpoint: 'https://bioimagesuiteweb.github.io/unstableapp/viewer.html?image=$asset_url$',
+  // },
+  //
+  // {
+  //   name: 'MetaCell/NWBExplorer',
+  //   regex: /\.nwb$/,
+  //   maxsize: 1e9,
+  //   endpoint: 'http://nwbexplorer.opensourcebrain.org/nwbfile=$asset_url$',
+  // },
+  //
+  // {
+  //   name: 'VTK/ITK Viewer',
+  //   regex: /\.ome\.zarr$/,
+  //   maxsize: Infinity,
+  //   endpoint: 'https://kitware.github.io/itk-vtk-viewer/app/?gradientOpacity=0.3&image=$asset_url$',
+  // },
+  //
+  // {
+  //   name: 'OME Zarr validator',
+  //   regex: /\.ome\.zarr$/,
+  //   maxsize: Infinity,
+  //   endpoint: 'https://ome.github.io/ome-ngff-validator/?source=$asset_url$',
+  // },
+  // {
+  //   name: 'Neurosift',
+  //   regex: /\.nwb$/,
+  //   maxsize: Infinity,
+  //   endpoint: 'https://flatironinstitute.github.io/neurosift?p=/nwb&url=$asset_dandi_url$&dandisetId=$dandiset_id$&dandisetVersion=$dandiset_version$', // eslint-disable-line max-len
+  // },
   {
-    name: 'Bioimagesuite/Viewer',
-    regex: /\.nii(\.gz)?$/,
-    maxsize: 1e9,
-    endpoint: 'https://bioimagesuiteweb.github.io/unstableapp/viewer.html?image=',
-  },
-
-  {
-    name: 'MetaCell/NWBExplorer',
-    regex: /\.nwb$/,
-    maxsize: 1e9,
-    endpoint: 'http://nwbexplorer.opensourcebrain.org/nwbfile=',
-  },
-
-  {
-    name: 'VTK/ITK Viewer',
-    regex: /\.ome\.zarr$/,
+    name: 'Neuroglancer',
+    regex: /\.(nwb|txt|nii(\.gz)?|ome\.zarr)$/,  // TODO: .txt for testing purposes
     maxsize: Infinity,
-    endpoint: 'https://kitware.github.io/itk-vtk-viewer/app/?gradientOpacity=0.3&image=',
-  },
-
-  {
-    name: 'OME Zarr validator',
-    regex: /\.ome\.zarr$/,
-    maxsize: Infinity,
-    endpoint: 'https://ome.github.io/ome-ngff-validator/?source=',
-  },
-
-  {
-    name: 'Neurosift',
-    regex: /\.nwb$/,
-    maxsize: Infinity,
-    endpoint: 'https://flatironinstitute.github.io/neurosift?p=/nwb&url=',
-  },
+    endpoint: 'value-defaults-to-endpoint-logic'
+  }
 ];
 type Service = typeof EXTERNAL_SERVICES[0];
 
@@ -366,35 +516,106 @@ const itemToDelete: Ref<AssetPath | null> = ref(null);
 const page = ref(1);
 const pages = ref(0);
 const updating = ref(false);
+const copied = ref(false);
 
+const menuOpen = ref<Record<string, boolean>>({});
 // Computed
 const owners = computed(() => store.owners?.map((u) => u.username) || null);
 const currentDandiset = computed(() => store.dandiset);
 const embargoed = computed(() => currentDandiset.value?.dandiset.embargo_status === 'EMBARGOED');
+const unembargo_in_progress = computed(() => currentDandiset.value?.dandiset.embargo_status === 'UNEMBARGOING')
 const splitLocation = computed(() => location.value.split('/'));
-const isAdmin = computed(() => dandiRest.user?.admin || false);
+const isAdmin = computed(() => user.value?.admin || false);
 const isOwner = computed(() => !!(
-  dandiRest.user && owners.value?.includes(dandiRest.user?.username)
+  user.value && owners.value?.includes(user.value?.username)
 ));
 const itemsNotFound = computed(() => items.value && !items.value.length);
 
-function getExternalServices(path: AssetPath) {
+console.log(items)
+
+function serviceURL(endpoint: string, data: {
+  dandisetId: string,
+  dandisetVersion: string,
+  assetUrl: string,
+  assetDandiUrl: string,
+  assetS3Url: string,
+}) {
+  return endpoint
+    .replaceAll('$dandiset_id$', data.dandisetId)
+    .replaceAll('$dandiset_version$', data.dandisetVersion)
+    .replaceAll('$asset_url$', data.assetUrl)
+    .replaceAll('$asset_dandi_url$', data.assetDandiUrl)
+    .replaceAll('$asset_s3_url$', data.assetS3Url);
+}
+
+async function redirectToNeuroglancerUrl(item: any) {
+  try {
+    const url = 'https://api.lincbrain.org/api/permissions/s3/' + item.asset.url; // Directly appending
+    const response = await fetch(url, {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    const data = await response.json();
+    window.open(data.full_url, "_blank");
+  } catch (error) {
+    console.error('Error fetching data:', error);
+  }
+}
+
+function copyToClipboard(s3Uri?: string) {
+  if (s3Uri) {
+    navigator.clipboard.writeText(s3Uri).then(() => {
+      copied.value = true;
+      setTimeout(() => {
+        copied.value = false;
+      }, 2000);
+    }).catch(err => {
+      console.error('Failed to copy text: ', err)
+    });
+  } else {
+    console.error('No S3 URI found')
+  }
+}
+
+
+
+function getExternalServices(path: AssetPath, info: {dandisetId: string, dandisetVersion: string}) {
+  if (path.asset === null) {
+    return [];
+  }
+
   const servicePredicate = (service: Service, _path: AssetPath) => (
     new RegExp(service.regex).test(path.path)
           && _path.asset !== null
           && _path.aggregate_size <= service.maxsize
   );
 
-  const baseApiUrl = process.env.VUE_APP_DANDI_API_ROOT;
-  const assetURL = () => (embargoed.value
-    ? `${baseApiUrl}assets/${path.asset?.asset_id}/download/`
-    : trimEnd((path.asset as AssetFile).url, '/'));
+  // Formulate the two possible asset URLs -- the direct S3 link to the relevant
+  // object, and the DANDI URL that redirects to the S3 one.
+  const baseApiUrl = import.meta.env.VITE_APP_DANDI_API_ROOT;
+  const assetDandiUrl = `${baseApiUrl}assets/${path.asset?.asset_id}/download/`;
+  const assetS3Url = trimEnd((path.asset as AssetFile).url, '/');
+
+  // Select the best "default" URL: the direct S3 link is better when it can be
+  // used, but we're forced to supply the internal DANDI URL for embargoed
+  // dandisets (since the ready-made S3 URL will prevent access in that case).
+  const assetUrl = embargoed.value ? assetDandiUrl : assetS3Url;
 
   return EXTERNAL_SERVICES
     .filter((service) => servicePredicate(service, path))
     .map((service) => ({
       name: service.name,
-      url: `${service.endpoint}${assetURL()}`,
+      url: serviceURL(service.endpoint, {
+        dandisetId: info.dandisetId,
+        dandisetVersion: info.dandisetVersion,
+        assetUrl,
+        assetDandiUrl,
+        assetS3Url,
+      }),
+      isNeuroglancer: service.name === 'Neuroglancer',
     }));
 }
 
@@ -402,12 +623,16 @@ function locationSlice(index: number) {
   return `${splitLocation.value.slice(0, index + 1).join('/')}/`;
 }
 
-function selectPath(item: AssetPath) {
+function openItem(item: AssetPath) {
   const { asset, path } = item;
 
-  // Return early if path is a file
-  if (asset) { return; }
-  location.value = path;
+  if (asset) {
+    // If the item is an asset, open it in the browser.
+    window.open(inlineURI(asset.asset_id), "_self");
+  } else {
+    // If it's a directory, move into it.
+    location.value = path;
+  }
 }
 
 function navigateToParent() {
@@ -462,7 +687,10 @@ async function getItems() {
       // Inject relative path
       name: path.path.split('/').pop()!,
       // Inject services
-      services: getExternalServices(path) || undefined,
+      services: getExternalServices(path, {
+        dandisetId: props.identifier,
+        dandisetVersion: props.version,
+      }) || undefined,
     }))
     .sort(sortByFolderThenName);
 
@@ -490,6 +718,35 @@ async function deleteAsset() {
   // Recompute the items to display in the browser.
   getItems();
   itemToDelete.value = null;
+}
+
+function getCookie(name: string): string | null {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+
+  if (parts.length === 2) {
+    const part = parts.pop();
+    if (part) {
+      return part.split(';').shift() || null;
+    }
+  }
+  return null;
+}
+
+function sleep(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function handleWebKnossosClick(url: string) {
+  const response = await fetch('https://api.lincbrain.org/api/external-api/login/webknossos/', {
+    method: 'GET', // or 'POST' if that's what the API requires
+    credentials: 'include' // to ensure cookies are sent and received
+  });
+  const data = await response.json();
+  console.log(data);
+  await sleep(1000);
+  window.open(url, '_blank');
+
 }
 
 // Update URL if location changes

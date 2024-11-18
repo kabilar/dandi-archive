@@ -15,7 +15,7 @@
 </template>
 
 <script lang="ts">
-import { dandiRest } from '@/rest';
+import { user } from '@/rest';
 import type { ComputedRef } from 'vue';
 import { computed, defineComponent } from 'vue';
 
@@ -30,17 +30,16 @@ export default defineComponent({
   components: { },
   setup() {
     const bannerInfo: ComputedRef<StatusBanner|null> = computed(() => {
-      const { user } = dandiRest;
-      switch (user?.status) {
+      switch (user.value?.status) {
         case 'PENDING':
           return {
-            text: 'Your  account is currently pending approval. Please allow up to 2 business days for approval and contact the DANDI admins at help@dandiarchive.org if you have any questions.',
+            text: 'Your LINC account is currently pending approval. Please allow up to 2 business days for approval and contact the LINC admins at help@lincbrain.org if you have any questions.',
             icon: 'mdi-timer-sand-empty',
             color: 'warning',
           };
         case 'REJECTED':
           return {
-            text: 'Your DANDI account was denied approval. Please contact the DANDI admin team at help@dandiarchive.org if you would like to appeal this decision.',
+            text: 'Your LINC account was denied approval. Please contact the LINC admin team at help@lincbrain.org if you would like to appeal this decision.',
             icon: 'mdi-close-octagon',
             color: 'error',
           };

@@ -1,8 +1,14 @@
-from allauth.socialaccount.models import SocialAccount
+from __future__ import annotations
+
+import csv
+from typing import TYPE_CHECKING
+
+from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db.models import Exists, OuterRef
+from django.http import HttpRequest, HttpResponseRedirect, StreamingHttpResponse
 from django.shortcuts import get_object_or_404, render
 from django.views.decorators.http import require_http_methods
 from django.views.generic.base import TemplateView
@@ -10,6 +16,11 @@ from django.views.generic.base import TemplateView
 from dandiapi.api.mail import send_approved_user_message, send_rejected_user_message
 from dandiapi.api.models import Asset, AssetBlob, Upload, UserMetadata, Version
 from dandiapi.api.views.users import social_account_to_dict
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
+
+    from allauth.socialaccount.models import SocialAccount
 
 
 class DashboardMixin(LoginRequiredMixin, UserPassesTestMixin):
@@ -74,8 +85,47 @@ class DashboardView(DashboardMixin, TemplateView):
         )
 
 
+def mailchimp_csv_view(request: HttpRequest) -> StreamingHttpResponse:
+    """Generate a Mailchimp-compatible CSV file of all active users."""
+    # Exclude the django-guardian anonymous user account.
+    users = User.objects.filter(metadata__status=UserMetadata.Status.APPROVED).exclude(
+        username='AnonymousUser'
+    )
+
+    fieldnames = ['email', 'first_name', 'last_name']
+    data = users.values(*fieldnames).iterator()
+
+    def streaming_output() -> Iterator[str]:
+        """Stream out the header and CSV rows (for consumption by streaming response)."""
+
+        # This class implements a filelike's write() interface to provide a way
+        # for the CSV writer to "return" the CSV lines as strings.
+        class Echo:
+            def write(self, value):
+                return value
+
+        # Yield back the rows of the CSV file.
+        writer = csv.DictWriter(Echo(), fieldnames=fieldnames)
+        yield writer.writeheader()
+        for row in data:
+            yield writer.writerow(row)
+
+    return StreamingHttpResponse(
+        streaming_output(),
+        content_type='text/csv',
+        headers={
+            'Content-Disposition': 'attachment; filename="dandi_users_mailchimp.csv"',
+        },
+    )
+
+
 @require_http_methods(['GET', 'POST'])
-def user_approval_view(request, username: str):
+def user_approval_view(request: HttpRequest, username: str):
+    # Redirect user to login if they're not authenticated
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(redirect_to=f'{settings.LOGIN_URL}?next={request.path}')
+
+    # If they are authenticated but are not a superuser, deny access
     if not request.user.is_superuser:
         raise PermissionDenied
 

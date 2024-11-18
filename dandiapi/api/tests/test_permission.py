@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import pytest
 from rest_framework.permissions import SAFE_METHODS
 
@@ -54,7 +56,7 @@ from rest_framework.permissions import SAFE_METHODS
         ),
         (
             'get',
-            '/api/dandisets/{dandiset.identifier}/versions/draft/assets/{asset.asset_id}/validation/',  # noqa: E501
+            '/api/dandisets/{dandiset.identifier}/versions/draft/assets/{asset.asset_id}/validation/',
             False,
         ),
         # Zarrs
@@ -86,11 +88,6 @@ def test_approved_or_readonly(
     url = url_format.format(dandiset=dandiset, asset=asset, zarr=zarr)
     response = getattr(api_client, method)(url)
 
-    # Safe method, read only is okay
-    if method.upper() in SAFE_METHODS:
-        assert response.status_code < 400
-        return
-
     # The client is not authenticated, so all response codes should be 401
     assert response.status_code == 401
 
@@ -99,6 +96,11 @@ def test_approved_or_readonly(
         return
 
     api_client.force_authenticate(user=user)
+
+    # Safe method, read only is okay
+    if method.upper() in SAFE_METHODS:
+        assert response.status_code < 400
+        return
 
     # Zarr create is a special case, as permission can only be
     # denied after reading the request body

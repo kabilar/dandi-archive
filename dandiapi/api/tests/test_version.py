@@ -1,18 +1,21 @@
 from __future__ import annotations
 
-from datetime import datetime
+import datetime
 from time import sleep
 from typing import TYPE_CHECKING
 
+from dandischema.models import AccessType
 from django.conf import settings
-from django.contrib.auth.models import User
 from freezegun import freeze_time
 from guardian.shortcuts import assign_perm
 import pytest
 
+from dandiapi.api.models.dandiset import Dandiset
 from dandiapi.api.services.metadata import version_aggregate_assets_summary
+from dandiapi.api.services.metadata.exceptions import VersionMetadataConcurrentlyModifiedError
 
 if TYPE_CHECKING:
+    from django.contrib.auth.models import User
     from rest_framework.test import APIClient
 
 from dandiapi.api import tasks
@@ -71,7 +74,7 @@ def test_draft_version_metadata_computed(draft_version: Version):
     expected_metadata = {
         **original_metadata,
         'manifestLocation': [
-            f'{settings.DANDI_API_URL}/api/dandisets/{draft_version.dandiset.identifier}/versions/draft/assets/'  # noqa: E501
+            f'{settings.DANDI_API_URL}/api/dandisets/{draft_version.dandiset.identifier}/versions/draft/assets/'
         ],
         'name': draft_version.name,
         'identifier': f'DANDI:{draft_version.dandiset.identifier}',
@@ -83,7 +86,8 @@ def test_draft_version_metadata_computed(draft_version: Version):
         ),
         'repository': settings.DANDI_WEB_APP_URL,
         'dateCreated': draft_version.dandiset.created.isoformat(),
-        '@context': f'https://raw.githubusercontent.com/dandi/schema/master/releases/{settings.DANDI_SCHEMA_VERSION}/context.json',  # noqa: E501
+        'access': [{'schemaKey': 'AccessRequirements', 'status': AccessType.OpenAccess.value}],
+        '@context': f'https://raw.githubusercontent.com/dandi/schema/master/releases/{settings.DANDI_SCHEMA_VERSION}/context.json',
         'assetsSummary': {
             'numberOfBytes': 0,
             'numberOfFiles': 0,
@@ -116,14 +120,18 @@ def test_published_version_metadata_computed(published_version: Version):
         'identifier': f'DANDI:{published_version.dandiset.identifier}',
         'version': published_version.version,
         'id': f'DANDI:{published_version.dandiset.identifier}/{published_version.version}',
-        'doi': f'10.80507/dandi.{published_version.dandiset.identifier}/{published_version.version}',  # noqa: E501
+        'doi': (
+            f'10.80507/dandi.'
+            f'{published_version.dandiset.identifier}/{published_version.version}'
+        ),
         'url': (
             f'{settings.DANDI_WEB_APP_URL}/dandiset/'
             f'{published_version.dandiset.identifier}/{published_version.version}'
         ),
         'repository': settings.DANDI_WEB_APP_URL,
         'dateCreated': published_version.dandiset.created.isoformat(),
-        '@context': f'https://raw.githubusercontent.com/dandi/schema/master/releases/{settings.DANDI_SCHEMA_VERSION}/context.json',  # noqa: E501
+        'access': [{'schemaKey': 'AccessRequirements', 'status': AccessType.OpenAccess.value}],
+        '@context': f'https://raw.githubusercontent.com/dandi/schema/master/releases/{settings.DANDI_SCHEMA_VERSION}/context.json',
         'assetsSummary': {
             'numberOfBytes': 0,
             'numberOfFiles': 0,
@@ -138,22 +146,25 @@ def test_published_version_metadata_computed(published_version: Version):
 @pytest.mark.django_db()
 def test_version_metadata_citation_draft(draft_version):
     name = draft_version.metadata['name'].rstrip('.')
-    year = datetime.now().year
-    url = f'{settings.DANDI_WEB_APP_URL}/dandiset/{draft_version.dandiset.identifier}/{draft_version.version}'  # noqa: E501
+    year = datetime.datetime.now(datetime.UTC).year
+    url = (
+        f'{settings.DANDI_WEB_APP_URL}/dandiset/'
+        f'{draft_version.dandiset.identifier}/{draft_version.version}'
+    )
     assert (
         draft_version.metadata['citation']
-        == f'{name} ({year}). (Version {draft_version.version}) [Data set]. DANDI archive. {url}'  # noqa: E501
+        == f'{name} ({year}). (Version {draft_version.version}) [Data set]. DANDI archive. {url}'
     )
 
 
 @pytest.mark.django_db()
 def test_version_metadata_citation_published(published_version):
     name = published_version.metadata['name'].rstrip('.')
-    year = datetime.now().year
+    year = datetime.datetime.now(datetime.UTC).year
     url = f'https://doi.org/{published_version.doi}'
-    assert (
-        published_version.metadata['citation']
-        == f'{name} ({year}). (Version {published_version.version}) [Data set]. DANDI archive. {url}'  # noqa: E501
+    assert published_version.metadata['citation'] == (
+        f'{name} ({year}). (Version {published_version.version}) [Data set]. '
+        f'DANDI archive. {url}'
     )
 
 
@@ -163,7 +174,7 @@ def test_version_metadata_citation_no_contributors(version):
     version.save()
 
     name = version.metadata['name'].rstrip('.')
-    year = datetime.now().year
+    year = datetime.datetime.now(datetime.UTC).year
     assert version.metadata['citation'].startswith(
         f'{name} ({year}). (Version {version.version}) [Data set]. DANDI archive. '
     )
@@ -178,7 +189,7 @@ def test_version_metadata_citation_contributor_not_in_citation(version):
     version.save()
 
     name = version.metadata['name'].rstrip('.')
-    year = datetime.now().year
+    year = datetime.datetime.now(datetime.UTC).year
     assert version.metadata['citation'].startswith(
         f'{name} ({year}). (Version {version.version}) [Data set]. DANDI archive. '
     )
@@ -190,7 +201,7 @@ def test_version_metadata_citation_contributor(version):
     version.save()
 
     name = version.metadata['name'].rstrip('.')
-    year = datetime.now().year
+    year = datetime.datetime.now(datetime.UTC).year
     assert version.metadata['citation'].startswith(
         f'Doe, Jane ({year}) {name} (Version {version.version}) [Data set]. DANDI archive. '
     )
@@ -205,7 +216,7 @@ def test_version_metadata_citation_multiple_contributors(version):
     version.save()
 
     name = version.metadata['name'].rstrip('.')
-    year = datetime.now().year
+    year = datetime.datetime.now(datetime.UTC).year
     assert version.metadata['citation'].startswith(
         f'John Doe; Jane Doe ({year}) {name} (Version {version.version}) [Data set]. '
         f'DANDI archive. '
@@ -236,6 +247,7 @@ def test_version_aggregate_assets_summary_valid_assets(draft_version, draft_asse
     invalid_asset = draft_asset_factory(status=Asset.Status.INVALID)
     draft_version.assets.add(valid_asset, invalid_asset)
     version_aggregate_assets_summary(draft_version)
+    draft_version.refresh_from_db()
     assert draft_version.metadata['assetsSummary']['numberOfFiles'] == 1
 
 
@@ -323,7 +335,7 @@ def test_version_publish_version(draft_version, asset):
         'dateCreated': UTC_ISO_TIMESTAMP_RE,
         'datePublished': UTC_ISO_TIMESTAMP_RE,
         'manifestLocation': [
-            f'http://{settings.MINIO_STORAGE_ENDPOINT}/test-dandiapi-dandisets/test-prefix/dandisets/{publish_version.dandiset.identifier}/{publish_version.version}/assets.yaml',  # noqa: E501
+            f'http://{settings.MINIO_STORAGE_ENDPOINT}/test-dandiapi-dandisets/test-prefix/dandisets/{publish_version.dandiset.identifier}/{publish_version.version}/assets.yaml',
         ],
         'identifier': f'DANDI:{publish_version.dandiset.identifier}',
         'version': publish_version.version,
@@ -345,6 +357,34 @@ def test_version_publish_version(draft_version, asset):
 
 
 @pytest.mark.django_db()
+def test_version_aggregate_assets_summary(draft_version_factory, draft_asset_factory):
+    version = draft_version_factory(status=Version.Status.VALID)
+    asset = draft_asset_factory(status=Asset.Status.VALID)
+    version.assets.add(asset)
+
+    version_aggregate_assets_summary(version)
+    version.refresh_from_db()
+
+    assert version.metadata['assetsSummary']['numberOfBytes'] == asset.blob.size
+    assert version.metadata['assetsSummary']['numberOfFiles'] == 1
+    assert version.metadata['assetsSummary']['schemaKey'] == 'AssetsSummary'
+
+
+@pytest.mark.django_db()
+def test_version_aggregate_assets_summary_metadata_modified(
+    draft_version_factory, draft_asset_factory
+):
+    version = draft_version_factory(status=Version.Status.VALID)
+    asset = draft_asset_factory(status=Asset.Status.VALID)
+    version.assets.add(asset)
+
+    # Modify the metadata passed to the function so that it's mismatched
+    version.metadata['foo'] = 'bar'
+    with pytest.raises(VersionMetadataConcurrentlyModifiedError):
+        version_aggregate_assets_summary(version)
+
+
+@pytest.mark.django_db()
 def test_version_size(
     version,
     asset_factory,
@@ -353,9 +393,7 @@ def test_version_size(
     zarr_archive_factory,
 ):
     version.assets.add(asset_factory(blob=asset_blob_factory(size=100)))
-    version.assets.add(
-        asset_factory(blob=None, embargoed_blob=embargoed_asset_blob_factory(size=200))
-    )
+    version.assets.add(asset_factory(blob=embargoed_asset_blob_factory(size=200)))
     version.assets.add(asset_factory(blob=None, zarr=zarr_archive_factory(size=400)))
     add_version_asset_paths(version=version)
 
@@ -363,7 +401,9 @@ def test_version_size(
 
 
 @pytest.mark.django_db()
-def test_version_rest_list(api_client, version, draft_version_factory):
+def test_version_rest_list(api_client, user, version, draft_version_factory):
+    api_client.force_authenticate(user=user)
+
     # Create an extra version so that there are multiple versions to filter down
     draft_version_factory()
 
@@ -393,7 +433,9 @@ def test_version_rest_list(api_client, version, draft_version_factory):
 
 
 @pytest.mark.django_db()
-def test_version_rest_retrieve(api_client, version, draft_version_factory):
+def test_version_rest_retrieve(api_client, user, version, draft_version_factory):
+    api_client.force_authenticate(user=user)
+
     # Create an extra version so that there are multiple versions to filter down
     draft_version_factory()
 
@@ -406,7 +448,9 @@ def test_version_rest_retrieve(api_client, version, draft_version_factory):
 
 
 @pytest.mark.django_db()
-def test_version_rest_info(api_client, version):
+def test_version_rest_info(api_client, user, version):
+    api_client.force_authenticate(user=user)
+
     assert api_client.get(
         f'/api/dandisets/{version.dandiset.identifier}/versions/{version.version}/info/'
     ).data == {
@@ -437,8 +481,9 @@ def test_version_rest_info(api_client, version):
     [Asset.Status.PENDING, Asset.Status.VALIDATING, Asset.Status.VALID, Asset.Status.INVALID],
 )
 def test_version_rest_info_with_asset(
-    api_client, draft_version_factory, draft_asset_factory, asset_status: Asset.Status
+    api_client, user, draft_version_factory, draft_asset_factory, asset_status: Asset.Status
 ):
+    api_client.force_authenticate(user=user)
     version = draft_version_factory(status=Version.Status.VALID)
     asset = draft_asset_factory(status=asset_status)
     version.assets.add(asset)
@@ -507,13 +552,13 @@ def test_version_rest_update(api_client, user, draft_version):
         # This should be stripped out
         'dateCreated': 'foobar',
     }
-    year = datetime.now().year
+    year = datetime.datetime.now(datetime.UTC).year
     url = f'{settings.DANDI_WEB_APP_URL}/dandiset/{draft_version.dandiset.identifier}/draft'
     saved_metadata = {
         **new_metadata,
         'schemaVersion': settings.DANDI_SCHEMA_VERSION,
         'manifestLocation': [
-            f'{settings.DANDI_API_URL}/api/dandisets/{draft_version.dandiset.identifier}/versions/draft/assets/'  # noqa: E501
+            f'{settings.DANDI_API_URL}/api/dandisets/{draft_version.dandiset.identifier}/versions/draft/assets/'
         ],
         'name': new_name,
         'identifier': f'DANDI:{draft_version.dandiset.identifier}',
@@ -522,6 +567,7 @@ def test_version_rest_update(api_client, user, draft_version):
         'url': url,
         'repository': settings.DANDI_WEB_APP_URL,
         'dateCreated': UTC_ISO_TIMESTAMP_RE,
+        'access': [{'schemaKey': 'AccessRequirements', 'status': AccessType.OpenAccess.value}],
         'citation': f'{new_name} ({year}). (Version draft) [Data set]. DANDI archive. {url}',
         'assetsSummary': {
             'numberOfBytes': 0,
@@ -567,6 +613,32 @@ def test_version_rest_update(api_client, user, draft_version):
 
 
 @pytest.mark.django_db()
+def test_version_rest_update_unembargo_in_progress(api_client, user, draft_version_factory):
+    draft_version = draft_version_factory(
+        dandiset__embargo_status=Dandiset.EmbargoStatus.UNEMBARGOING
+    )
+    assign_perm('owner', user, draft_version.dandiset)
+    api_client.force_authenticate(user=user)
+
+    new_name = 'A unique and special name!'
+    new_metadata = {
+        '@context': (
+            'https://raw.githubusercontent.com/dandi/schema/master/releases/'
+            f'{settings.DANDI_SCHEMA_VERSION}/context.json'
+        ),
+        'schemaVersion': settings.DANDI_SCHEMA_VERSION,
+        'num': 123,
+    }
+
+    resp = api_client.put(
+        f'/api/dandisets/{draft_version.dandiset.identifier}/versions/{draft_version.version}/',
+        {'metadata': new_metadata, 'name': new_name},
+        format='json',
+    )
+    assert resp.status_code == 400
+
+
+@pytest.mark.django_db()
 def test_version_rest_update_published_version(api_client, user, published_version):
     assign_perm('owner', user, published_version.dandiset)
     api_client.force_authenticate(user=user)
@@ -599,6 +671,94 @@ def test_version_rest_update_not_an_owner(api_client, user, version):
         ).status_code
         == 403
     )
+
+
+@pytest.mark.parametrize(
+    ('access'),
+    [
+        'some value',
+        123,
+        None,
+        [],
+        ['a', 'b'],
+        ['a', 'b', {}],
+        [{'schemaKey': 'AccessRequirements', 'status': 'foobar'}],
+    ],
+)
+@pytest.mark.django_db()
+def test_version_rest_update_access_values(api_client, user, draft_version, access):
+    assign_perm('owner', user, draft_version.dandiset)
+    api_client.force_authenticate(user=user)
+
+    new_metadata = {**draft_version.metadata, 'access': access}
+    resp = api_client.put(
+        f'/api/dandisets/{draft_version.dandiset.identifier}/versions/{draft_version.version}/',
+        {'metadata': new_metadata, 'name': draft_version.name},
+        format='json',
+    )
+    assert resp.status_code == 200
+    draft_version.refresh_from_db()
+
+    access = draft_version.metadata['access']
+    assert access != new_metadata['access']
+    assert access[0]['schemaKey'] == 'AccessRequirements'
+    assert (
+        access[0]['status'] == AccessType.EmbargoedAccess.value
+        if draft_version.dandiset.embargoed
+        else AccessType.OpenAccess.value
+    )
+
+
+@pytest.mark.django_db()
+def test_version_rest_update_access_missing(api_client, user, draft_version):
+    assign_perm('owner', user, draft_version.dandiset)
+    api_client.force_authenticate(user=user)
+
+    # Check that the field missing entirely is also okay
+    new_metadata = {**draft_version.metadata}
+    new_metadata.pop('access', None)
+
+    resp = api_client.put(
+        f'/api/dandisets/{draft_version.dandiset.identifier}/versions/{draft_version.version}/',
+        {'metadata': new_metadata, 'name': draft_version.name},
+        format='json',
+    )
+    assert resp.status_code == 200
+    draft_version.refresh_from_db()
+    assert 'access' in draft_version.metadata
+    access = draft_version.metadata['access']
+    assert access[0]['schemaKey'] == 'AccessRequirements'
+    assert (
+        access[0]['status'] == AccessType.EmbargoedAccess.value
+        if draft_version.dandiset.embargoed
+        else AccessType.OpenAccess.value
+    )
+
+
+@pytest.mark.django_db()
+def test_version_rest_update_access_valid(api_client, user, draft_version):
+    assign_perm('owner', user, draft_version.dandiset)
+    api_client.force_authenticate(user=user)
+
+    # Check that extra fields persist
+    new_metadata = {**draft_version.metadata, 'access': [{'extra': 'field'}]}
+    resp = api_client.put(
+        f'/api/dandisets/{draft_version.dandiset.identifier}/versions/{draft_version.version}/',
+        {'metadata': new_metadata, 'name': draft_version.name},
+        format='json',
+    )
+    assert resp.status_code == 200
+    draft_version.refresh_from_db()
+    access = draft_version.metadata['access']
+    assert access != new_metadata['access']
+    assert access[0]['schemaKey'] == 'AccessRequirements'
+    assert (
+        access[0]['status'] == AccessType.EmbargoedAccess.value
+        if draft_version.dandiset.embargoed
+        else AccessType.OpenAccess.value
+    )
+
+    assert access[0]['extra'] == 'field'
 
 
 @pytest.mark.django_db()
@@ -636,6 +796,36 @@ def test_version_rest_publish(
 
 
 @pytest.mark.django_db()
+def test_version_rest_publish_embargo(api_client: APIClient, user: User, draft_version_factory):
+    draft_version = draft_version_factory(dandiset__embargo_status=Dandiset.EmbargoStatus.EMBARGOED)
+    assign_perm('owner', user, draft_version.dandiset)
+    api_client.force_authenticate(user=user)
+
+    resp = api_client.post(
+        f'/api/dandisets/{draft_version.dandiset.identifier}'
+        f'/versions/{draft_version.version}/publish/'
+    )
+    assert resp.status_code == 400
+
+
+@pytest.mark.django_db()
+def test_version_rest_publish_unembargo_in_progress(
+    api_client: APIClient, user: User, draft_version_factory
+):
+    draft_version = draft_version_factory(
+        dandiset__embargo_status=Dandiset.EmbargoStatus.UNEMBARGOING
+    )
+    assign_perm('owner', user, draft_version.dandiset)
+    api_client.force_authenticate(user=user)
+
+    resp = api_client.post(
+        f'/api/dandisets/{draft_version.dandiset.identifier}'
+        f'/versions/{draft_version.version}/publish/'
+    )
+    assert resp.status_code == 400
+
+
+@pytest.mark.django_db()
 def test_version_rest_publish_zarr(
     api_client,
     user: User,
@@ -670,7 +860,7 @@ def test_version_rest_publish_zarr(
         f'/versions/{draft_version.version}/publish/'
     )
     assert resp.status_code == 400
-    assert resp.json() == ['Cannot publish dandisets which contain zarrs']
+    assert resp.json() == 'Cannot publish dandisets which contain zarrs'
 
 
 @pytest.mark.django_db()
@@ -703,17 +893,17 @@ def test_version_rest_publish_not_a_draft(api_client, user, published_version, a
     [
         (
             Version.Status.PENDING,
-            'Metadata validation is pending for this dandiset, please try again later.',
+            'Metadata validation is pending for this dataset, please try again later.',
             409,
         ),
-        (Version.Status.VALIDATING, 'Dandiset is currently being validated', 409),
-        (Version.Status.INVALID, 'Dandiset metadata or asset metadata is not valid', 400),
+        (Version.Status.VALIDATING, 'Dataset is currently being validated', 409),
+        (Version.Status.INVALID, 'Dataset metadata or asset metadata is not valid', 400),
         (
             Version.Status.PUBLISHED,
             'There have been no changes to the draft version since the last publish.',
             400,
         ),
-        (Version.Status.PUBLISHING, 'Dandiset is currently being published', 423),
+        (Version.Status.PUBLISHING, 'Dataset is currently being published', 423),
     ],
 )
 def test_version_rest_publish_invalid(

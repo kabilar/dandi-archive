@@ -1,6 +1,6 @@
 <template>
   <DandisetsPage
-    title="Search Dandisets"
+    title="Search Datasets"
     search
   >
     <template #no-content>

@@ -3,19 +3,12 @@
 ## Develop with Docker (recommended quickstart)
 This is the simplest configuration for developers to start with.
 
-### Initial Setup
-1. Run `docker-compose run --rm django ./manage.py migrate`
-2. Run `docker-compose run --rm django ./manage.py createcachetable`
-3. Run `docker-compose run --rm django ./manage.py createsuperuser`
-   and follow the prompts to create your own user.
-   Set your username to your email to ensure parity with how GitHub logins work.
-4. Run `docker-compose run --rm django ./manage.py create_dev_dandiset --owner your.email@email.com`
-   to create a dummy dandiset to start working with.
+## Instructions for local development with front-end hot reloading
 
-### Run Application
-1. Run `docker-compose up`
-2. Access the site, starting at http://localhost:8000/admin/
-3. When finished, use `Ctrl+C`
+1. Ensure you have installed Docker on your local machine
+2. Run `./admin_dev_startup.sh <fun-image-name-you-can-pick> <your-email>`.  When prompted, enter an username and password in the command prompt. (If you run into local errors with the script, you may need to run `chmod +x admin_dev_startup.sh` first)
+3. Navigate to `localhost:8000/admin`, and log in with the username and password you used in Step #2.  Under the `User` section, select the username and change the `Status` from `Incomplete` to `Approved`.
+4. Navigate to `localhost:8085` and select `LOG IN WITH GITHUB`.
 
 ### Application Maintenance
 Occasionally, new package dependencies or schema changes will necessitate
@@ -45,8 +38,8 @@ but allows developers to run Python code on their native system.
 7. Run `source ./dev/export-env.sh`
 8. Run `./manage.py migrate`
 9. Run `./manage.py createcachetable`
-10. Run `./manage.py createsuperuser` and follow the prompts to create your own user
-11. Run `./manage.py create_dev_dandiset --owner your.email@email.com`
+10. Run `./manage.py createsuperuser --email $(git config user.email)` and follow the prompts.
+11. Run `./manage.py create_dev_dandiset --owner $(git config user.email)`
    to create a dummy dandiset to start working with.
 
 ### Run Application
@@ -122,7 +115,7 @@ to call.
 
 ### Creating a Token
 Visit the URL `/admin` with a web browser, logging
-in with the credentials entered during the `createsuperuser` setup step..
+in with the credentials entered during the `createsuperuser` setup step.
 Then go to `/swagger` and use `GET /auth/token` end-point.
 
 ### Supplying the Token
@@ -137,7 +130,7 @@ For frequent deployment administration tasks, `django-extensions` provides a con
 ### create_dev_dandiset
 
 ```
-python manage.py create_dev_dandiset --owner your.email@email.com --name My Dummy Dandiset
+python manage.py create_dev_dandiset --owner $(git config user.email) --name My Dummy Dandiset
 ```
 
 This creates a dummy dandiset with valid metadata and a single dummy asset.

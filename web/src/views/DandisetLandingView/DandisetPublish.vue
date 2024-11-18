@@ -16,7 +16,7 @@
         </v-card-title>
         <v-divider class="my-3" />
         <v-card-text>
-          This action will force publish this Dandiset, potentially
+          This action will force publish this dataset, potentially
           before the owners are prepared to do so.
         </v-card-text>
         <v-card-text>
@@ -70,7 +70,7 @@
               <v-col>
                 <span>
                   As an <span class="font-weight-bold">admin</span>,
-                  you may publish Dandisets without being an owner.
+                  you may publish datasets without being an owner.
                 </span>
               </v-col>
             </v-row>
@@ -188,7 +188,7 @@
                       v-if="currentDandiset"
                       class="text-caption"
                     >
-                      Validation of the dandiset is pending.
+                      Validation of the dataset is pending.
                     </div>
                   </v-col>
                 </v-row>
@@ -236,7 +236,7 @@
             v-if="currentDandiset"
             class="text-caption"
           >
-            This Dandiset has {{ currentDandiset.version_validation_errors.length }}
+            This Dataset has {{ currentDandiset.version_validation_errors.length }}
             metadata validation error(s).
           </div>
         </v-col>
@@ -265,7 +265,7 @@
         <v-spacer />
         <v-col cols="9">
           <div class="text-caption">
-            This Dandiset has {{ numAssetValidationErrors }}
+            This Dataset has {{ numAssetValidationErrors }}
             asset validation error(s).
           </div>
         </v-col>
@@ -321,7 +321,7 @@
       </v-col>
     </v-row>
     <v-snackbar :value="!!alreadyBeingPublishedError">
-      This dandiset is already being published. Please wait for publishing to complete.
+      This dataset is already being published. Please wait for publishing to complete.
     </v-snackbar>
     <v-snackbar :value="!!publishedVersion">
       Publish complete.
@@ -354,7 +354,7 @@ import moment from 'moment';
 
 import type { RawLocation } from 'vue-router';
 import { useRoute } from 'vue-router/composables';
-import { dandiRest, loggedIn as loggedInFunc, user as userFunc } from '@/rest';
+import { dandiRest, loggedIn as loggedInFunc, user } from '@/rest';
 import { useDandisetStore } from '@/stores/dandiset';
 import router from '@/router';
 import type { User, Version } from '@/types';
@@ -404,7 +404,6 @@ const otherVersions: ComputedRef<Version[]|undefined> = computed(
   ).sort(sortVersions),
 );
 
-const user: ComputedRef<User|null> = computed(userFunc);
 const loggedIn: ComputedRef<boolean> = computed(loggedInFunc);
 
 const isOwner: ComputedRef<boolean> = computed(
@@ -440,25 +439,25 @@ const publishDisabledMessage: ComputedRef<string> = computed(() => {
     return 'Only draft versions can be published.';
   }
   if (!props.userCanModifyDandiset && !user.value?.admin) {
-    return 'You do not have permission to edit this dandiset.';
+    return 'You do not have permission to edit this dataset.';
   }
   if (currentDandiset.value?.status === 'Pending') {
-    return 'This dandiset has not yet been validated.';
+    return 'This dataset has not yet been validated.';
   }
   if (currentDandiset.value?.status === 'Validating') {
-    return 'Currently validating this dandiset.';
+    return 'Currently validating this dataset.';
   }
   if (currentDandiset.value?.status === 'Published') {
     return 'No changes since last publish.';
   }
   if (currentDandiset.value?.dandiset.embargo_status === 'UNEMBARGOING') {
-    return 'This dandiset is being unembargoed, please wait.';
+    return 'This dataset is being unembargoed, please wait.';
   }
   if (publishing.value) {
-    return 'This dandiset is being published, please wait.';
+    return 'This dataset is being published, please wait.';
   }
   if (containsZarr.value) {
-    return 'Dandisets containing Zarr archives cannot currently be published.';
+    return 'Datasets containing Zarr archives cannot currently be published.';
   }
   return '';
 });

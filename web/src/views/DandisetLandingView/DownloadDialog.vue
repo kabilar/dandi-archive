@@ -39,7 +39,7 @@
       </v-card-title>
       <v-list class="pa-0">
         <v-list-item dense>
-          Use this command in your Lincbrain CLI
+          Use this command in your LINC Brain CLI
         </v-list-item>
         <v-list-item dense>
           <CopyText
@@ -62,10 +62,6 @@
                     <v-radio
                       label="Draft"
                       value="draft"
-                    />
-                    <v-radio
-                      label="Latest version"
-                      value="latest"
                     />
                     <v-radio
                       label="Other version"
@@ -96,16 +92,16 @@
           </v-expansion-panel>
           <v-expansion-panel>
             <v-expansion-panel-header>
-              Don't have DANDI CLI?
+              Don't have LINC Brain CLI?
             </v-expansion-panel-header>
             <v-expansion-panel-content>
               <v-list>
                 <v-list-item>
-                  Install the Python client (DANDI CLI)
+                  Install the Python client (LINC Brain CLI)
                   in a Python 3.7+ environment using command:
                 </v-list-item>
                 <v-list-item>
-                  <kbd>pip install "dandi>=0.13.0"</kbd>
+                  <kbd>pip install lincbrain-cli</kbd>
                 </v-list-item>
               </v-list>
             </v-expansion-panel-content>
@@ -121,14 +117,21 @@ import { useDandisetStore } from '@/stores/dandiset';
 import CopyText from '@/components/CopyText.vue';
 
 function formatDownloadCommand(identifier: string, version: string): string {
+  const baseUrl = import.meta.env.VITE_APP_DANDI_API_ROOT === 'https://staging-api.lincbrain.org/api/'
+      ? 'https://staging.lincbrain.org/dandiset/'
+      : 'https://lincbrain.org/dandiset/';
+
   if (version === 'draft') {
-    return `lincbrain download https://lincbrain.org/dandiset/${identifier}/draft`;
+    return `dandi download ${baseUrl}${identifier}/draft`;
   }
+
   if (!version) {
-    return `lincbrain download DANDI:${identifier}`;
+    return `dandi download ${baseUrl}:${identifier}`;
   }
-  return `lincbrain download DANDI:${identifier}/${version}`;
+
+  return `dandi download ${baseUrl}:${identifier}/${version}`;
 }
+
 
 const store = useDandisetStore();
 

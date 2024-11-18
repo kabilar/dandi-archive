@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from pathlib import Path
 
 from setuptools import find_namespace_packages, setup
@@ -15,7 +17,6 @@ setup(
     description='',
     # Determine version with scm
     use_scm_version={'version_scheme': 'post-release'},
-    setup_requires=['setuptools_scm'],
     long_description=long_description,
     long_description_content_type='text/markdown',
     license='Apache 2.0',
@@ -39,40 +40,40 @@ setup(
     include_package_data=True,
     install_requires=[
         'celery',
-        'dandischema~=0.8.4',
+        'dandischema==0.10.4',
         'django~=4.1.0',
         'django-admin-display',
-        'django-allauth',
+        # Require 0.58.0 as it is the first version to support postgres' native
+        # JSONField for SocialAccount.extra_data
+        'django-allauth>=0.58.0',
         'django-click',
         'django-configurations[database,email]',
         'django-extensions',
         'django-filter',
         'django-guardian',
         'django-oauth-toolkit>=1.7,<2',
-        'djangorestframework',
+        # TODO: pin this until we figure out what the cause of
+        # https://github.com/dandi/dandi-archive/issues/1894 is.
+        'djangorestframework==3.14.0',
         'djangorestframework-yaml',
         'drf-extensions',
         'drf-yasg',
         'jsonschema',
-        'pydantic',
         'boto3[s3]',
         'more_itertools',
         'requests',
         's3-log-parse',
         'zarr-checksum>=0.2.8',
+        'rsa',
+        'cryptography',
         # Production-only
         'django-composed-configuration[prod]>=0.23.0',
-        # pin directly to a version since we're extending the private multipart interface
-        'django-s3-file-field[boto3]==0.3.2',
-        'django-storages[s3]>=1.14.2',
+        'django-s3-file-field[s3]>=1.0.0',
+        'django-storages[s3]==1.14.3',
         'gunicorn',
         # Development-only, but required
-        # TODO: starting with v0.5.0, django-minio-storage requires v7
-        # of the minio-py library. minio-py 7 introduces several
-        # breaking changes to the API, and django-s3-file-field is also
-        # incompatible with it since it has minio<7 as a dependency.
-        # Until these issues are resolved, we pin it to an older version.
-        'django-minio-storage<0.5.0',
+        'django-minio-storage',
+        'minio>7',
         'tqdm',
     ],
     extras_require={
@@ -97,6 +98,7 @@ setup(
             'pytest-factoryboy',
             'pytest-memray',
             'pytest-mock',
+            'setuptools',
         ],
     },
 )

@@ -1,11 +1,15 @@
 from __future__ import annotations
 
-from django.contrib.auth.models import User
+from typing import TYPE_CHECKING
+
 from django.db import models
 from django.db.models import OuterRef, Q, Subquery
 from guardian.shortcuts import get_objects_for_user
 
 from dandiapi.api.models import Dandiset
+
+if TYPE_CHECKING:
+    from django.contrib.auth.models import User
 
 
 class AssetSearchManager(models.Manager):
@@ -22,12 +26,12 @@ class AssetSearchManager(models.Manager):
 
 
 class AssetSearch(models.Model):
-    objects = AssetSearchManager()
-
     dandiset_id = models.PositiveBigIntegerField()
     asset_id = models.PositiveBigIntegerField(primary_key=True)
     asset_metadata = models.JSONField()
     asset_size = models.PositiveBigIntegerField()
+
+    objects = AssetSearchManager()
 
     class Meta:
         managed = False
@@ -37,3 +41,6 @@ class AssetSearch(models.Model):
                 fields=['dandiset_id', 'asset_id'], name='unique_dandiset_asset'
             )
         ]
+
+    def __str__(self) -> str:
+        return f'{self.dandiset_id}:{self.asset_id}'

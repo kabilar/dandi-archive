@@ -1,6 +1,9 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from allauth.socialaccount.models import SocialAccount
 from django.contrib.auth.models import User
-from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Count, Max, OuterRef, Subquery, Sum
 from django.db.models.functions import Coalesce
 from django.db.models.query_utils import Q
@@ -14,7 +17,6 @@ from rest_framework import filters, status
 from rest_framework.decorators import action
 from rest_framework.exceptions import NotAuthenticated, PermissionDenied
 from rest_framework.generics import get_object_or_404
-from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.serializers import ValidationError
 from rest_framework.viewsets import ReadOnlyModelViewSet
@@ -22,9 +24,15 @@ from rest_framework.viewsets import ReadOnlyModelViewSet
 from dandiapi.api.asset_paths import get_root_paths_many
 from dandiapi.api.mail import send_ownership_change_emails
 from dandiapi.api.models import Dandiset, Version
+from dandiapi.api.permissions import IsApproved
 from dandiapi.api.services.dandiset import create_dandiset, delete_dandiset
-from dandiapi.api.services.embargo import unembargo_dandiset
-from dandiapi.api.views.common import DANDISET_PK_PARAM, DandiPagination
+from dandiapi.api.services.embargo import kickoff_dandiset_unembargo
+from dandiapi.api.services.embargo.exceptions import (
+    DandisetUnembargoInProgressError,
+    UnauthorizedEmbargoAccessError,
+)
+from dandiapi.api.views.common import DANDISET_PK_PARAM
+from dandiapi.api.views.pagination import DandiPagination
 from dandiapi.api.views.serializers import (
     CreateDandisetQueryParameterSerializer,
     DandisetDetailSerializer,
@@ -36,6 +44,9 @@ from dandiapi.api.views.serializers import (
     VersionMetadataSerializer,
 )
 from dandiapi.search.models import AssetSearch
+
+if TYPE_CHECKING:
+    from rest_framework.request import Request
 
 
 class DandisetFilterBackend(filters.OrderingFilter):
@@ -52,14 +63,14 @@ class DandisetFilterBackend(filters.OrderingFilter):
             # ordering can be either 'created' or '-created', so test for both
             if ordering.endswith('id'):
                 return queryset.order_by(ordering)
-            elif ordering.endswith('name'):
+            if ordering.endswith('name'):
                 # name refers to the name of the most recent version, so a subquery is required
                 latest_version = Version.objects.filter(dandiset=OuterRef('pk')).order_by(
                     '-created'
                 )[:1]
                 queryset = queryset.annotate(name=Subquery(latest_version.values('metadata__name')))
                 return queryset.order_by(ordering)
-            elif ordering.endswith('modified'):
+            if ordering.endswith('modified'):
                 # modified refers to the modification timestamp of the most
                 # recent version, so a subquery is required
                 latest_version = Version.objects.filter(dandiset=OuterRef('pk')).order_by(
@@ -71,7 +82,7 @@ class DandisetFilterBackend(filters.OrderingFilter):
                     modified_version=Subquery(latest_version.values('modified'))
                 )
                 return queryset.order_by(f'{ordering}_version')
-            elif ordering.endswith('size'):
+            if ordering.endswith('size'):
                 latest_version = Version.objects.filter(dandiset=OuterRef('pk')).order_by(
                     '-created'
                 )[:1]
@@ -79,7 +90,6 @@ class DandisetFilterBackend(filters.OrderingFilter):
                     size=Subquery(
                         latest_version.annotate(
                             size=Coalesce(Sum('assets__blob__size'), 0)
-                            + Coalesce(Sum('assets__embargoed_blob__size'), 0)
                             + Coalesce(Sum('assets__zarr__size'), 0)
                         ).values('size')
                     )
@@ -93,6 +103,7 @@ class DandisetViewSet(ReadOnlyModelViewSet):
     pagination_class = DandiPagination
     filter_backends = [filters.SearchFilter, DandisetFilterBackend]
     search_fields = ['versions__metadata']
+    permission_classes = [IsApproved]
 
     lookup_value_regex = Dandiset.IDENTIFIER_REGEX
     # This is to maintain consistency with the auto-generated names shown in swagger.
@@ -119,6 +130,10 @@ class DandisetViewSet(ReadOnlyModelViewSet):
             show_draft: bool = query_serializer.validated_data['draft']
             show_empty: bool = query_serializer.validated_data['empty']
             show_embargoed: bool = query_serializer.validated_data['embargoed']
+
+            # Return early if attempting to access embargoed data without authentication
+            if show_embargoed and not self.request.user.is_authenticated:
+                raise UnauthorizedEmbargoAccessError
 
             if not show_draft:
                 # Only include dandisets that have more than one version, i.e. published dandisets.
@@ -147,8 +162,8 @@ class DandisetViewSet(ReadOnlyModelViewSet):
         lookup_url = self.kwargs[self.lookup_url_kwarg]
         try:
             lookup_value = int(lookup_url)
-        except ValueError:
-            raise Http404('Not a valid identifier.')
+        except ValueError as e:
+            raise Http404('Not a valid identifier.') from e
         self.kwargs[self.lookup_url_kwarg] = lookup_value
 
         dandiset = super().get_object()
@@ -237,9 +252,9 @@ class DandisetViewSet(ReadOnlyModelViewSet):
             .filter(dandiset_id__in=[dandiset.id for dandiset in dandisets])
             .annotate(
                 **{
-                    filter_name: Count('asset_id', filter=filter)
-                    for filter_name, filter in query_filters.items()
-                    if filter != Q()
+                    query_filter_name: Count('asset_id', filter=query_filter_q)
+                    for query_filter_name, query_filter_q in query_filters.items()
+                    if query_filter_q != Q()
                 }
             )
         )
@@ -336,7 +351,7 @@ class DandisetViewSet(ReadOnlyModelViewSet):
     @method_decorator(permission_required_or_403('owner', (Dandiset, 'pk', 'dandiset__pk')))
     def unembargo(self, request, dandiset__pk):
         dandiset: Dandiset = get_object_or_404(Dandiset, pk=dandiset__pk)
-        unembargo_dandiset(user=request.user, dandiset=dandiset)
+        kickoff_dandiset_unembargo(user=request.user, dandiset=dandiset)
 
         return Response(None, status=status.HTTP_200_OK)
 
@@ -361,9 +376,12 @@ class DandisetViewSet(ReadOnlyModelViewSet):
     )
     # TODO: move these into a viewset
     @action(methods=['GET', 'PUT'], detail=True)
-    def users(self, request, dandiset__pk):
-        dandiset = self.get_object()
+    def users(self, request, dandiset__pk):  # noqa: C901
+        dandiset: Dandiset = self.get_object()
         if request.method == 'PUT':
+            if dandiset.unembargo_in_progress:
+                raise DandisetUnembargoInProgressError
+
             # Verify that the user is currently an owner
             response = get_40x_or_None(request, ['owner'], dandiset, return_403=True)
             if response:
@@ -372,42 +390,50 @@ class DandisetViewSet(ReadOnlyModelViewSet):
             serializer = UserSerializer(data=request.data, many=True)
             serializer.is_valid(raise_exception=True)
 
-            def get_user_or_400(username):
-                # SocialAccount uses the generic JSONField instead of the PostGres JSONFIELD,
-                # so it is not empowered to do a more powerful query like:
-                # SocialAccount.objects.get(extra_data__login=username)
-                # We resort to doing this awkward search instead.
-                for social_account in SocialAccount.objects.filter(extra_data__icontains=username):
-                    if social_account.extra_data['login'] == username:
-                        return social_account.user
-                else:
-                    try:
-                        return User.objects.get(username=username)
-                    except ObjectDoesNotExist:
-                        raise ValidationError(f'User {username} not found')
-
-            owners = [
-                get_user_or_400(username=owner['username']) for owner in serializer.validated_data
-            ]
-            if len(owners) < 1:
+            # Ensure not all owners removed
+            if not serializer.validated_data:
                 raise ValidationError('Cannot remove all draft owners')
 
+            # Get all owners that have the provided username in one of the two possible locations
+            usernames = [owner['username'] for owner in serializer.validated_data]
+            user_owners = list(User.objects.filter(username__in=usernames))
+            socialaccount_owners = list(
+                SocialAccount.objects.select_related('user').filter(extra_data__login__in=usernames)
+            )
+
+            # Check that all owners were found
+            if len(user_owners) + len(socialaccount_owners) < len(usernames):
+                username_set = {
+                    *(user.username for user in user_owners),
+                    *(owner.extra_data['login'] for owner in socialaccount_owners),
+                }
+
+                # Raise exception on first username in list that's not found
+                for username in usernames:
+                    if username not in username_set:
+                        raise ValidationError(f'User {username} not found')
+
+            # All owners found
+            owners = user_owners + [acc.user for acc in socialaccount_owners]
             removed_owners, added_owners = dandiset.set_owners(owners)
             dandiset.save()
 
             send_ownership_change_emails(dandiset, removed_owners, added_owners)
 
         owners = []
-        for owner in dandiset.owners:
+        for owner_user in dandiset.owners:
             try:
-                owner = SocialAccount.objects.get(user=owner)
-                owner_dict = {'username': owner.extra_data['login']}
-                if 'name' in owner.extra_data:
-                    owner_dict['name'] = owner.extra_data['name']
+                owner_account = SocialAccount.objects.get(user=owner_user)
+                owner_dict = {'username': owner_account.extra_data['login']}
+                if 'name' in owner_account.extra_data:
+                    owner_dict['name'] = owner_account.extra_data['name']
                 owners.append(owner_dict)
             except SocialAccount.DoesNotExist:
                 # Just in case some users aren't using social accounts, have a fallback
                 owners.append(
-                    {'username': owner.username, 'name': f'{owner.first_name} {owner.last_name}'}
+                    {
+                        'username': owner_user.username,
+                        'name': f'{owner_user.first_name} {owner_user.last_name}',
+                    }
                 )
         return Response(owners, status=status.HTTP_200_OK)

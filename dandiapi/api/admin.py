@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 import csv
+from typing import TYPE_CHECKING
 
 from allauth.socialaccount.models import SocialAccount
 from django.contrib import admin, messages
@@ -8,7 +11,6 @@ from django.contrib.auth.models import User
 from django.db.models.aggregates import Count
 from django.db.models.query import Prefetch, QuerySet
 from django.forms.models import BaseInlineFormSet
-from django.http.request import HttpRequest
 from django.http.response import HttpResponse
 from django.urls import reverse
 from django.utils.html import format_html
@@ -18,13 +20,18 @@ from dandiapi.api.models import (
     Asset,
     AssetBlob,
     Dandiset,
-    EmbargoedAssetBlob,
     Upload,
     UserMetadata,
     Version,
+    WebKnossosAnnotation,
+    WebKnossosDataset,
+    WebKnossosDataLayer
 )
 from dandiapi.api.views.users import social_account_to_dict
 from dandiapi.zarr.tasks import ingest_dandiset_zarrs
+
+if TYPE_CHECKING:
+    from django.http.request import HttpRequest
 
 admin.site.site_header = 'DANDI Admin'
 admin.site.site_title = 'DANDI Admin'
@@ -32,11 +39,22 @@ admin.site.site_title = 'DANDI Admin'
 
 class UserMetadataInline(TabularInline):
     model = UserMetadata
-    fields = ['status', 'questionnaire_form', 'rejection_reason']
-
+    fields = ['status', 'webknossos_credential', 'questionnaire_form', 'rejection_reason']
 
 class SocialAccountInline(TabularInline):
     model = SocialAccount
+
+@admin.register(WebKnossosAnnotation)
+class WebKnossosAnnotationAdmin(admin.ModelAdmin):
+    model = WebKnossosAnnotation
+
+@admin.register(WebKnossosDataset)
+class WebKnossosDatasetAdmin(admin.ModelAdmin):
+    model = WebKnossosDataset
+
+@admin.register(WebKnossosDataLayer)
+class WebKnossosDataLayerAdmin(admin.ModelAdmin):
+    model = WebKnossosDataLayer
 
 
 class UserAdmin(BaseUserAdmin):
@@ -59,7 +77,7 @@ class UserAdmin(BaseUserAdmin):
             )
         )
 
-    @admin.action(description="Export selected users\' emails")
+    @admin.action(description="Export selected users' emails")
     def export_emails_to_plaintext(self, request, queryset):
         response = HttpResponse(content_type='text/plain')
         writer = csv.writer(response)
@@ -142,6 +160,7 @@ class VersionStatusFilter(admin.SimpleListFilter):
         status = self.value()
         if status:
             return queryset.filter(status=status)
+        return None
 
 
 @admin.register(Version)
@@ -182,33 +201,17 @@ class AssetBlobAdmin(admin.ModelAdmin):
         return super().get_queryset(request).prefetch_related('assets')
 
 
-@admin.register(EmbargoedAssetBlob)
-class EmbargoedAssetBlobAdmin(AssetBlobAdmin):
-    list_display = [
-        'id',
-        'blob_id',
-        'dandiset',
-        'blob',
-        'references',
-        'size',
-        'sha256',
-        'modified',
-        'created',
-    ]
-
-
 class AssetBlobInline(LimitedTabularInline):
     model = AssetBlob
 
 
 @admin.register(Asset)
 class AssetAdmin(admin.ModelAdmin):
-    autocomplete_fields = ['blob', 'embargoed_blob', 'zarr', 'versions']
+    autocomplete_fields = ['blob', 'zarr', 'versions']
     fields = [
         'asset_id',
         'path',
         'blob',
-        'embargoed_blob',
         'zarr',
         'metadata',
         'versions',

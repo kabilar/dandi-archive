@@ -1,10 +1,13 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from django.conf import settings
 from django.core.files.storage import Storage
 from minio_storage.storage import MinioStorage
 import pytest
 from pytest_factoryboy import register
 from rest_framework.test import APIClient
-from storages.backends.s3 import S3Storage
 
 from dandiapi.api.storage import create_s3_storage
 from dandiapi.api.tests.factories import (
@@ -23,12 +26,16 @@ from dandiapi.api.tests.factories import (
 from dandiapi.zarr.tests.factories import ZarrArchiveFactory
 from dandiapi.zarr.tests.utils import upload_zarr_file
 
+if TYPE_CHECKING:
+    from django.core.files.storage import Storage
+    from minio_storage.storage import MinioStorage
+    from storages.backends.s3 import S3Storage
+
 register(PublishedAssetFactory, _name='published_asset')
 register(DraftAssetFactory, _name='draft_asset')
 register(AssetBlobFactory)
-register(EmbargoedAssetBlobFactory)
+register(EmbargoedAssetBlobFactory, _name='embargoed_asset_blob')
 register(DandisetFactory)
-register(EmbargoedAssetBlobFactory)
 register(EmbargoedUploadFactory)
 register(PublishedVersionFactory, _name='published_version')
 register(DraftVersionFactory, _name='draft_version')
@@ -84,16 +91,12 @@ def authenticated_api_client(user) -> APIClient:
 # storage fixtures are copied from django-s3-file-field test fixtures
 
 
-def base_s3boto3_storage_factory(bucket_name: str) -> 'S3Storage':
+def base_s3_storage_factory(bucket_name: str) -> S3Storage:
     return create_s3_storage(bucket_name)
 
 
-def s3boto3_storage_factory():
-    return base_s3boto3_storage_factory(settings.DANDI_DANDISETS_BUCKET_NAME)
-
-
-def embargoed_s3boto3_storage_factory():
-    return base_s3boto3_storage_factory(settings.DANDI_DANDISETS_EMBARGO_BUCKET_NAME)
+def s3_storage_factory():
+    return base_s3_storage_factory(settings.DANDI_DANDISETS_BUCKET_NAME)
 
 
 def base_minio_storage_factory(bucket_name: str) -> MinioStorage:
@@ -104,18 +107,9 @@ def minio_storage_factory() -> MinioStorage:
     return base_minio_storage_factory(settings.DANDI_DANDISETS_BUCKET_NAME)
 
 
-def embargoed_minio_storage_factory() -> MinioStorage:
-    return base_minio_storage_factory(settings.DANDI_DANDISETS_EMBARGO_BUCKET_NAME)
-
-
 @pytest.fixture()
-def s3boto3_storage() -> 'S3Storage':
-    return s3boto3_storage_factory()
-
-
-@pytest.fixture()
-def embargoed_s3boto3_storage() -> 'S3Storage':
-    return s3boto3_storage_factory()
+def s3_storage() -> S3Storage:
+    return s3_storage_factory()
 
 
 @pytest.fixture()
@@ -123,15 +117,10 @@ def minio_storage() -> MinioStorage:
     return minio_storage_factory()
 
 
-@pytest.fixture()
-def embargoed_minio_storage() -> MinioStorage:
-    return minio_storage_factory()
-
-
-@pytest.fixture(params=[s3boto3_storage_factory, minio_storage_factory], ids=['s3boto3', 'minio'])
+@pytest.fixture(params=[s3_storage_factory, minio_storage_factory], ids=['s3', 'minio'])
 def storage(request, settings) -> Storage:
     storage_factory = request.param
-    if storage_factory == s3boto3_storage_factory:
+    if storage_factory == s3_storage_factory:
         settings.DEFAULT_FILE_STORAGE = 'storages.backends.s3.S3Storage'
         settings.AWS_S3_ACCESS_KEY_ID = settings.MINIO_STORAGE_ACCESS_KEY
         settings.AWS_S3_SECRET_ACCESS_KEY = settings.MINIO_STORAGE_SECRET_KEY
@@ -150,24 +139,3 @@ def storage(request, settings) -> Storage:
         )
 
     return storage_factory()
-
-
-@pytest.fixture(
-    params=[embargoed_s3boto3_storage_factory, embargoed_minio_storage_factory],
-    ids=['s3boto3', 'minio'],
-)
-def embargoed_storage(request) -> Storage:
-    storage_factory = request.param
-    return storage_factory()
-
-
-@pytest.fixture(
-    params=[
-        (s3boto3_storage_factory, embargoed_s3boto3_storage_factory),
-        (minio_storage_factory, embargoed_minio_storage_factory),
-    ],
-    ids=['s3boto3', 'minio'],
-)
-def storage_tuple(request) -> tuple[Storage, Storage]:
-    storage_factory, embargoed_storage_factory = request.param
-    return (storage_factory(), embargoed_storage_factory())

@@ -1,4 +1,6 @@
-from datetime import datetime
+from __future__ import annotations
+
+import datetime
 
 from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
@@ -63,23 +65,29 @@ def test_dandiset_manager_visible_to(
 
 
 @pytest.mark.django_db()
-def test_dandiset_rest_list(api_client, dandiset):
-    assert api_client.get('/api/dandisets/', {'draft': 'true', 'empty': 'true'}).json() == {
-        'count': 1,
-        'next': None,
-        'previous': None,
-        'results': [
-            {
-                'identifier': dandiset.identifier,
-                'created': TIMESTAMP_RE,
-                'modified': TIMESTAMP_RE,
-                'draft_version': None,
-                'most_recent_published_version': None,
-                'contact_person': '',
-                'embargo_status': 'OPEN',
-            }
-        ],
-    }
+def test_dandiset_rest_list(api_client, dandiset, user):
+    # # Test un-authenticated request
+    # assert api_client.get('/api/dandisets/', {'draft': 'true', 'empty': 'true'}).json() == {
+    #     'count': 1,
+    #     'next': None,
+    #     'previous': None,
+    #     'results': [
+    #         {
+    #             'identifier': dandiset.identifier,
+    #             'created': TIMESTAMP_RE,
+    #             'modified': TIMESTAMP_RE,
+    #             'draft_version': None,
+    #             'most_recent_published_version': None,
+    #             'contact_person': '',
+    #             'embargo_status': 'OPEN',
+    #         }
+    #     ],
+    # }
+    r = api_client.get('/api/dandisets/', {'draft': 'true', 'empty': 'true', 'embargoed': 'true'})
+    assert r.status_code == 401
+    api_client.force_authenticate(user=user)
+    r = api_client.get('/api/dandisets/', {'draft': 'true', 'empty': 'true', 'embargoed': 'true'})
+    assert r.status_code == 200
 
 
 @pytest.mark.parametrize(
@@ -105,12 +113,14 @@ def test_dandiset_rest_list(api_client, dandiset):
 def test_dandiset_versions(
     api_client,
     dandiset_factory,
+    user_factory,
     draft_version_factory,
     published_version_factory,
     asset_factory,
     params,
     results,
 ):
+    api_client.force_authenticate(user=user_factory())
     # Create some dandisets of different kinds.
     #
     # Dandiset with empty draft
@@ -150,28 +160,32 @@ def test_dandiset_versions(
             'modified': TIMESTAMP_RE,
             'contact_person': contact_person,
             'embargo_status': 'OPEN',
-            'draft_version': {
-                'version': draft_version.version,
-                'name': draft_version.name,
-                'asset_count': draft_version.asset_count,
-                'size': draft_version.size,
-                'status': 'Pending',
-                'created': TIMESTAMP_RE,
-                'modified': TIMESTAMP_RE,
-            }
-            if draft_version is not None
-            else None,
-            'most_recent_published_version': {
-                'version': published_version.version,
-                'name': published_version.name,
-                'asset_count': published_version.asset_count,
-                'size': published_version.size,
-                'status': 'Pending',
-                'created': TIMESTAMP_RE,
-                'modified': TIMESTAMP_RE,
-            }
-            if published_version is not None
-            else None,
+            'draft_version': (
+                {
+                    'version': draft_version.version,
+                    'name': draft_version.name,
+                    'asset_count': draft_version.asset_count,
+                    'size': draft_version.size,
+                    'status': 'Pending',
+                    'created': TIMESTAMP_RE,
+                    'modified': TIMESTAMP_RE,
+                }
+                if draft_version is not None
+                else None
+            ),
+            'most_recent_published_version': (
+                {
+                    'version': published_version.version,
+                    'name': published_version.name,
+                    'asset_count': published_version.asset_count,
+                    'size': published_version.size,
+                    'status': 'Pending',
+                    'created': TIMESTAMP_RE,
+                    'modified': TIMESTAMP_RE,
+                }
+                if published_version is not None
+                else None
+            ),
         }
 
     possible_results = {
@@ -217,7 +231,8 @@ def test_dandiset_rest_list_for_user(api_client, user, dandiset_factory):
 
 
 @pytest.mark.django_db()
-def test_dandiset_rest_retrieve(api_client, dandiset):
+def test_dandiset_rest_retrieve(api_client, dandiset, user_factory):
+    api_client.force_authenticate(user=user_factory())
     assert api_client.get(f'/api/dandisets/{dandiset.identifier}/').data == {
         'identifier': dandiset.identifier,
         'created': TIMESTAMP_RE,
@@ -240,6 +255,7 @@ def test_dandiset_rest_embargo_access(
 ):
     owner = user_factory()
     unauthorized_user = user_factory()
+    api_client.force_authenticate(user=user_factory())
     dandiset = dandiset_factory(embargo_status=embargo_status)
     assign_perm('owner', owner, dandiset)
 
@@ -303,7 +319,10 @@ def test_dandiset_rest_embargo_access(
         api_client.get(f'/api/dandisets/{dandiset.identifier}/').json()
         == expected_dandiset_serialization
     )
-    assert api_client.get('/api/dandisets/').json() == expected_visible_pagination
+    assert (
+        api_client.get('/api/dandisets/', {'embargoed': 'true'}).json()
+        == expected_visible_pagination
+    )
 
 
 @pytest.mark.django_db()
@@ -342,11 +361,11 @@ def test_dandiset_rest_create(api_client, user):
         },
         'most_recent_published_version': None,
     }
-    id = int(response.data['identifier'])
+    dandiset_id = int(response.data['identifier'])
 
     # Creating a Dandiset has side affects.
     # Verify that the user is the only owner.
-    dandiset = Dandiset.objects.get(id=id)
+    dandiset = Dandiset.objects.get(id=dandiset_id)
     assert list(dandiset.owners.all()) == [user]
 
     # Verify that a draft Version and VersionMetadata were also created.
@@ -357,12 +376,12 @@ def test_dandiset_rest_create(api_client, user):
     assert dandiset.draft_version.status == Version.Status.PENDING
 
     # Verify that computed metadata was injected
-    year = datetime.now().year
+    year = datetime.datetime.now(datetime.UTC).year
     url = f'{settings.DANDI_WEB_APP_URL}/dandiset/{dandiset.identifier}/draft'
     assert dandiset.draft_version.metadata == {
         **metadata,
         'manifestLocation': [
-            f'{settings.DANDI_API_URL}/api/dandisets/{dandiset.identifier}/versions/draft/assets/'  # noqa: E501
+            f'{settings.DANDI_API_URL}/api/dandisets/{dandiset.identifier}/versions/draft/assets/'
         ],
         'name': name,
         'identifier': DANDISET_SCHEMA_ID_RE,
@@ -374,7 +393,7 @@ def test_dandiset_rest_create(api_client, user):
             f'{user.last_name}, {user.first_name} ({year}) {name} '
             f'(Version draft) [Data set]. DANDI archive. {url}'
         ),
-        '@context': f'https://raw.githubusercontent.com/dandi/schema/master/releases/{settings.DANDI_SCHEMA_VERSION}/context.json',  # noqa: E501
+        '@context': f'https://raw.githubusercontent.com/dandi/schema/master/releases/{settings.DANDI_SCHEMA_VERSION}/context.json',
         'schemaVersion': settings.DANDI_SCHEMA_VERSION,
         'schemaKey': 'Dandiset',
         'access': [{'schemaKey': 'AccessRequirements', 'status': 'dandi:OpenAccess'}],
@@ -450,12 +469,12 @@ def test_dandiset_rest_create_with_identifier(api_client, admin_user):
     assert dandiset.draft_version.status == Version.Status.PENDING
 
     # Verify that computed metadata was injected
-    year = datetime.now().year
+    year = datetime.datetime.now(datetime.UTC).year
     url = f'{settings.DANDI_WEB_APP_URL}/dandiset/{dandiset.identifier}/draft'
     assert dandiset.draft_version.metadata == {
         **metadata,
         'manifestLocation': [
-            f'{settings.DANDI_API_URL}/api/dandisets/{dandiset.identifier}/versions/draft/assets/'  # noqa: E501
+            f'{settings.DANDI_API_URL}/api/dandisets/{dandiset.identifier}/versions/draft/assets/'
         ],
         'name': name,
         'identifier': f'DANDI:{identifier}',
@@ -467,7 +486,7 @@ def test_dandiset_rest_create_with_identifier(api_client, admin_user):
             f'{admin_user.last_name}, {admin_user.first_name} ({year}) {name} '
             f'(Version draft) [Data set]. DANDI archive. {url}'
         ),
-        '@context': f'https://raw.githubusercontent.com/dandi/schema/master/releases/{settings.DANDI_SCHEMA_VERSION}/context.json',  # noqa: E501
+        '@context': f'https://raw.githubusercontent.com/dandi/schema/master/releases/{settings.DANDI_SCHEMA_VERSION}/context.json',
         'schemaVersion': settings.DANDI_SCHEMA_VERSION,
         'schemaKey': 'Dandiset',
         'access': [{'schemaKey': 'AccessRequirements', 'status': 'dandi:OpenAccess'}],
@@ -557,12 +576,12 @@ def test_dandiset_rest_create_with_contributor(api_client, admin_user):
     assert dandiset.draft_version.status == Version.Status.PENDING
 
     # Verify that computed metadata was injected
-    year = datetime.now().year
+    year = datetime.datetime.now(datetime.UTC).year
     url = f'{settings.DANDI_WEB_APP_URL}/dandiset/{dandiset.identifier}/draft'
     assert dandiset.draft_version.metadata == {
         **metadata,
         'manifestLocation': [
-            f'{settings.DANDI_API_URL}/api/dandisets/{dandiset.identifier}/versions/draft/assets/'  # noqa: E501
+            f'{settings.DANDI_API_URL}/api/dandisets/{dandiset.identifier}/versions/draft/assets/'
         ],
         'name': name,
         'identifier': f'DANDI:{identifier}',
@@ -573,7 +592,7 @@ def test_dandiset_rest_create_with_contributor(api_client, admin_user):
         'citation': (
             f'Jane Doe ({year}) {name} ' f'(Version draft) [Data set]. DANDI archive. {url}'
         ),
-        '@context': f'https://raw.githubusercontent.com/dandi/schema/master/releases/{settings.DANDI_SCHEMA_VERSION}/context.json',  # noqa: E501
+        '@context': f'https://raw.githubusercontent.com/dandi/schema/master/releases/{settings.DANDI_SCHEMA_VERSION}/context.json',
         'schemaVersion': settings.DANDI_SCHEMA_VERSION,
         'schemaKey': 'Dandiset',
         'access': [{'schemaKey': 'AccessRequirements', 'status': 'dandi:OpenAccess'}],
@@ -632,11 +651,11 @@ def test_dandiset_rest_create_embargoed(api_client, user):
         },
         'most_recent_published_version': None,
     }
-    id = int(response.data['identifier'])
+    dandiset_id = int(response.data['identifier'])
 
     # Creating a Dandiset has side affects.
     # Verify that the user is the only owner.
-    dandiset = Dandiset.objects.get(id=id)
+    dandiset = Dandiset.objects.get(id=dandiset_id)
     assert list(dandiset.owners.all()) == [user]
 
     # Verify that a draft Version and VersionMetadata were also created.
@@ -647,12 +666,12 @@ def test_dandiset_rest_create_embargoed(api_client, user):
     assert dandiset.draft_version.status == Version.Status.PENDING
 
     # Verify that computed metadata was injected
-    year = datetime.now().year
+    year = datetime.datetime.now(datetime.UTC).year
     url = f'{settings.DANDI_WEB_APP_URL}/dandiset/{dandiset.identifier}/draft'
     assert dandiset.draft_version.metadata == {
         **metadata,
         'manifestLocation': [
-            f'{settings.DANDI_API_URL}/api/dandisets/{dandiset.identifier}/versions/draft/assets/'  # noqa: E501
+            f'{settings.DANDI_API_URL}/api/dandisets/{dandiset.identifier}/versions/draft/assets/'
         ],
         'name': name,
         'identifier': DANDISET_SCHEMA_ID_RE,
@@ -664,7 +683,7 @@ def test_dandiset_rest_create_embargoed(api_client, user):
             f'{user.last_name}, {user.first_name} ({year}) {name} '
             f'(Version draft) [Data set]. DANDI archive. {url}'
         ),
-        '@context': f'https://raw.githubusercontent.com/dandi/schema/master/releases/{settings.DANDI_SCHEMA_VERSION}/context.json',  # noqa: E501
+        '@context': f'https://raw.githubusercontent.com/dandi/schema/master/releases/{settings.DANDI_SCHEMA_VERSION}/context.json',
         'schemaVersion': settings.DANDI_SCHEMA_VERSION,
         'schemaKey': 'Dandiset',
         'access': [{'schemaKey': 'AccessRequirements', 'status': 'dandi:EmbargoedAccess'}],
@@ -720,20 +739,42 @@ def test_dandiset_rest_create_with_invalid_identifier(api_client, admin_user):
 
 
 @pytest.mark.parametrize(
-    ('embargo_status'),
-    [choice[0] for choice in Dandiset.EmbargoStatus.choices],
-    ids=[choice[1] for choice in Dandiset.EmbargoStatus.choices],
+    ('embargo_status', 'success'),
+    [
+        (Dandiset.EmbargoStatus.OPEN, True),
+        (Dandiset.EmbargoStatus.EMBARGOED, True),
+        (Dandiset.EmbargoStatus.UNEMBARGOING, False),
+    ],
 )
-@pytest.mark.django_db()
-def test_dandiset_rest_delete(api_client, draft_version_factory, user, embargo_status):
-    draft_version = draft_version_factory(dandiset__embargo_status=embargo_status)
+def test_dandiset_rest_delete(api_client, draft_version_factory, user, embargo_status, success):
     api_client.force_authenticate(user=user)
-    assign_perm('owner', user, draft_version.dandiset)
 
+    # Ensure that open or embargoed dandisets can be deleted
+    draft_version = draft_version_factory(dandiset__embargo_status=embargo_status)
+    assign_perm('owner', user, draft_version.dandiset)
+    response = api_client.delete(f'/api/dandisets/{draft_version.dandiset.identifier}/')
+
+    if success:
+        assert response.status_code == 204
+        assert not Dandiset.objects.all()
+    else:
+        assert response.status_code >= 400
+        assert Dandiset.objects.count() == 1
+
+    draft_version = draft_version_factory(dandiset__embargo_status=Dandiset.EmbargoStatus.EMBARGOED)
+    assign_perm('owner', user, draft_version.dandiset)
     response = api_client.delete(f'/api/dandisets/{draft_version.dandiset.identifier}/')
     assert response.status_code == 204
-
     assert not Dandiset.objects.all()
+
+    # Ensure that currently unembargoing dandisets can't be deleted
+    draft_version = draft_version_factory(
+        dandiset__embargo_status=Dandiset.EmbargoStatus.UNEMBARGOING
+    )
+    assign_perm('owner', user, draft_version.dandiset)
+    response = api_client.delete(f'/api/dandisets/{draft_version.dandiset.identifier}/')
+    assert response.status_code == 400
+    assert Dandiset.objects.count() == 1
 
 
 @pytest.mark.django_db()
@@ -747,7 +788,7 @@ def test_dandiset_rest_delete_with_zarrs(
     api_client.force_authenticate(user=user)
     assign_perm('owner', user, draft_version.dandiset)
     zarr = zarr_archive_factory(dandiset=draft_version.dandiset)
-    asset = draft_asset_factory(blob=None, embargoed_blob=None, zarr=zarr)
+    asset = draft_asset_factory(blob=None, zarr=zarr)
 
     # Add paths
     add_asset_paths(asset=asset, version=draft_version)
@@ -792,9 +833,9 @@ def test_dandiset_rest_delete_published_admin(api_client, published_version, adm
 
 
 @pytest.mark.django_db()
-def test_dandiset_rest_get_owners(api_client, dandiset, social_account):
+def test_dandiset_rest_get_owners(api_client, user_factory, dandiset, social_account):
     assign_perm('owner', social_account.user, dandiset)
-
+    api_client.force_authenticate(user=user_factory())
     resp = api_client.get(f'/api/dandisets/{dandiset.identifier}/users/')
 
     assert resp.status_code == 200
@@ -807,23 +848,29 @@ def test_dandiset_rest_get_owners(api_client, dandiset, social_account):
 
 
 @pytest.mark.django_db()
-def test_dandiset_rest_get_owners_no_social_account(api_client, dandiset, user):
+def test_dandiset_rest_get_owners_no_social_account(api_client, user_factory, dandiset, user):
     assign_perm('owner', user, dandiset)
-
+    api_client.force_authenticate(user=user_factory())
     resp = api_client.get(f'/api/dandisets/{dandiset.identifier}/users/')
 
     assert resp.status_code == 200
     assert resp.data == [{'username': user.username, 'name': f'{user.first_name} {user.last_name}'}]
 
 
+@pytest.mark.parametrize(
+    'embargo_status',
+    [Dandiset.EmbargoStatus.OPEN, Dandiset.EmbargoStatus.EMBARGOED],
+)
 @pytest.mark.django_db()
 def test_dandiset_rest_change_owner(
     api_client,
-    draft_version,
+    draft_version_factory,
     user_factory,
     social_account_factory,
     mailoutbox,
+    embargo_status,
 ):
+    draft_version = draft_version_factory(dandiset__embargo_status=embargo_status)
     dandiset = draft_version.dandiset
     user1 = user_factory()
     user2 = user_factory()
@@ -847,10 +894,41 @@ def test_dandiset_rest_change_owner(
     assert list(dandiset.owners) == [user2]
 
     assert len(mailoutbox) == 2
-    assert mailoutbox[0].subject == f'Removed from Dandiset "{dandiset.draft_version.name}"'
+    assert mailoutbox[0].subject == f'Removed from dataset "{dandiset.draft_version.name}"'
     assert mailoutbox[0].to == [user1.email]
-    assert mailoutbox[1].subject == f'Added to Dandiset "{dandiset.draft_version.name}"'
+    assert mailoutbox[1].subject == f'Added to dataset "{dandiset.draft_version.name}"'
     assert mailoutbox[1].to == [user2.email]
+
+
+@pytest.mark.django_db()
+def test_dandiset_rest_change_owners_unembargo_in_progress(
+    api_client,
+    draft_version_factory,
+    user_factory,
+    social_account_factory,
+):
+    """Test that a dandiset undergoing unembargo prevents user modification."""
+    draft_version = draft_version_factory(
+        dandiset__embargo_status=Dandiset.EmbargoStatus.UNEMBARGOING
+    )
+    dandiset = draft_version.dandiset
+    user1 = user_factory()
+    user2 = user_factory()
+    social_account1 = social_account_factory(user=user1)
+    social_account2 = social_account_factory(user=user2)
+    assign_perm('owner', user1, dandiset)
+    api_client.force_authenticate(user=user1)
+
+    resp = api_client.put(
+        f'/api/dandisets/{dandiset.identifier}/users/',
+        [
+            {'username': social_account1.extra_data['login']},
+            {'username': social_account2.extra_data['login']},
+        ],
+        format='json',
+    )
+
+    assert resp.status_code == 400
 
 
 @pytest.mark.django_db()
@@ -892,7 +970,7 @@ def test_dandiset_rest_add_owner(
     assert list(dandiset.owners) == [user1, user2]
 
     assert len(mailoutbox) == 1
-    assert mailoutbox[0].subject == f'Added to Dandiset "{dandiset.draft_version.name}"'
+    assert mailoutbox[0].subject == f'Added to dataset "{dandiset.draft_version.name}"'
     assert mailoutbox[0].to == [user2.email]
 
 
@@ -928,7 +1006,7 @@ def test_dandiset_rest_remove_owner(
     assert list(dandiset.owners) == [user1]
 
     assert len(mailoutbox) == 1
-    assert mailoutbox[0].subject == f'Removed from Dandiset "{dandiset.draft_version.name}"'
+    assert mailoutbox[0].subject == f'Removed from dataset "{dandiset.draft_version.name}"'
     assert mailoutbox[0].to == [user2.email]
 
 
@@ -988,17 +1066,20 @@ def test_dandiset_rest_add_malformed(api_client, dandiset, user):
 
 
 @pytest.mark.django_db()
-def test_dandiset_rest_search_no_query(api_client):
+def test_dandiset_rest_search_no_query(api_client, user_factory):
+    api_client.force_authenticate(user=user_factory())
     assert api_client.get('/api/dandisets/').data['results'] == []
 
 
 @pytest.mark.django_db()
-def test_dandiset_rest_search_empty_query(api_client):
+def test_dandiset_rest_search_empty_query(api_client, user_factory):
+    api_client.force_authenticate(user=user_factory())
     assert api_client.get('/api/dandisets/', {'search': ''}).data['results'] == []
 
 
 @pytest.mark.django_db()
-def test_dandiset_rest_search_identifier(api_client, draft_version):
+def test_dandiset_rest_search_identifier(api_client, user_factory, draft_version):
+    api_client.force_authenticate(user=user_factory())
     results = api_client.get(
         '/api/dandisets/',
         {'search': draft_version.dandiset.identifier, 'draft': 'true', 'empty': 'true'},
@@ -1010,3 +1091,22 @@ def test_dandiset_rest_search_identifier(api_client, draft_version):
 
     assert results[0]['draft_version']['version'] == draft_version.version
     assert results[0]['draft_version']['name'] == draft_version.name
+
+
+@pytest.mark.django_db()
+@pytest.mark.parametrize(
+    'contributors',
+    [None, 'string', 1, [], {}],
+)
+def test_dandiset_contact_person_malformed_contributors(
+    api_client, user_factory, draft_version, contributors
+):
+    api_client.force_authenticate(user=user_factory())
+    draft_version.metadata['contributor'] = contributors
+    draft_version.save()
+
+    results = api_client.get(
+        f'/api/dandisets/{draft_version.dandiset.identifier}/',
+    )
+
+    assert results.data['draft_version']['dandiset']['contact_person'] == ''

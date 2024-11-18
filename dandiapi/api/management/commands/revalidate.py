@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import djclick as click
 
 from dandiapi.api.models import Asset, Version
@@ -9,7 +11,7 @@ from dandiapi.api.services.metadata import validate_asset_metadata, validate_ver
 @click.option('--versions', is_flag=True, default=False)
 @click.option('--revalidate-all', is_flag=True, default=False)
 @click.option('--dry-run', is_flag=True, default=False)
-def revalidate(assets: bool, versions: bool, revalidate_all: bool, dry_run: bool):
+def revalidate(*, assets: bool, versions: bool, revalidate_all: bool, dry_run: bool):
     """
     Revalidate all Versions and Assets.
 

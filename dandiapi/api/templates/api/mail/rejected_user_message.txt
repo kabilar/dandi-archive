@@ -1,15 +1,15 @@
 {% autoescape off %}
 Dear {{ greeting_name }},
 
-Your DANDI account has been denied approval.
+Your LINC account has been denied approval.
 {% if rejection_reason %}
     Reason:
     {{ rejection_reason }}
 {% endif %}
 
-If you would like to appeal this decision, please contact the DANDI admins at help@dandiarchive.org.
+If you would like to appeal this decision, please contact the DANDI admins at help@lincbrain.org.
 
 Sincerely,
 
-The DANDI team
+The LINC team
 {% endautoescape %}

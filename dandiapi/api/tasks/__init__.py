@@ -1,7 +1,11 @@
+from __future__ import annotations
+
 from celery import shared_task
 from celery.utils.log import get_task_logger
+import requests
 
 from dandiapi.api.doi import delete_doi
+from dandiapi.api.mail import send_dandiset_unembargo_failed_message
 from dandiapi.api.manifests import (
     write_assets_jsonld,
     write_assets_yaml,
@@ -9,26 +13,29 @@ from dandiapi.api.manifests import (
     write_dandiset_jsonld,
     write_dandiset_yaml,
 )
-from dandiapi.api.models import Asset, AssetBlob, Dandiset, EmbargoedAssetBlob, Version
+from dandiapi.api.models import Asset, AssetBlob, Version
+from dandiapi.api.models.dandiset import Dandiset
 
 logger = get_task_logger(__name__)
 
 
+@shared_task(soft_time_limit=60)
+def remove_asset_blob_embargoed_tag_task(blob_id: str) -> None:
+    from dandiapi.api.services.embargo import remove_asset_blob_embargoed_tag
+
+    asset_blob = AssetBlob.objects.get(blob_id=blob_id)
+    remove_asset_blob_embargoed_tag(asset_blob)
+
+
 @shared_task(queue='calculate_sha256', soft_time_limit=86_400)
 def calculate_sha256(blob_id: str) -> None:
-    try:
-        asset_blob = AssetBlob.objects.get(blob_id=blob_id)
-        logger.info(f'Found AssetBlob {blob_id}')
-    except AssetBlob.DoesNotExist:
-        asset_blob = EmbargoedAssetBlob.objects.get(blob_id=blob_id)
-        logger.info(f'Found EmbargoedAssetBlob {blob_id}')
-
+    asset_blob = AssetBlob.objects.get(blob_id=blob_id)
+    logger.info('Found AssetBlob %s', blob_id)
     sha256 = asset_blob.blob.storage.sha256_checksum(asset_blob.blob.name)
 
     # TODO: Run dandi-cli validation
 
-    asset_blob.sha256 = sha256
-    asset_blob.save()
+    AssetBlob.objects.filter(blob_id=blob_id).update(sha256=sha256)
 
 
 @shared_task(soft_time_limit=180)
@@ -66,15 +73,50 @@ def delete_doi_task(doi: str) -> None:
 
 
 @shared_task
-def unembargo_dandiset_task(dandiset_id: int):
-    from dandiapi.api.services.embargo import _unembargo_dandiset
-
-    dandiset = Dandiset.objects.get(id=dandiset_id)
-    _unembargo_dandiset(dandiset)
-
-
-@shared_task
 def publish_dandiset_task(dandiset_id: int):
     from dandiapi.api.services.publish import _publish_dandiset
 
     _publish_dandiset(dandiset_id=dandiset_id)
+
+
+@shared_task
+def register_external_api_request_task(method: str, external_endpoint: str, payload: dict = None,
+                                       query_params: dict = None):
+    headers = {
+        'Content-Type': 'application/json',
+    }
+    try:
+        if method.upper() == 'POST':
+            response = requests.post(external_endpoint, json=payload, headers=headers, timeout=10)
+            response.raise_for_status()
+            logger.info(f"POST to {external_endpoint} successful with payload: {payload}")
+            logger.info(f"Response: {response.status_code}, {response.text}")
+        elif method.upper() == 'GET':
+            response = requests.get(external_endpoint, params=query_params, headers=headers,
+                                    timeout=10)
+            logger.info(f"GET to {external_endpoint} successful")
+            logger.info(f"Response: {response.status_code}, {response.headers}")
+            return {'status_code': response.status_code, 'headers': response.headers}
+        else:
+            logger.error("Unsupported HTTP method: %s", method)
+            return
+    except requests.exceptions.HTTPError as http_err:
+        logger.error(f"HTTP error occurred: {http_err}")
+        logger.error(f"Response content: {response.text}")  # Log response in case of error
+    except requests.exceptions.RequestException as req_err:
+        logger.error(f"Request exception occurred: {req_err}")
+    except Exception as err:
+        logger.error(f"An unexpected error occurred: {err}")
+
+@shared_task(soft_time_limit=1200)
+def unembargo_dandiset_task(dandiset_id: int):
+    from dandiapi.api.services.embargo import unembargo_dandiset
+
+    ds = Dandiset.objects.get(pk=dandiset_id)
+
+    # If the unembargo fails for any reason, send an email, but continue the error propagation
+    try:
+        unembargo_dandiset(ds)
+    except Exception:
+        send_dandiset_unembargo_failed_message(ds)
+        raise

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import os
 from pathlib import Path
 
@@ -29,6 +31,12 @@ class DandiMixin(ConfigMixin):
     # Needed for Sentry Performance to work in frontend
     CORS_ALLOW_HEADERS = (*default_headers, 'baggage', 'sentry-trace')
 
+    CORS_ALLOW_CREDENTIALS = True
+    CORS_ALLOWED_ORIGINS = [
+        'https://lincbrain.org',
+        'https://staging.lincbrain.org'
+    ]
+
     @staticmethod
     def mutate_configuration(configuration: type[ComposedConfiguration]):
         # Install local apps first, to ensure any overridden resources are found first
@@ -52,8 +60,6 @@ class DandiMixin(ConfigMixin):
         # Authentication
         configuration.AUTHENTICATION_BACKENDS += ['guardian.backends.ObjectPermissionBackend']
         configuration.REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'] += [
-            # TODO: remove TokenAuthentication, it is only here to support
-            # the setTokenHack login workaround
             'rest_framework.authentication.TokenAuthentication',
         ]
 
@@ -71,13 +77,13 @@ class DandiMixin(ConfigMixin):
         ]
 
         # Pagination
-        configuration.REST_FRAMEWORK[
-            'DEFAULT_PAGINATION_CLASS'
-        ] = 'dandiapi.api.views.common.DandiPagination'
+        configuration.REST_FRAMEWORK['DEFAULT_PAGINATION_CLASS'] = (
+            'dandiapi.api.views.pagination.DandiPagination'
+        )
 
-        configuration.REST_FRAMEWORK[
-            'EXCEPTION_HANDLER'
-        ] = 'dandiapi.drf_utils.rewrap_django_core_exceptions'
+        configuration.REST_FRAMEWORK['EXCEPTION_HANDLER'] = (
+            'dandiapi.drf_utils.rewrap_django_core_exceptions'
+        )
 
         # If this environment variable is set, the pydantic model will allow URLs with localhost
         # in them. This is important for development and testing environments, where URLs will
@@ -88,8 +94,6 @@ class DandiMixin(ConfigMixin):
     DANDI_DANDISETS_BUCKET_NAME = values.Value(environ_required=True)
     DANDI_DANDISETS_BUCKET_PREFIX = values.Value(default='', environ=True)
     DANDI_DANDISETS_LOG_BUCKET_NAME = values.Value(environ_required=True)
-    DANDI_DANDISETS_EMBARGO_BUCKET_NAME = values.Value(environ_required=True)
-    DANDI_DANDISETS_EMBARGO_BUCKET_PREFIX = values.Value(default='', environ=True)
     DANDI_DANDISETS_EMBARGO_LOG_BUCKET_NAME = values.Value(environ_required=True)
     DANDI_ZARR_PREFIX_NAME = values.Value(default='zarr', environ=True)
 
@@ -109,6 +113,7 @@ class DandiMixin(ConfigMixin):
     DANDI_WEB_APP_URL = values.URLValue(environ_required=True)
     DANDI_API_URL = values.URLValue(environ_required=True)
     DANDI_JUPYTERHUB_URL = values.URLValue(environ_required=True)
+    DANDI_DEV_EMAIL = values.EmailValue(environ_required=False)
 
     DANDI_VALIDATION_JOB_INTERVAL = values.IntegerValue(environ=True, default=60)
 
@@ -130,6 +135,9 @@ class DandiMixin(ConfigMixin):
     # the number of concurrent tasks (default is 8) to keep memory usage down.
     CELERY_WORKER_CONCURRENCY = values.IntegerValue(environ=True, default=8)
 
+    CELERY_TIMEZONE = 'US/Eastern'
+    CELERY_ENABLE_UTC = True
+
     # Automatically approve new users by default
     AUTO_APPROVE_USERS = True
 
@@ -150,8 +158,6 @@ class TestingConfiguration(DandiMixin, TestingBaseConfiguration):
     DANDI_DANDISETS_BUCKET_NAME = 'test-dandiapi-dandisets'
     DANDI_DANDISETS_BUCKET_PREFIX = 'test-prefix/'
     DANDI_DANDISETS_LOG_BUCKET_NAME = 'test-dandiapi-dandisets-logs'
-    DANDI_DANDISETS_EMBARGO_BUCKET_NAME = 'test--embargo-dandiapi-dandisets'
-    DANDI_DANDISETS_EMBARGO_BUCKET_PREFIX = 'test-embargo-prefix/'
     DANDI_DANDISETS_EMBARGO_LOG_BUCKET_NAME = 'test-embargo-dandiapi-dandisets-logs'
     DANDI_ZARR_PREFIX_NAME = 'test-zarr'
     DANDI_JUPYTERHUB_URL = 'https://hub.dandiarchive.org/'
@@ -199,9 +205,8 @@ class HerokuProductionConfiguration(DandiMixin, HerokuProductionBaseConfiguratio
         ALLOWED_HOSTS = []
 
     ALLOWED_HOSTS += [
-        "linc-staging-terraform-83d11b79c499.herokuapp.com",
-        "api.lincbrain.com",
-        "api.lincbrain.org",
+        'linc-staging-terraform-0b817cb1246b.herokuapp.com/',
+        'api.lincbrain.org'
     ]
 
 
@@ -215,8 +220,10 @@ class HerokuStagingConfiguration(HerokuProductionConfiguration):
     OAUTH2_PROVIDER_APPLICATION_MODEL = 'api.StagingApplication'
 
     if 'ALLOWED_HOSTS' not in globals():
-            ALLOWED_HOSTS = []
+        ALLOWED_HOSTS = []
 
     ALLOWED_HOSTS += [
-        "linc-staging-terraform-83d11b79c499.herokuapp.com"
+        'linc-brain-staging-7c7293e5e9f8.herokuapp.com/',
+        'staging-api.lincbrain.org'
     ]
+

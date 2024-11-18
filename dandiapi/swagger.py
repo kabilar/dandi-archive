@@ -1,5 +1,7 @@
 # Separate from settings.py due to being a somewhat of a premature import there.
 # See https://github.com/dandi/dandi-api/pull/482#issuecomment-901250541 .
+from __future__ import annotations
+
 from drf_yasg.inspectors import SwaggerAutoSchema
 
 
@@ -15,5 +17,4 @@ class DANDISwaggerAutoSchema(SwaggerAutoSchema):
         summary, description = super().split_summary_from_description(description)
         if summary is None:
             return description, None
-        else:
-            return summary, description
+        return summary, description

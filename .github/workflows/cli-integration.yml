@@ -1,4 +1,4 @@
-name: Test Integration with dandi-cli
+name: Test Integration with lincbrain-cli
 
 on:
   push:
@@ -20,16 +20,16 @@ jobs:
       - name: Build Docker image
         run: |
           docker build \
-            -t dandiarchive/dandiarchive-api \
+            -t lincbrain/dandiarchive-api \
             -f dev/django-public.Dockerfile \
             .
 
       - name: Export Docker image
         run: |
-          docker image save -o dandiarchive-api.tgz dandiarchive/dandiarchive-api
+          docker image save -o dandiarchive-api.tgz lincbrain/dandiarchive-api
 
       - name: Upload Docker image tarball
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: dandiarchive-api.tgz
           path: dandiarchive-api.tgz
@@ -50,7 +50,7 @@ jobs:
       DANDI_TESTS_PULL_DOCKER_COMPOSE: 0
     steps:
       - name: Download Docker image tarball
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: dandiarchive-api.tgz
 
@@ -58,7 +58,7 @@ jobs:
         run: docker image load -i dandiarchive-api.tgz
 
       - name: Set up Python ${{ matrix.python }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
 
@@ -68,16 +68,20 @@ jobs:
 
       - name: Install released dandi
         if: matrix.dandi-version == 'release'
-        run: pip install "dandi[test]"
+        run: pip install "lincbrain-cli[test]"
 
       - name: Install dev dandi
         if: matrix.dandi-version == 'master'
-        run: pip install "dandi[test] @ git+https://github.com/dandi/dandi-cli"
+        run: pip install "lincbrain-cli[test] @ git+https://github.com/lincbrain/linc-cli"
 
-      - name: Run dandi-api tests in dandi-cli
+      - name: Install dev dandi
+        if: matrix.dandi-version == 'master'
+        run: pip install "lincbrain-cli[test] @ git+https://github.com/lincbrain/linc-cli"
+
+      - name: Run dandi-api tests in linc-cli
         run: |
           python -m pytest --dandi-api \
-            "$pythonLocation/lib/python${{ matrix.python }}/site-packages/dandi"
+            "$pythonLocation/lib/python${{ matrix.python }}/site-packages/lincbrain"
         env:
           DANDI_TESTS_PERSIST_DOCKER_COMPOSE: "1"
 
@@ -85,11 +89,11 @@ jobs:
         if: failure()
         run: |
           docker-compose \
-            -f "$pythonLocation/lib/python${{ matrix.python }}/site-packages/dandi/tests/data/dandiarchive-docker/docker-compose.yml" \
+            -f "$pythonLocation/lib/python${{ matrix.python }}/site-packages/lincbrain/tests/data/dandiarchive-docker/docker-compose.yml" \
             logs --timestamps
 
       - name: Shut down Docker Compose
         run: |
           docker-compose \
-            -f "$pythonLocation/lib/python${{ matrix.python }}/site-packages/dandi/tests/data/dandiarchive-docker/docker-compose.yml" \
+            -f "$pythonLocation/lib/python${{ matrix.python }}/site-packages/lincbrain/tests/data/dandiarchive-docker/docker-compose.yml" \
             down -v

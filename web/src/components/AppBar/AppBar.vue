@@ -16,9 +16,9 @@
               v-if="!navItem.if || navItem.if()"
               :key="navItem.text"
               :to="navItem.external ? undefined : {name: navItem.to}"
-              :href="navItem.external ? navItem.to : undefined"
-              :target="navItem.external ? '_blank' : undefined"
-              :rel="navItem.external ? 'noopener' : undefined"
+              :href="navItem.external && navItem.text !== 'WebKNOSSOS' ? navItem.to : undefined"
+              :target="navItem.external && navItem.text !== 'WebKNOSSOS' ? '_blank' : undefined"
+              :rel="navItem.external && navItem.text !== 'WebKNOSSOS' ? 'noopener' : undefined"
               exact
               text
             >
@@ -47,6 +47,24 @@
               </v-icon>
             </v-list-item>
           </template>
+          <v-list-item
+              @click.stop.prevent="handleWebKNOSSOSClick()"
+              exact
+              text
+            >
+              <v-list-item-content
+                text
+                class="text-md"
+              >
+                WebKNOSSOS
+              </v-list-item-content>
+              <v-icon
+                class="ml-1"
+                small
+              >
+                mdi-open-in-new
+              </v-icon>
+            </v-list-item>
         </v-list-item-group>
       </v-list>
     </v-menu>
@@ -55,7 +73,7 @@
         alt="DANDI logo"
         contain
         width="100px"
-        src="@/assets/logo.svg"
+        :src="logo"
         class="mr-3"
       />
     </router-link>
@@ -87,23 +105,50 @@
           </v-icon>
         </v-btn>
       </template>
+        <v-btn
+          exact
+          text
+          @click.stop.prevent="handleWebKNOSSOSClick"
+          class="justify-start"
+          style="padding-left: 0;"
+        >
+        <v-list-item
+          exact
+          text
+        >
+          <v-list-item-content
+            text
+            class="text-md"
+          >
+            WebKNOSSOS
+          </v-list-item-content>
+          <v-icon
+            class="ml-1"
+            small
+          >
+            mdi-open-in-new
+          </v-icon>
+        </v-list-item>
+            </v-btn>
     </v-toolbar-items>
 
     <v-spacer />
 
     <div v-if="!insideIFrame">
       <template v-if="loggedIn">
-        <v-btn
-          :disabled="!dandiRest.user?.approved"
-          :to="{ name: 'createDandiset' }"
-          exact
-          class="mx-3"
-          color="primary"
-          rounded
-        >
-          New Dandiset
-        </v-btn>
-        <UserMenu />
+        <div class="d-flex align-center">
+          <v-btn
+            :disabled="!user?.approved"
+            :to="{ name: 'createDandiset' }"
+            exact
+            class="mx-3"
+            color="#c44fc4"
+            rounded
+          >
+            New Dataset
+          </v-btn>
+          <UserMenu />
+        </div>
       </template>
       <template v-else>
         <v-tooltip
@@ -115,7 +160,7 @@
               <v-btn
                 id="login"
                 class="mx-1"
-                color="primary"
+                color="#c44fc4"
                 rounded
                 :disabled="!cookiesEnabled"
                 @click="login"
@@ -139,17 +184,20 @@ import {
   loggedIn as loggedInFunc,
   insideIFrame as insideIFrameFunc,
   dandiRest,
+  user,
 } from '@/rest';
 import {
-  dandiAboutUrl, dandiDocumentationUrl, dandiHelpUrl, dandihubUrl,
+  dandiAboutUrl, lincDocumentationUrl, lincHelpUrl, lincHubUrl, lincBrainUrl, lincWebKNOSSOSUrl
 } from '@/utils/constants';
 import UserMenu from '@/components/AppBar/UserMenu.vue';
+import logo from '@/assets/linc-logo.svg';
 
 interface NavigationItem {
   text: string,
   to: string,
   if?(): boolean,
   external: boolean,
+  onClick?: () => void
 }
 
 const cookiesEnabled = computed(cookiesEnabledFunc);
@@ -158,39 +206,59 @@ const insideIFrame = computed(insideIFrameFunc);
 
 const navItems: NavigationItem[] = [
   {
-    text: 'Public Dandisets',
+    text: 'Shared Datasets',
     to: 'publicDandisets',
-    external: false,
-  },
-  {
-    text: 'My Dandisets',
-    to: 'myDandisets',
     external: false,
     if: loggedInFunc,
   },
   {
-    text: 'About',
-    to: dandiAboutUrl,
+    text: 'My Datasets',
+    to: 'myDandisets',
+    external: false,
+    if: loggedInFunc,
+  },
+    {
+    text: 'Homepage',
+    to: lincBrainUrl,
     external: true,
   },
   {
     text: 'Documentation',
-    to: dandiDocumentationUrl,
+    to: lincDocumentationUrl,
     external: true,
   },
   {
     text: 'Help',
-    to: dandiHelpUrl,
+    to: lincHelpUrl,
     external: true,
   },
   {
-    text: 'DandiHub',
-    to: dandihubUrl,
+    text: 'JupyterHub',
+    to: lincHubUrl,
     external: true,
-  },
+  }
 ];
 
 function login() {
   dandiRest.login();
+}
+
+function sleep(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function handleWebKNOSSOSClick() {
+  try {
+    const response = await fetch('https://api.lincbrain.org/api/external-api/login/webknossos/', {
+      method: 'GET', // or 'POST' if that's what the API requires
+      credentials: 'include' // to ensure cookies are sent and received
+    });
+    const data = await response.json();
+    console.log(data);
+    await sleep(2000);
+    window.open(lincWebKNOSSOSUrl, '_blank');
+  } catch (error) {
+    console.error('Login to WebKNOSSOS failed:', error);
+  }
 }
 </script>

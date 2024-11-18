@@ -1,10 +1,9 @@
 from __future__ import annotations
 
 import logging
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 from django.db import IntegrityError, transaction
-from django.db.models.query import QuerySet
 from django.http import HttpResponseRedirect
 from drf_yasg.utils import no_body, swagger_auto_schema
 from rest_framework import serializers, status
@@ -16,10 +15,14 @@ from rest_framework.utils.urls import replace_query_param
 from rest_framework.viewsets import ReadOnlyModelViewSet
 
 from dandiapi.api.models.dandiset import Dandiset
+from dandiapi.api.permissions import IsApproved
 from dandiapi.api.storage import get_boto_client
-from dandiapi.api.views.common import DandiPagination
+from dandiapi.api.views.pagination import DandiPagination
 from dandiapi.zarr.models import ZarrArchive, ZarrArchiveStatus
 from dandiapi.zarr.tasks import ingest_zarr_archive
+
+if TYPE_CHECKING:
+    from django.db.models.query import QuerySet
 
 logger = logging.getLogger(__name__)
 
@@ -94,6 +97,8 @@ class ZarrViewSet(ReadOnlyModelViewSet):
     lookup_field = 'zarr_id'
     lookup_value_regex = ZarrArchive.UUID_REGEX
 
+    permission_classes = [IsApproved]
+
     @swagger_auto_schema(
         query_serializer=ZarrListQuerySerializer,
         responses={200: ZarrListSerializer(many=True)},
@@ -138,8 +143,8 @@ class ZarrViewSet(ReadOnlyModelViewSet):
         zarr_archive: ZarrArchive = ZarrArchive(name=name, dandiset=dandiset)
         try:
             zarr_archive.save()
-        except IntegrityError:
-            raise ValidationError('Zarr already exists')
+        except IntegrityError as e:
+            raise ValidationError('Zarr already exists') from e
 
         serializer = ZarrSerializer(instance=zarr_archive)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -193,17 +198,18 @@ class ZarrViewSet(ReadOnlyModelViewSet):
         serializer.is_valid(raise_exception=True)
 
         # The root path for this zarr in s3
-        base_path = Path(zarr_archive.s3_path(''))
+        # This will contain a trailing slash, due to the empty string argument
+        base_path = zarr_archive.s3_path('')
 
         # Retrieve and join query params
         limit = serializer.validated_data['limit']
         download = serializer.validated_data['download']
 
-        raw_prefix = serializer.validated_data['prefix']
-        full_prefix = str(base_path / raw_prefix)
+        raw_prefix = serializer.validated_data['prefix'].lstrip('/')
+        full_prefix = (base_path + raw_prefix).rstrip('/')
 
-        _after = serializer.validated_data['after']
-        after = str(base_path / _after) if _after else ''
+        raw_after = serializer.validated_data['after'].lstrip('/')
+        after = (base_path + raw_after).rstrip('/') if raw_after else ''
 
         # Handle head request redirects
         if request.method == 'HEAD':
@@ -229,7 +235,7 @@ class ZarrViewSet(ReadOnlyModelViewSet):
         # Map/filter listing
         results = [
             {
-                'Key': str(Path(obj['Key']).relative_to(base_path)),
+                'Key': obj['Key'].removeprefix(base_path),
                 'LastModified': obj['LastModified'],
                 'ETag': obj['ETag'].strip('"'),
                 'Size': obj['Size'],
@@ -279,7 +285,7 @@ class ZarrViewSet(ReadOnlyModelViewSet):
             serializer.is_valid(raise_exception=True)
 
             # Generate presigned urls
-            logger.info(f'Beginning upload to zarr archive {zarr_archive.zarr_id}')
+            logger.info('Beginning upload to zarr archive %s', zarr_archive.zarr_id)
             urls = zarr_archive.generate_upload_urls(serializer.validated_data)
 
             # Set status back to pending, since with these URLs the zarr could have been changed
@@ -287,7 +293,9 @@ class ZarrViewSet(ReadOnlyModelViewSet):
             zarr_archive.save()
 
         # Return presigned urls
-        logger.info(f'Presigned {len(urls)} URLs to upload to zarr archive {zarr_archive.zarr_id}')
+        logger.info(
+            'Presigned %d URLs to upload to zarr archive %s', len(urls), zarr_archive.zarr_id
+        )
         return Response(urls, status=status.HTTP_200_OK)
 
     @swagger_auto_schema(

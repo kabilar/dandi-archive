@@ -29,7 +29,7 @@
           <v-list-item>
             <v-switch
               v-model="showEmpty"
-              label="Empty Dandisets"
+              label="Empty Dataset"
               dense
             />
           </v-list-item>

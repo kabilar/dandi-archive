@@ -2,7 +2,7 @@
   <div>
     <Meditor v-if="currentDandiset" />
     <v-toolbar class="grey darken-2 white--text">
-      <DandisetSearchField />
+<!--      <DandisetSearchField />-->
       <v-pagination
         v-model="page"
         :length="pages"
@@ -17,12 +17,12 @@
       <div class="d-block">
         <span class="text-h5">
           <v-icon>mdi-alert</v-icon>
-          Error: Dandiset does not exist
+          Error: Dataset does not exist
         </span>
         <br><br>
         <span class="text-body-2">
-          Proceed to the <a href="/dandiset">Public Dandisets page</a>
-          or use the search bar to find a valid Dandiset.
+          Proceed to the <a href="/dandiset">Public Datasets page</a>
+          or use the search bar to find a valid dataset.
         </span>
       </div>
     </v-container>

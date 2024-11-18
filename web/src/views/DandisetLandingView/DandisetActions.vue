@@ -6,7 +6,7 @@
     outlined
   >
     <div class="black--text text-h5 mt-2">
-      Dandiset Actions
+      Dataset Actions
     </div>
 
     <!-- Download and Cite As buttons -->
@@ -37,32 +37,32 @@
           </template>
         </DownloadDialog>
       </v-row>
-      <v-row no-gutters>
-        <CiteAsDialog>
-          <template
-            #activator="{ on }"
-          >
-            <v-btn
-              id="download"
-              outlined
-              block
-              v-on="on"
-            >
-              <v-icon
-                color="primary"
-                left
-              >
-                mdi-format-quote-close
-              </v-icon>
-              <span>Cite As</span>
-              <v-spacer />
-              <v-icon right>
-                mdi-chevron-down
-              </v-icon>
-            </v-btn>
-          </template>
-        </CiteAsDialog>
-      </v-row>
+<!--      <v-row no-gutters>-->
+<!--        <CiteAsDialog>-->
+<!--          <template-->
+<!--            #activator="{ on }"-->
+<!--          >-->
+<!--            <v-btn-->
+<!--              id="download"-->
+<!--              outlined-->
+<!--              block-->
+<!--              v-on="on"-->
+<!--            >-->
+<!--              <v-icon-->
+<!--                color="primary"-->
+<!--                left-->
+<!--              >-->
+<!--                mdi-format-quote-close-->
+<!--              </v-icon>-->
+<!--              <span>Cite As</span>-->
+<!--              <v-spacer />-->
+<!--              <v-icon right>-->
+<!--                mdi-chevron-down-->
+<!--              </v-icon>-->
+<!--            </v-btn>-->
+<!--          </template>-->
+<!--        </CiteAsDialog>-->
+<!--      </v-row>-->
     </div>
 
     <!-- Files and Metadata buttons -->
@@ -72,7 +72,7 @@
           id="view-data"
           outlined
           block
-          :disabled="currentDandiset.dandiset.embargo_status === 'UNEMBARGOING'"
+          :disabled="unembargo_in_progress"
           :to="fileBrowserLink"
           exact
         >
@@ -123,19 +123,19 @@
     </div>
 
     <!-- Share button -->
-    <div class="mt-6 mb-4">
-      <v-row
-        no-gutters
-        class="justify-center"
-      >
-        <v-btn
-          outlined
-          class="justify-center"
-        >
-          <ShareDialog text="Share" />
-        </v-btn>
-      </v-row>
-    </div>
+<!--    <div class="mt-6 mb-4">-->
+<!--      <v-row-->
+<!--        no-gutters-->
+<!--        class="justify-center"-->
+<!--      >-->
+<!--        <v-btn-->
+<!--          outlined-->
+<!--          class="justify-center"-->
+<!--        >-->
+<!--          <ShareDialog text="Share" />-->
+<!--        </v-btn>-->
+<!--      </v-row>-->
+<!--    </div>-->
   </v-card>
 </template>
 
@@ -156,6 +156,7 @@ const store = useDandisetStore();
 
 const currentDandiset = computed(() => store.dandiset);
 const currentVersion = computed(() => store.version);
+const unembargo_in_progress = computed(() => currentDandiset.value && currentDandiset.value.dandiset.embargo_status === 'UNEMBARGOING')
 
 const fileBrowserLink: ComputedRef<Location|null> = computed(() => {
   if (!currentDandiset.value) {

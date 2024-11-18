@@ -13,89 +13,89 @@
             <ShareDialog />
             {{ meta.name }}
           </h1>
-          <v-chip
-            v-if="currentDandiset.version != 'draft'"
-            outlined
-            class="mx-2 pl-1"
-          >
-            <v-tooltip
-              top
-            >
-              <template #activator="{ on, attrs }">
-                <v-btn
-                  v-if="currentDandiset !== null"
-                  icon
-                  small
-                  v-bind="attrs"
-                  v-on="on"
-                  @click="copy('DOI')"
-                >
-                  <v-icon
-                    small
-                  >
-                    mdi-content-copy
-                  </v-icon>
-                </v-btn>
-              </template>
-              <span>Copy DOI URL to clipboard</span>
-            </v-tooltip>
-            <span>
-              DOI:
-            </span>
-            <v-divider
-              vertical
-              class="mx-2"
-            />
-            {{ meta.doi }}
-          </v-chip>
+<!--          <v-chip-->
+<!--            v-if="currentDandiset.version != 'draft'"-->
+<!--            outlined-->
+<!--            class="mx-2 pl-1"-->
+<!--          >-->
+<!--            <v-tooltip-->
+<!--              top-->
+<!--            >-->
+<!--              <template #activator="{ on, attrs }">-->
+<!--                <v-btn-->
+<!--                  v-if="currentDandiset !== null"-->
+<!--                  icon-->
+<!--                  small-->
+<!--                  v-bind="attrs"-->
+<!--                  v-on="on"-->
+<!--                  @click="copy('DOI')"-->
+<!--                >-->
+<!--                  <v-icon-->
+<!--                    small-->
+<!--                  >-->
+<!--                    mdi-content-copy-->
+<!--                  </v-icon>-->
+<!--                </v-btn>-->
+<!--              </template>-->
+<!--              <span>Copy DOI URL to clipboard</span>-->
+<!--            </v-tooltip>-->
+<!--            <span>-->
+<!--              DOI:-->
+<!--            </span>-->
+<!--            <v-divider-->
+<!--              vertical-->
+<!--              class="mx-2"-->
+<!--            />-->
+<!--            {{ meta.doi }}-->
+<!--          </v-chip>-->
         </v-col>
       </v-row>
       <v-row class="mx-1">
-        <v-col :cols="$vuetify.breakpoint.xs ? 12 : 3">
-          <v-chip
-            class="text-wrap py-1 pl-1"
-            style="text-align: center;"
-            outlined
-          >
-            <v-tooltip
-              top
-            >
-              <template #activator="{ on, attrs }">
-                <v-btn
-                  v-if="currentDandiset !== null"
-                  icon
-                  small
-                  v-bind="attrs"
-                  v-on="on"
-                  @click="copy('dandiID')"
-                >
-                  <v-icon
-                    small
-                  >
-                    mdi-content-copy
-                  </v-icon>
-                </v-btn>
-              </template>
-              <span>Copy ID to clipboard</span>
-            </v-tooltip>
-            <span>
-              ID: <span class="font-weight-bold">{{ currentDandiset.dandiset.identifier }}</span>
-            </span>
+<!--        <v-col :cols="$vuetify.breakpoint.xs ? 12 : 3">-->
+<!--          <v-chip-->
+<!--            class="text-wrap py-1 pl-1"-->
+<!--            style="text-align: center;"-->
+<!--            outlined-->
+<!--          >-->
+<!--            <v-tooltip-->
+<!--              top-->
+<!--            >-->
+<!--              <template #activator="{ on, attrs }">-->
+<!--                <v-btn-->
+<!--                  v-if="currentDandiset !== null"-->
+<!--                  icon-->
+<!--                  small-->
+<!--                  v-bind="attrs"-->
+<!--                  v-on="on"-->
+<!--                  @click="copy('dandiID')"-->
+<!--                >-->
+<!--                  <v-icon-->
+<!--                    small-->
+<!--                  >-->
+<!--                    mdi-content-copy-->
+<!--                  </v-icon>-->
+<!--                </v-btn>-->
+<!--              </template>-->
+<!--              <span>Copy ID to clipboard</span>-->
+<!--            </v-tooltip>-->
+<!--            <span>-->
+<!--              ID: <span class="font-weight-bold">{{ currentDandiset.dandiset.identifier }}</span>-->
+<!--            </span>-->
 
-            <v-divider
-              vertical
-              class="mx-2"
-            />
-            <span
-              :class="`
-                font-weight-bold
-                ${currentDandiset.version === 'draft' ? 'orange' : 'blue'}--text text--darken-4
-              `"
-            >
-              {{ currentDandiset.version.toUpperCase() }}
-            </span>
-          </v-chip>
-        </v-col>
+<!--            <v-divider-->
+<!--              vertical-->
+<!--              class="mx-2"-->
+<!--            />-->
+<!--            <span-->
+<!--              :class="`-->
+<!--                font-weight-bold-->
+<!--                ${currentDandiset.version === 'draft' ? 'orange' : 'blue'}&#45;&#45;text text&#45;&#45;darken-4-->
+<!--              `"-->
+<!--            >-->
+<!--              {{ currentDandiset.version.toUpperCase() }}-->
+<!--            </span>-->
+<!--          </v-chip>-->
+<!--        </v-col>-->
         <v-col :cols="$vuetify.breakpoint.xs ? 12 : 3">
           <span>
             <v-icon class="grey--text text--lighten-1">mdi-account</v-icon>
@@ -118,7 +118,7 @@
         <v-col :cols="$vuetify.breakpoint.xs ? 12 : 3">
           <span>
             <v-icon class="grey--text text--lighten-1">mdi-server</v-icon>
-            File Size <strong>{{ transformFilesize(stats.size) }}</strong>
+            Size <strong>{{ transformFilesize(stats.size) }}</strong>
           </span>
         </v-col>
       </v-row>
@@ -153,17 +153,17 @@
           </span>
         </v-col>
         <v-col :cols="$vuetify.breakpoint.xs ? 12 : 3">
-          <span v-if="accessInformation && accessInformation.length">
-            <v-icon class="grey--text text--lighten-1">mdi-account-question</v-icon>
-            Access Information:
-            <span
-              v-for="(item, i) in accessInformation"
-              :key="i"
-            >
-              <strong>{{ item.status }}</strong>
-              <span v-text="accessInformation && i === accessInformation.length - 1 ? '' : ', '" />
-            </span>
-          </span>
+<!--          <span v-if="accessInformation && accessInformation.length">-->
+<!--            <v-icon class="grey&#45;&#45;text text&#45;&#45;lighten-1">mdi-account-question</v-icon>-->
+<!--            Access Information:-->
+<!--            <span-->
+<!--              v-for="(item, i) in accessInformation"-->
+<!--              :key="i"-->
+<!--            >-->
+<!--              <strong>{{ item.status }}</strong>-->
+<!--              <span v-text="accessInformation && i === accessInformation.length - 1 ? '' : ', '" />-->
+<!--            </span>-->
+<!--          </span>-->
         </v-col>
       </v-row>
 
@@ -266,7 +266,7 @@ import {
 import filesize from 'filesize';
 import { marked } from 'marked';
 import moment from 'moment';
-import { sanitize } from 'dompurify';
+import DOMPurify from 'dompurify';
 
 import { useDandisetStore } from '@/stores/dandiset';
 import type { AccessInformation, DandisetStats, SubjectMatterOfTheDataset } from '@/types';
@@ -368,7 +368,7 @@ export default defineComponent({
       return shortenedDescription;
     });
     const htmlDescription: ComputedRef<string> = computed(
-      () => sanitize(marked.parse(description.value)),
+      () => DOMPurify.sanitize(marked.parse(description.value)),
     );
     const meta = computed(() => currentDandiset.value?.metadata);
 

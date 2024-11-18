@@ -1,20 +1,28 @@
-from collections import OrderedDict
-from typing import Any
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any
+
+import requests
+import json
 
 from django.conf import settings
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.db.models.query_utils import Q
+from drf_yasg.utils import swagger_serializer_method
 from rest_framework import serializers
 
 from dandiapi.api.models import Asset, AssetBlob, AssetPath, Dandiset, Version
 from dandiapi.search.models import AssetSearch
 
+if TYPE_CHECKING:
+    from collections import OrderedDict
 
-def extract_contact_person(version):
+
+def extract_contact_person(version: Version) -> str:
     """Extract a version's contact person from its metadata."""
     # TODO: move this logic into dandischema since it is schema-dependant
     contributors = version.metadata.get('contributor')
-    if contributors is not None:
+    if contributors is not None and isinstance(contributors, list):
         for contributor in contributors:
             name = contributor.get('name')
             role_names = contributor.get('roleName')
@@ -30,6 +38,7 @@ class UserSerializer(serializers.Serializer):
 
 class UserDetailSerializer(serializers.Serializer):
     username = serializers.CharField(validators=[UnicodeUsernameValidator()])
+    email = serializers.CharField(required=False, allow_blank=True)
     name = serializers.CharField(validators=[UnicodeUsernameValidator()])
     admin = serializers.BooleanField()
     status = serializers.CharField()
@@ -122,6 +131,7 @@ class DandisetListSerializer(DandisetSerializer):
     class Meta(DandisetSerializer.Meta):
         fields = [*DandisetSerializer.Meta.fields, 'most_recent_published_version', 'draft_version']
 
+    @swagger_serializer_method(serializer_or_field=DandisetVersionSerializer)
     def get_draft_version(self, dandiset):
         draft = self.context['dandisets'].get(dandiset.id, {}).get('draft')
         if draft is None:
@@ -129,6 +139,7 @@ class DandisetListSerializer(DandisetSerializer):
 
         return DandisetVersionSerializer(draft).data
 
+    @swagger_serializer_method(serializer_or_field=DandisetVersionSerializer)
     def get_most_recent_published_version(self, dandiset):
         version = self.context['dandisets'].get(dandiset.id, {}).get('published')
         if version is None:
@@ -171,10 +182,20 @@ class DandisetDetailSerializer(DandisetSerializer):
 
 
 class DandisetQueryParameterSerializer(serializers.Serializer):
-    draft = serializers.BooleanField(default=True)
-    empty = serializers.BooleanField(default=True)
-    embargoed = serializers.BooleanField(default=True)
-    user = serializers.CharField(required=False)
+    draft = serializers.BooleanField(
+        default=True,
+        help_text='Whether to include dandisets that only have draft '
+        "versions (i.e., haven't been published yet).",
+    )
+    empty = serializers.BooleanField(default=True, help_text='Whether to include empty dandisets.')
+    embargoed = serializers.BooleanField(
+        default=False, help_text='Whether to include embargoed dandisets.'
+    )
+    user = serializers.ChoiceField(
+        choices=['me'],
+        required=False,
+        help_text='Set this value to "me" to only return dandisets owned by the current user.',
+    )
 
 
 class DandisetSearchQueryParameterSerializer(DandisetQueryParameterSerializer):
@@ -302,26 +323,6 @@ class AssetDownloadQueryParameterSerializer(serializers.Serializer):
     content_disposition = serializers.ChoiceField(['attachment', 'inline'], default='attachment')
 
 
-class EmbargoedSlugRelatedField(serializers.SlugRelatedField):
-    """
-    A Field for cleanly serializing embargoed model fields.
-
-    Embargoed fields are paired with their non-embargoed equivalents, like "blob" and
-    "embargoed_blob", or "zarr" and "embargoed_zarr". There are DB constraints in place to ensure
-    that only one field is defined at a time. When serializing one of those pairs, we would like to
-    conceal the fact that the field might be embargoed by silently using the embargoed model field
-    in place of the normal field if it is defined.
-    """
-
-    def get_attribute(self, instance: Asset):
-        attr = super().get_attribute(instance)
-        if attr is None:
-            # The normal field was not defined on the model, try the embargoed_ variant instead
-            embargoed_source = f'embargoed_{self.source}'
-            attr = getattr(instance, embargoed_source, None)
-        return attr
-
-
 class AssetSerializer(serializers.ModelSerializer):
     class Meta:
         model = Asset
@@ -337,7 +338,7 @@ class AssetSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['created']
 
-    blob = EmbargoedSlugRelatedField(slug_field='blob_id', read_only=True)
+    blob = serializers.SlugRelatedField(slug_field='blob_id', read_only=True)
     zarr = serializers.SlugRelatedField(slug_field='zarr_id', read_only=True)
     metadata = serializers.JSONField(source='full_metadata')
 
@@ -365,10 +366,29 @@ class AssetPathsQueryParameterSerializer(serializers.Serializer):
 
 
 class AssetFileSerializer(AssetSerializer):
+    webknossos_info = serializers.SerializerMethodField()
+
     class Meta(AssetSerializer.Meta):
-        fields = ['asset_id', 'url']
+        fields = ['asset_id', 'url', 's3_uri', 'webknossos_info']
 
     url = serializers.URLField(source='s3_url')
+
+    def get_webknossos_info(self, obj):
+        return [
+            {
+                "webknossos_url": dataset.get_webknossos_url(),
+                "webknossos_name": dataset.webknossos_dataset.webknossos_dataset_name,
+                "webknossos_annotations": [
+                    {
+                        "webknossos_annotation_name": annotation.webknossos_annotation_name,
+                        "webknossos_annotation_url": annotation.get_webknossos_url(),
+                        "webknossos_annotation_author": annotation.get_author_full_name()
+                    }
+                    for annotation in dataset.webknossos_dataset.webknossos_annotations.all()
+                ]
+            }
+            for dataset in obj.webknossos_datasets.all()
+        ]
 
 
 class AssetPathsSerializer(serializers.ModelSerializer):

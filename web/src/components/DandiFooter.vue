@@ -6,7 +6,7 @@
           <span
             v-if="cookiesEnabled()"
           >We use cookies to ensure you get the best experience on
-            DANDI.</span>
+            the LINC Data Platform</span>
           <span
             v-else
           >We noticed you're blocking cookies - note that certain aspects of
@@ -15,7 +15,7 @@
       </cookie-law>
       <v-row>
         <v-col offset="2">
-          &copy; 2023 LINC Team<br>
+          &copy; 2023 - 2024 LINC<br>
           version
           <a
             class="version-link"
@@ -30,19 +30,7 @@
             target="_blank"
             rel="noopener"
             href="https://braininitiative.nih.gov/"
-          >BRAIN Initiative</a>
-          <v-icon x-small>
-            mdi-open-in-new
-          </v-icon>
-          <br>
-        </v-col>
-        <v-col>
-          Support:<br>
-          - <a
-            target="_blank"
-            rel="noopener"
-            :href="dandiAboutUrl"
-          >LINC Project Homepage</a>
+          >BRAIN Initiative CONNECTS Program</a>
           <v-icon x-small>
             mdi-open-in-new
           </v-icon>
@@ -50,11 +38,22 @@
           - <a
             target="_blank"
             rel="noopener"
-            href="https://github.com/lincbrain/linc-archive"
-          >GitHub Repository</a>
+            :href="sentryLandingPageUrl"
+          >Sentry</a>
           <v-icon x-small>
             mdi-open-in-new
           </v-icon>
+          <br>
+          - <button
+            target="_blank"
+            rel="noopener"
+            href="#"
+            @click="handleWebKnossosClick"
+          >WebKnossos</button>
+          <v-icon x-small>
+            mdi-open-in-new
+          </v-icon>
+          <br>
         </v-col>
       </v-row>
     </v-container>
@@ -65,21 +64,34 @@
 import { defineComponent } from 'vue';
 import CookieLaw from 'vue-cookie-law';
 
-import { dandiAboutUrl } from '@/utils/constants';
-import { cookiesEnabled } from '@/rest';
+import { dandiAboutUrl, lincBrainUrl, sentryLandingPageUrl } from '@/utils/constants';
+import { cookiesEnabled, webknossosRest } from '@/rest';
 
-const version = process.env.VUE_APP_VERSION;
-const githubLink = process.env.VUE_APP_GIT_REVISION ? `https://github.com/lincbrain/linc-archive/commit/${process.env.VUE_APP_GIT_REVISION}` : 'https://github.com/lincbrain/linc-archive';
+const version = import.meta.env.VITE_APP_VERSION;
+const githubLink = import.meta.env.VITE_APP_GIT_REVISION ? `https://github.com/lincbrain/linc-archive/commit/${import.meta.env.VITE_APP_GIT_REVISION}` : 'https://github.com/lincbrain/linc-archive';
 
+const handleWebKnossosClick = async () => {
+  try {
+    const res = await webknossosRest.datasets();
+    alert(JSON.stringify(res));
+  } catch (error) {
+    alert('Error fetching data');
+    console.log(error)
+    console.error(error);
+  }
+};
 export default defineComponent({
   name: 'DandiFooter',
   components: { CookieLaw },
   setup() {
     return {
+      lincBrainUrl,
       dandiAboutUrl,
+      sentryLandingPageUrl,
       version,
       githubLink,
       cookiesEnabled,
+      handleWebKnossosClick,
     };
   },
 });

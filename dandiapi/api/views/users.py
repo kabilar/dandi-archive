@@ -2,21 +2,24 @@ from __future__ import annotations
 
 import logging
 import re
+from typing import TYPE_CHECKING
 
 from allauth.socialaccount.models import SocialAccount
 from django.contrib.auth.models import User
 from django.db.models import OuterRef, Q, Subquery
-from django.http.response import HttpResponseBase
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.decorators import api_view, parser_classes, permission_classes
 from rest_framework.parsers import JSONParser
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.request import Request
 from rest_framework.response import Response
 
 from dandiapi.api.models import UserMetadata
 from dandiapi.api.permissions import IsApproved
 from dandiapi.api.views.serializers import UserDetailSerializer, UserSerializer
+
+if TYPE_CHECKING:
+    from django.http.response import HttpResponseBase
+    from rest_framework.request import Request
 
 logger = logging.getLogger(__name__)
 
@@ -37,6 +40,7 @@ def user_to_dict(user: User):
     return {
         'admin': user.is_superuser,
         'username': user.username,
+        'email': user.email,
         'name': f'{user.first_name} {user.last_name}'.strip(),
         'status': _get_user_status(user),
     }
@@ -54,6 +58,7 @@ def social_account_to_dict(social_account: SocialAccount):
 
     return {
         'admin': user.is_superuser,
+        'email': user.email,
         'username': username,
         'name': name,
         'status': _get_user_status(user),
@@ -74,7 +79,7 @@ def serialize_user(user: User):
         'admin': user.is_superuser,
         'username': username,
         'name': name,
-        'status': _get_user_status(user),
+        'status': _get_user_status(user)
     }
 
 
@@ -105,6 +110,9 @@ def users_me_view(request: Request) -> HttpResponseBase:
 @parser_classes([JSONParser])
 @permission_classes([IsApproved])
 def users_search_view(request: Request) -> HttpResponseBase:
+    logger.info('Query params %s', request.query_params)
+    logger.info('Query headers %s', request.headers)
+
     """Search for a user."""
     request_serializer = UserSerializer(data=request.query_params)
 

@@ -5,7 +5,7 @@
   >
     <v-row>
       <v-img
-        src="@/assets/logo.svg"
+        :src="logo"
         class="grey lighten-5"
         position="left"
         max-height="500px"
@@ -23,17 +23,22 @@
           >
             <v-col class="splash-text my-12">
               <div class="text-h2 font-weight-thin text-center light-blue--text text--darken-1">
-                Center for Large-scale Imaging of Neural Circuits (LINC)
+                LINC Data Platform
               </div>
+              <br>
               <div class="text-h6 font-weight-light text-center">
-                The BRAIN Initiative UM1 center for mapping cortical to subthalamic nucleus projections.
-                This platform allows for internally sharing imaging data amongst the LINC team.
+                A private data sharing and visualization platform for the <a target="_blank" href="https://connects.mgh.harvard.edu/">LINC Project</a>, which aims to develop novel technologies for imaging brain connections down to the microscopic scale.
               </div>
             </v-col>
           </v-row>
         </v-container>
       </v-img>
     </v-row>
+<!--    <v-row no-gutters>-->
+<!--      <v-col class="grey darken-2 pa-12">-->
+<!--        <DandisetSearchField :dense="false" />-->
+<!--      </v-col>-->
+<!--    </v-row>-->
     <StatsBar />
   </v-container>
 </template>
@@ -43,6 +48,7 @@ import { watchEffect } from 'vue';
 import { useRoute, useRouter } from 'vue-router/composables';
 import StatsBar from '@/views/HomeView/StatsBar.vue';
 import DandisetSearchField from '@/components/DandisetSearchField.vue';
+import logo from '@/assets/linc-logo.svg';
 
 /**
 * Redirect old hash URLS to the correct one. This is only done on

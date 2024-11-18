@@ -1,17 +1,25 @@
+from __future__ import annotations
+
 import datetime
 import hashlib
+from typing import TYPE_CHECKING
 
 from django.conf import settings
-from django.contrib.auth.models import User
-from django.core.files.storage import Storage
+from django.forms.models import model_to_dict
+from django.utils import timezone
 from guardian.shortcuts import assign_perm
 import pytest
 from rest_framework.test import APIClient
 
 from dandiapi.api import tasks
-from dandiapi.api.models import Asset, AssetBlob, EmbargoedAssetBlob, Version
+from dandiapi.api.models import Asset, AssetBlob, Version
 
 from .fuzzy import URN_RE, UTC_ISO_TIMESTAMP_RE
+
+if TYPE_CHECKING:
+    from django.contrib.auth.models import User
+    from django.core.files.storage import Storage
+    from rest_framework.test import APIClient
 
 
 @pytest.mark.django_db()
@@ -33,9 +41,11 @@ def test_calculate_checksum_task(storage: Storage, asset_blob_factory):
 
 
 @pytest.mark.django_db()
-def test_calculate_checksum_task_embargo(storage: Storage, embargoed_asset_blob_factory):
-    # Pretend like EmbargoedAssetBlob was defined with the given storage
-    EmbargoedAssetBlob.blob.field.storage = storage
+def test_calculate_checksum_task_embargo(
+    storage: Storage, embargoed_asset_blob_factory, monkeypatch
+):
+    # Pretend like AssetBlob was defined with the given storage
+    monkeypatch.setattr(AssetBlob.blob.field, 'storage', storage)
 
     asset_blob = embargoed_asset_blob_factory(sha256=None)
 
@@ -146,7 +156,7 @@ def test_validate_asset_metadata_no_digest(draft_asset: Asset):
 
     assert draft_asset.status == Asset.Status.INVALID
     assert draft_asset.validation_errors == [
-        {'field': 'digest', 'message': 'A non-zarr asset must have a sha2_256.'}
+        {'field': 'digest', 'message': 'Value error, A non-zarr asset must have a sha2_256.'}
     ]
 
 
@@ -185,12 +195,41 @@ def test_validate_asset_metadata_saves_version(draft_asset: Asset, draft_version
 def test_validate_version_metadata(draft_version: Version, asset: Asset):
     draft_version.assets.add(asset)
 
-    tasks.validate_version_metadata_task(draft_version.id)
+    # Bypass .save to manually set an older timestamp
+    old_modified = timezone.now() - datetime.timedelta(minutes=10)
+    updated = Version.objects.filter(id=draft_version.id).update(modified=old_modified)
+    assert updated == 1
 
+    tasks.validate_version_metadata_task(draft_version.id)
     draft_version.refresh_from_db()
 
     assert draft_version.status == Version.Status.VALID
     assert draft_version.validation_errors == []
+
+    # Ensure modified field was updated
+    assert draft_version.modified > old_modified
+
+
+@pytest.mark.django_db()
+def test_validate_version_metadata_no_side_effects(draft_version: Version, asset: Asset):
+    draft_version.assets.add(asset)
+
+    # Set the version `status` and `validation_errors` fields to something
+    # which can't be a result of validate_version_metadata
+    draft_version.status = Version.Status.PENDING
+    draft_version.validation_errors = [{'foo': 'bar'}]
+    draft_version.save()
+
+    # Validate version metadata, storing the model data before and after
+    old_data = model_to_dict(draft_version)
+    tasks.validate_version_metadata_task(draft_version.id)
+    draft_version.refresh_from_db()
+    new_data = model_to_dict(draft_version)
+
+    # Check that change is isolated to these two fields
+    assert old_data.pop('status') != new_data.pop('status')
+    assert old_data.pop('validation_errors') != new_data.pop('validation_errors')
+    assert old_data == new_data
 
 
 @pytest.mark.django_db()
@@ -256,7 +295,8 @@ def test_validate_version_metadata_no_assets(
     assert draft_version.validation_errors == [
         {
             'field': 'assetsSummary',
-            'message': 'A Dandiset containing no files or zero bytes is not publishable',
+            'message': 'Value error, '
+            'A Dandiset containing no files or zero bytes is not publishable',
         }
     ]
 
@@ -317,7 +357,7 @@ def test_publish_task(
         },
         'datePublished': UTC_ISO_TIMESTAMP_RE,
         'manifestLocation': [
-            f'http://{settings.MINIO_STORAGE_ENDPOINT}/test-dandiapi-dandisets/test-prefix/dandisets/{draft_version.dandiset.identifier}/{published_version.version}/assets.yaml',  # noqa: E501
+            f'http://{settings.MINIO_STORAGE_ENDPOINT}/test-dandiapi-dandisets/test-prefix/dandisets/{draft_version.dandiset.identifier}/{published_version.version}/assets.yaml',
         ],
         'identifier': f'DANDI:{draft_version.dandiset.identifier}',
         'version': published_version.version,
