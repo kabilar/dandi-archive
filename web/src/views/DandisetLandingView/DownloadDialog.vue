@@ -64,10 +64,6 @@
                       value="draft"
                     />
                     <v-radio
-                      label="Latest version"
-                      value="latest"
-                    />
-                    <v-radio
                       label="Other version"
                       value="other"
                     />
@@ -121,18 +117,19 @@ import { useDandisetStore } from '@/stores/dandiset';
 import CopyText from '@/components/CopyText.vue';
 
 function formatDownloadCommand(identifier: string, version: string): string {
-  if (version === 'draft') {
-    const baseUrl = import.meta.env.VITE_APP_DANDI_API_ROOT === 'https://staging-api.lincbrain.org/api/'
+  const baseUrl = import.meta.env.VITE_APP_DANDI_API_ROOT === 'https://staging-api.lincbrain.org/api/'
       ? 'https://staging.lincbrain.org/dandiset/'
       : 'https://lincbrain.org/dandiset/';
-    return `lincbrain download ${baseUrl}${identifier}/draft`;
+
+  if (version === 'draft') {
+    return `dandi download ${baseUrl}${identifier}/draft`;
   }
 
   if (!version) {
-    return `lincbrain download DANDI:${identifier}`;
+    return `dandi download ${baseUrl}:${identifier}`;
   }
 
-  return `lincbrain download DANDI:${identifier}/${version}`;
+  return `dandi download ${baseUrl}:${identifier}/${version}`;
 }
 
 
