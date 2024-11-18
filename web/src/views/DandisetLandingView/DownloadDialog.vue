@@ -64,10 +64,6 @@
                       value="draft"
                     />
                     <v-radio
-                      label="Latest version"
-                      value="latest"
-                    />
-                    <v-radio
                       label="Other version"
                       value="other"
                     />
