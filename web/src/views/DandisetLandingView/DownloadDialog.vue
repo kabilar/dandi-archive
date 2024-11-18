@@ -121,18 +121,19 @@ import { useDandisetStore } from '@/stores/dandiset';
 import CopyText from '@/components/CopyText.vue';
 
 function formatDownloadCommand(identifier: string, version: string): string {
-  if (version === 'draft') {
-    const baseUrl = import.meta.env.VITE_APP_DANDI_API_ROOT === 'https://staging-api.lincbrain.org/api/'
+  const baseUrl = import.meta.env.VITE_APP_DANDI_API_ROOT === 'https://staging-api.lincbrain.org/api/'
       ? 'https://staging.lincbrain.org/dandiset/'
       : 'https://lincbrain.org/dandiset/';
+
+  if (version === 'draft') {
     return `dandi download ${baseUrl}${identifier}/draft`;
   }
 
   if (!version) {
-    return `dandi download DANDI:${identifier}`;
+    return `dandi download ${baseUrl}:${identifier}`;
   }
 
-  return `dandi download DANDI:${identifier}/${version}`;
+  return `dandi download ${baseUrl}:${identifier}/${version}`;
 }
 
 

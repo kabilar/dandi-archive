@@ -24,8 +24,8 @@
           >
             <div>{{ downloadCommand }}</div>
             <div>> cd {{ dandisetIdentifier }}</div>
-            <div>> dandi organize -i linc &lt;source_folder&gt; -f dry</div>
-            <div>> dandi organize -i linc &lt;source_folder&gt;</div>
+            <div>> dandi organize &lt;source_folder&gt; -f dry</div>
+            <div>> dandi organize &lt;source_folder&gt;</div>
             <div>> dandi upload -i linc</div>
           </v-sheet>
         </div>
