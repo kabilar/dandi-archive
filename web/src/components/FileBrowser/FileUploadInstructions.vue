@@ -12,7 +12,7 @@
         but this is where they will appear once they're added.
       </div>
       <div class="my-7">
-        <span class="text-subtitle-1">Use the LINC Brain CLI on the command line:</span>
+        <span class="text-subtitle-1">Use the DANDI CLI on the command line:</span>
         <div
           class="d-flex justify-center"
           style="font-family: monospace;"
@@ -31,7 +31,7 @@
         </div>
       </div>
       <div>
-        <span class="text-subtitle-1">Don't have LINC Brain CLI?</span>
+        <span class="text-subtitle-1">Don't have the DANDI CLI?</span>
         <div>
           <span class="text-body-2 grey--text text--darken-1">
             <span class="text-body-2 grey--text text--darken-1">
@@ -60,7 +60,7 @@ const downloadCommand = computed(() => {
     : 'https://lincbrain.org/dandiset/';
 
   return dandisetIdentifier.value
-    ? `> lincbrain download ${baseUrl}${dandisetIdentifier.value}/draft`
+    ? `> dandi download ${baseUrl}${dandisetIdentifier.value}/draft`
     : ''; // Empty string just as a fallback in case store.dandiset? is undefined
 });
 </script>
