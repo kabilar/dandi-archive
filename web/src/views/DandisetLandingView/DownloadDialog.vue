@@ -39,7 +39,7 @@
       </v-card-title>
       <v-list class="pa-0">
         <v-list-item dense>
-          Use this command in your LINC Brain CLI
+          Use this command in your DANDI CLI
         </v-list-item>
         <v-list-item dense>
           <CopyText
@@ -92,16 +92,16 @@
           </v-expansion-panel>
           <v-expansion-panel>
             <v-expansion-panel-header>
-              Don't have LINC Brain CLI?
+              Don't have the DANDI CLI?
             </v-expansion-panel-header>
             <v-expansion-panel-content>
               <v-list>
                 <v-list-item>
-                  Install the Python client (LINC Brain CLI)
-                  in a Python 3.7+ environment using command:
+                  Install the Python client (DANDI CLI)
+                  in a Python 3.9+ environment using command:
                 </v-list-item>
                 <v-list-item>
-                  <kbd>pip install lincbrain-cli</kbd>
+                  <kbd>pip install dandi</kbd>
                 </v-list-item>
               </v-list>
             </v-expansion-panel-content>
