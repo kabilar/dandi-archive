@@ -9,6 +9,8 @@ const lincWebKNOSSOSUrl = 'https://webknossos.lincbrain.org';
 
 const sentryLandingPageUrl = "https://sentry.io";
 
+const netlifyLandingPageUrl = "https://netlify.com";
+
 const draftVersion = 'draft';
 
 const VALIDATION_ICONS = {
@@ -66,4 +68,5 @@ export {
   sortingOptions,
   DANDISETS_PER_PAGE,
   sentryLandingPageUrl,
+  netlifyLandingPageUrl,
 };

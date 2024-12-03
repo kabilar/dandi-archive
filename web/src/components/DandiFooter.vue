@@ -49,7 +49,16 @@
             rel="noopener"
             href="#"
             @click="handleWebKnossosClick"
-          >WebKnossos</button>
+            >WebKnossos</button>
+          <v-icon x-small>
+            mdi-open-in-new
+          </v-icon>
+          <br>
+          - <a
+            target="_blank"
+            rel="noopener"
+            :href="netlifyLandingPageUrl"
+          >This site is powered by Netlify</a>
           <v-icon x-small>
             mdi-open-in-new
           </v-icon>
@@ -64,7 +73,7 @@
 import { defineComponent } from 'vue';
 import CookieLaw from 'vue-cookie-law';
 
-import { dandiAboutUrl, lincBrainUrl, sentryLandingPageUrl } from '@/utils/constants';
+import { dandiAboutUrl, lincBrainUrl, sentryLandingPageUrl, netlifyLandingPageUrl} from '@/utils/constants';
 import { cookiesEnabled, webknossosRest } from '@/rest';
 
 const version = import.meta.env.VITE_APP_VERSION;
@@ -88,6 +97,7 @@ export default defineComponent({
       lincBrainUrl,
       dandiAboutUrl,
       sentryLandingPageUrl,
+      netlifyLandingPageUrl,
       version,
       githubLink,
       cookiesEnabled,
