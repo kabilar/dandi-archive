@@ -23,7 +23,7 @@ from dandiapi.api.tests.factories import (
     UploadFactory,
     UserFactory,
 )
-from dandiapi.zarr.tests.factories import ZarrArchiveFactory
+from dandiapi.zarr.tests.factories import EmbargoedZarrArchiveFactory, ZarrArchiveFactory
 from dandiapi.zarr.tests.utils import upload_zarr_file
 
 if TYPE_CHECKING:
@@ -47,15 +47,16 @@ register(UploadFactory)
 
 # zarr app
 register(ZarrArchiveFactory)
+register(EmbargoedZarrArchiveFactory, _name='embargoed_zarr_archive')
 
 
 # Register zarr file/directory factories
-@pytest.fixture()
+@pytest.fixture
 def zarr_file_factory():
     return upload_zarr_file
 
 
-@pytest.fixture()
+@pytest.fixture
 def user(user_factory):
     """Override the default `user` fixture to use our `UserFactory` so `UserMetadata` works."""
     return user_factory()
@@ -66,7 +67,7 @@ def asset_factory(request):
     return request.param
 
 
-@pytest.fixture()
+@pytest.fixture
 def asset(asset_factory):
     return asset_factory()
 
@@ -76,12 +77,12 @@ def version(request):
     return request.param()
 
 
-@pytest.fixture()
+@pytest.fixture
 def api_client() -> APIClient:
     return APIClient()
 
 
-@pytest.fixture()
+@pytest.fixture
 def authenticated_api_client(user) -> APIClient:
     client = APIClient()
     client.force_authenticate(user=user)
@@ -107,12 +108,12 @@ def minio_storage_factory() -> MinioStorage:
     return base_minio_storage_factory(settings.DANDI_DANDISETS_BUCKET_NAME)
 
 
-@pytest.fixture()
+@pytest.fixture
 def s3_storage() -> S3Storage:
     return s3_storage_factory()
 
 
-@pytest.fixture()
+@pytest.fixture
 def minio_storage() -> MinioStorage:
     return minio_storage_factory()
 

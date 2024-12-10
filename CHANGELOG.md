@@ -1,3 +1,408 @@
+# v0.3.115 (Mon Dec 09 2024)
+
+#### 🐛 Bug Fix
+
+- Bump `django-allauth` to latest version [#2099](https://github.com/dandi/dandi-archive/pull/2099) ([@mvandenburgh](https://github.com/mvandenburgh))
+
+#### Authors: 1
+
+- Mike VanDenburgh ([@mvandenburgh](https://github.com/mvandenburgh))
+
+---
+
+# v0.3.114 (Mon Dec 09 2024)
+
+#### 🐛 Bug Fix
+
+- Pin `django-allauth` to 0.61.1 [#2098](https://github.com/dandi/dandi-archive/pull/2098) ([@mvandenburgh](https://github.com/mvandenburgh))
+- Set `--max-warnings` to zero for `eslint` [#2088](https://github.com/dandi/dandi-archive/pull/2088) ([@mvandenburgh](https://github.com/mvandenburgh))
+
+#### Authors: 1
+
+- Mike VanDenburgh ([@mvandenburgh](https://github.com/mvandenburgh))
+
+---
+
+# v0.3.113 (Wed Dec 04 2024)
+
+#### 🐛 Bug Fix
+
+- Fix validation error when only Zarr assets are uploaded [#2062](https://github.com/dandi/dandi-archive/pull/2062) ([@jjnesbitt](https://github.com/jjnesbitt) [@aaronkanzer](https://github.com/aaronkanzer))
+
+#### Authors: 2
+
+- [@aaronkanzer](https://github.com/aaronkanzer)
+- Jacob Nesbitt ([@jjnesbitt](https://github.com/jjnesbitt))
+
+---
+
+# v0.3.112 (Mon Dec 02 2024)
+
+#### 🐛 Bug Fix
+
+- Add incomplete upload dialog to DLP when unembargo is blocked [#2082](https://github.com/dandi/dandi-archive/pull/2082) ([@jjnesbitt](https://github.com/jjnesbitt))
+
+#### Authors: 1
+
+- Jacob Nesbitt ([@jjnesbitt](https://github.com/jjnesbitt))
+
+---
+
+# v0.3.111 (Mon Dec 02 2024)
+
+:tada: This release contains work from a new contributor! :tada:
+
+Thank you, null[@aaronkanzer](https://github.com/aaronkanzer), for all your work!
+
+#### 🐛 Bug Fix
+
+- Empty PR to trigger release [#2086](https://github.com/dandi/dandi-archive/pull/2086) ([@jjnesbitt](https://github.com/jjnesbitt))
+- Include robots.txt in UI and API for handling of web crawlers [#2084](https://github.com/dandi/dandi-archive/pull/2084) (aaronkanzer@Aarons-MacBook-Pro.local [@jjnesbitt](https://github.com/jjnesbitt) [@aaronkanzer](https://github.com/aaronkanzer))
+- Use a dedicated logger. not top level logging. module [#2077](https://github.com/dandi/dandi-archive/pull/2077) ([@yarikoptic](https://github.com/yarikoptic))
+- Add API support for Embargoed Zarrs [#2069](https://github.com/dandi/dandi-archive/pull/2069) ([@jjnesbitt](https://github.com/jjnesbitt))
+
+#### Authors: 4
+
+- [@aaronkanzer](https://github.com/aaronkanzer)
+- Aaron Kanzer (aaronkanzer@Aarons-MacBook-Pro.local)
+- Jacob Nesbitt ([@jjnesbitt](https://github.com/jjnesbitt))
+- Yaroslav Halchenko ([@yarikoptic](https://github.com/yarikoptic))
+
+---
+
+# v0.3.110 (Wed Nov 13 2024)
+
+#### 🐛 Bug Fix
+
+- Fix display of embargoed dandiset error page in GUI [#2073](https://github.com/dandi/dandi-archive/pull/2073) ([@jjnesbitt](https://github.com/jjnesbitt))
+
+#### Authors: 1
+
+- Jacob Nesbitt ([@jjnesbitt](https://github.com/jjnesbitt))
+
+---
+
+# v0.3.109 (Thu Oct 31 2024)
+
+#### 🐛 Bug Fix
+
+- Add neurosift external service for dandisets [#2041](https://github.com/dandi/dandi-archive/pull/2041) ([@magland](https://github.com/magland) [@waxlamp](https://github.com/waxlamp))
+- Display message in GUI when accessing embargoed dandiset [#2060](https://github.com/dandi/dandi-archive/pull/2060) ([@jjnesbitt](https://github.com/jjnesbitt))
+
+#### Authors: 3
+
+- Jacob Nesbitt ([@jjnesbitt](https://github.com/jjnesbitt))
+- Jeremy Magland ([@magland](https://github.com/magland))
+- Roni Choudhury ([@waxlamp](https://github.com/waxlamp))
+
+---
+
+# v0.3.108 (Thu Oct 24 2024)
+
+#### 🐛 Bug Fix
+
+- Empty PR to trigger release [#2059](https://github.com/dandi/dandi-archive/pull/2059) ([@mvandenburgh](https://github.com/mvandenburgh))
+- Remove `Asset.previous` field [#2008](https://github.com/dandi/dandi-archive/pull/2008) ([@mvandenburgh](https://github.com/mvandenburgh))
+- Add pre-commit config and apply it across codebase [#2045](https://github.com/dandi/dandi-archive/pull/2045) ([@yarikoptic](https://github.com/yarikoptic))
+
+#### Authors: 2
+
+- Mike VanDenburgh ([@mvandenburgh](https://github.com/mvandenburgh))
+- Yaroslav Halchenko ([@yarikoptic](https://github.com/yarikoptic))
+
+---
+
+# v0.3.107 (Tue Oct 22 2024)
+
+#### 🐛 Bug Fix
+
+- Update new user registration questions [#2054](https://github.com/dandi/dandi-archive/pull/2054) ([@kabilar](https://github.com/kabilar) [@waxlamp](https://github.com/waxlamp))
+- Pin ruff version to avoid spurious test failures [#2053](https://github.com/dandi/dandi-archive/pull/2053) ([@waxlamp](https://github.com/waxlamp))
+- Pin ubuntu-22.04 for all CI jobs [#2056](https://github.com/dandi/dandi-archive/pull/2056) ([@waxlamp](https://github.com/waxlamp))
+
+#### Authors: 2
+
+- Kabilar Gunalan ([@kabilar](https://github.com/kabilar))
+- Roni Choudhury ([@waxlamp](https://github.com/waxlamp))
+
+---
+
+# v0.3.106 (Thu Oct 17 2024)
+
+#### 🐛 Bug Fix
+
+- Derive asset `access` field from asset blob [#2010](https://github.com/dandi/dandi-archive/pull/2010) ([@jjnesbitt](https://github.com/jjnesbitt))
+- Add command for asset metadata re-extraction [#1545](https://github.com/dandi/dandi-archive/pull/1545) ([@jjnesbitt](https://github.com/jjnesbitt))
+- Explicitly install Python in CD workflows [#2046](https://github.com/dandi/dandi-archive/pull/2046) ([@mvandenburgh](https://github.com/mvandenburgh))
+- Auto-allow people with @alleninstitute.org email addresses [#2044](https://github.com/dandi/dandi-archive/pull/2044) ([@yarikoptic](https://github.com/yarikoptic))
+
+#### 🏠 Internal
+
+- Add calculate_sha256 management command to trigger (re)computation for a blob [#1938](https://github.com/dandi/dandi-archive/pull/1938) ([@yarikoptic](https://github.com/yarikoptic) [@waxlamp](https://github.com/waxlamp))
+
+#### 🧪 Tests
+
+- Do login into docker hub so we could reliably build our docker image [#2043](https://github.com/dandi/dandi-archive/pull/2043) ([@yarikoptic](https://github.com/yarikoptic))
+- Stick to ubuntu-22.04 for now for frontend-ci.yml [#2042](https://github.com/dandi/dandi-archive/pull/2042) ([@yarikoptic](https://github.com/yarikoptic))
+
+#### Authors: 4
+
+- Jacob Nesbitt ([@jjnesbitt](https://github.com/jjnesbitt))
+- Mike VanDenburgh ([@mvandenburgh](https://github.com/mvandenburgh))
+- Roni Choudhury ([@waxlamp](https://github.com/waxlamp))
+- Yaroslav Halchenko ([@yarikoptic](https://github.com/yarikoptic))
+
+---
+
+# v0.3.105 (Mon Sep 23 2024)
+
+#### 🐛 Bug Fix
+
+- Fix Dandiset emptiness detection logic [#2035](https://github.com/dandi/dandi-archive/pull/2035) ([@waxlamp](https://github.com/waxlamp))
+
+#### Authors: 1
+
+- Roni Choudhury ([@waxlamp](https://github.com/waxlamp))
+
+---
+
+# v0.3.104 (Mon Sep 23 2024)
+
+#### 🐛 Bug Fix
+
+- ../assets/{asset_id}/ PUT: clarify that new asset is created [#2019](https://github.com/dandi/dandi-archive/pull/2019) ([@yarikoptic](https://github.com/yarikoptic))
+
+#### Authors: 1
+
+- Yaroslav Halchenko ([@yarikoptic](https://github.com/yarikoptic))
+
+---
+
+# v0.3.103 (Mon Sep 23 2024)
+
+#### 🐛 Bug Fix
+
+- add external neurosift service for .nwb.lindi.tar [#2030](https://github.com/dandi/dandi-archive/pull/2030) ([@magland](https://github.com/magland))
+
+#### Authors: 1
+
+- Jeremy Magland ([@magland](https://github.com/magland))
+
+---
+
+# v0.3.102 (Fri Sep 20 2024)
+
+:tada: This release contains work from a new contributor! :tada:
+
+Thank you, null[@aaronkanzer](https://github.com/aaronkanzer), for all your work!
+
+#### 🐛 Bug Fix
+
+- Empty PR to force a release [#2032](https://github.com/dandi/dandi-archive/pull/2032) ([@waxlamp](https://github.com/waxlamp))
+- For staging environment, include dynamic text for `dandi download` command [#1810](https://github.com/dandi/dandi-archive/pull/1810) (aaronkanzer@Aarons-MacBook-Pro.local [@waxlamp](https://github.com/waxlamp) [@aaronkanzer](https://github.com/aaronkanzer))
+
+#### Authors: 4
+
+- [@aaronkanzer](https://github.com/aaronkanzer)
+- Aaron Kanzer (aaronkanzer@Aarons-MacBook-Pro.local)
+- Aaron Kanzer (aaronkanzer@dhcp-10-29-239-233.dyn.MIT.EDU)
+- Roni Choudhury ([@waxlamp](https://github.com/waxlamp))
+
+---
+
+# v0.3.101 (Fri Sep 20 2024)
+
+:tada: This release contains work from a new contributor! :tada:
+
+Thank you, null[@aaronkanzer](https://github.com/aaronkanzer), for all your work!
+
+#### 🐛 Bug Fix
+
+- Only include APPROVED users for stats on homepage [#1952](https://github.com/dandi/dandi-archive/pull/1952) (aaronkanzer@Aarons-MacBook-Pro.local [@aaronkanzer](https://github.com/aaronkanzer) [@waxlamp](https://github.com/waxlamp))
+
+#### Authors: 3
+
+- [@aaronkanzer](https://github.com/aaronkanzer)
+- Aaron Kanzer (aaronkanzer@Aarons-MacBook-Pro.local)
+- Roni Choudhury ([@waxlamp](https://github.com/waxlamp))
+
+---
+
+# v0.3.100 (Fri Sep 20 2024)
+
+#### 🐛 Bug Fix
+
+- Add text from the Handbook to the rejected user email [#2022](https://github.com/dandi/dandi-archive/pull/2022) ([@kabilar](https://github.com/kabilar))
+
+#### Authors: 1
+
+- Kabilar Gunalan ([@kabilar](https://github.com/kabilar))
+
+---
+
+# v0.3.99 (Tue Sep 10 2024)
+
+#### 🐛 Bug Fix
+
+- Manually configure celery to retry connections on startup [#2026](https://github.com/dandi/dandi-archive/pull/2026) ([@danlamanna](https://github.com/danlamanna))
+
+#### Authors: 1
+
+- Dan LaManna ([@danlamanna](https://github.com/danlamanna))
+
+---
+
+# v0.3.98 (Tue Sep 10 2024)
+
+#### 🐛 Bug Fix
+
+- admin view: Also show (list) zarr for Assets view [#2017](https://github.com/dandi/dandi-archive/pull/2017) ([@yarikoptic](https://github.com/yarikoptic))
+
+#### Authors: 1
+
+- Yaroslav Halchenko ([@yarikoptic](https://github.com/yarikoptic))
+
+---
+
+# v0.3.97 (Tue Sep 10 2024)
+
+#### 🐛 Bug Fix
+
+- Disable GUI "Unembargo" button if there are active uploads [#2015](https://github.com/dandi/dandi-archive/pull/2015) ([@jjnesbitt](https://github.com/jjnesbitt))
+
+#### Authors: 1
+
+- Jacob Nesbitt ([@jjnesbitt](https://github.com/jjnesbitt))
+
+---
+
+# v0.3.96 (Mon Sep 09 2024)
+
+#### 🐛 Bug Fix
+
+- Use bulk_update for updating blob download counts [#2025](https://github.com/dandi/dandi-archive/pull/2025) ([@danlamanna](https://github.com/danlamanna))
+
+#### Authors: 1
+
+- Dan LaManna ([@danlamanna](https://github.com/danlamanna))
+
+---
+
+# v0.3.95 (Tue Aug 27 2024)
+
+#### 🐛 Bug Fix
+
+- Respond with 409 when creating duplicate asset blobs [#2011](https://github.com/dandi/dandi-archive/pull/2011) ([@danlamanna](https://github.com/danlamanna))
+- Apply new `ruff` rules [#2009](https://github.com/dandi/dandi-archive/pull/2009) ([@mvandenburgh](https://github.com/mvandenburgh))
+- Add Neurosift service for AVI files [#1983](https://github.com/dandi/dandi-archive/pull/1983) ([@magland](https://github.com/magland))
+
+#### 🏠 Internal
+
+- [gh-actions](deps): Bump actions/add-to-project from 0.6.0 to 1.0.2 [#1962](https://github.com/dandi/dandi-archive/pull/1962) ([@dependabot[bot]](https://github.com/dependabot[bot]))
+
+#### Authors: 4
+
+- [@dependabot[bot]](https://github.com/dependabot[bot])
+- Dan LaManna ([@danlamanna](https://github.com/danlamanna))
+- Jeremy Magland ([@magland](https://github.com/magland))
+- Mike VanDenburgh ([@mvandenburgh](https://github.com/mvandenburgh))
+
+---
+
+# v0.3.94 (Fri Aug 16 2024)
+
+#### 🐛 Bug Fix
+
+- Fix admin access to embargoed asset blobs [#2004](https://github.com/dandi/dandi-archive/pull/2004) ([@jjnesbitt](https://github.com/jjnesbitt))
+- Re-validate version metadata during unembargo [#1989](https://github.com/dandi/dandi-archive/pull/1989) ([@jjnesbitt](https://github.com/jjnesbitt))
+- Separate core model logic from top-level asset service layer functions [#1991](https://github.com/dandi/dandi-archive/pull/1991) ([@jjnesbitt](https://github.com/jjnesbitt))
+
+#### Authors: 1
+
+- Jacob Nesbitt ([@jjnesbitt](https://github.com/jjnesbitt))
+
+---
+
+# v0.3.93 (Wed Aug 14 2024)
+
+#### 🐛 Bug Fix
+
+- Empty commit to trigger release process [#2005](https://github.com/dandi/dandi-archive/pull/2005) ([@waxlamp](https://github.com/waxlamp))
+- Upgrade oauth client package [#1998](https://github.com/dandi/dandi-archive/pull/1998) ([@mvandenburgh](https://github.com/mvandenburgh))
+- Merge remote-tracking branch 'origin/master' into audit-backend [#1886](https://github.com/dandi/dandi-archive/pull/1886) ([@waxlamp](https://github.com/waxlamp))
+- Replace `docker-compose` with `docker compose` to fix newly failing CI tests [#1999](https://github.com/dandi/dandi-archive/pull/1999) ([@waxlamp](https://github.com/waxlamp))
+- Merge remote-tracking branch 'origin/fix-docker-compose' into audit-backend [#1886](https://github.com/dandi/dandi-archive/pull/1886) ([@waxlamp](https://github.com/waxlamp))
+- Add test for publish_dandiset audit record [#1886](https://github.com/dandi/dandi-archive/pull/1886) ([@waxlamp](https://github.com/waxlamp))
+- Disable complexity warning on users view [#1886](https://github.com/dandi/dandi-archive/pull/1886) ([@waxlamp](https://github.com/waxlamp))
+- Add explanatory comment [#1886](https://github.com/dandi/dandi-archive/pull/1886) ([@waxlamp](https://github.com/waxlamp))
+- Use nested transaction to handle integrity error [#1886](https://github.com/dandi/dandi-archive/pull/1886) ([@waxlamp](https://github.com/waxlamp))
+- Split long tests up into individual tests [#1886](https://github.com/dandi/dandi-archive/pull/1886) ([@waxlamp](https://github.com/waxlamp))
+- bugfix: Pass correct and stringified ID values in asset/zarr records [#1886](https://github.com/dandi/dandi-archive/pull/1886) ([@waxlamp](https://github.com/waxlamp))
+- bugfix: Include correct asset in update_asset record [#1886](https://github.com/dandi/dandi-archive/pull/1886) ([@waxlamp](https://github.com/waxlamp))
+- Add tests [#1886](https://github.com/dandi/dandi-archive/pull/1886) ([@waxlamp](https://github.com/waxlamp))
+- Fix invocation of unembargo routines in tests [#1886](https://github.com/dandi/dandi-archive/pull/1886) ([@waxlamp](https://github.com/waxlamp))
+- Remove duplicate task launch line [#1886](https://github.com/dandi/dandi-archive/pull/1886) ([@waxlamp](https://github.com/waxlamp))
+- Remove references to deleted model fields [#1886](https://github.com/dandi/dandi-archive/pull/1886) ([@waxlamp](https://github.com/waxlamp))
+- Use audit service in zarr views [#1886](https://github.com/dandi/dandi-archive/pull/1886) ([@waxlamp](https://github.com/waxlamp))
+- Eliminate the need for manually calling .save() [#1886](https://github.com/dandi/dandi-archive/pull/1886) ([@waxlamp](https://github.com/waxlamp))
+- Create a service layer module for audit [#1886](https://github.com/dandi/dandi-archive/pull/1886) ([@waxlamp](https://github.com/waxlamp))
+- Use the `user` fixture directly [#1886](https://github.com/dandi/dandi-archive/pull/1886) ([@waxlamp](https://github.com/waxlamp))
+- Reformat long line [#1886](https://github.com/dandi/dandi-archive/pull/1886) ([@waxlamp](https://github.com/waxlamp))
+- Suppress ruff warnings for complexity and number of arguments [#1886](https://github.com/dandi/dandi-archive/pull/1886) ([@waxlamp](https://github.com/waxlamp))
+- Report list of paths to zarr chunk audit records [#1886](https://github.com/dandi/dandi-archive/pull/1886) ([@waxlamp](https://github.com/waxlamp))
+- Report live metadata to audit records [#1886](https://github.com/dandi/dandi-archive/pull/1886) ([@waxlamp](https://github.com/waxlamp))
+- Move "set new owners" operation inside of transaction [#1886](https://github.com/dandi/dandi-archive/pull/1886) ([@waxlamp](https://github.com/waxlamp))
+- Remove Dandiset add_owner() and remove_owner() methods [#1886](https://github.com/dandi/dandi-archive/pull/1886) ([@waxlamp](https://github.com/waxlamp))
+- Apply formatting to new migration [#1886](https://github.com/dandi/dandi-archive/pull/1886) ([@waxlamp](https://github.com/waxlamp))
+- Add explanatory comments for weird char field length limits [#1886](https://github.com/dandi/dandi-archive/pull/1886) ([@waxlamp](https://github.com/waxlamp))
+- Rename upload_zarr to upload_zarr_chunks [#1886](https://github.com/dandi/dandi-archive/pull/1886) ([@waxlamp](https://github.com/waxlamp))
+- Fix tests broken by signature changes [#1886](https://github.com/dandi/dandi-archive/pull/1886) ([@waxlamp](https://github.com/waxlamp))
+- Add migration for AuditRecord [#1886](https://github.com/dandi/dandi-archive/pull/1886) ([@waxlamp](https://github.com/waxlamp))
+- Generate delete_dandiset audit record [#1886](https://github.com/dandi/dandi-archive/pull/1886) ([@waxlamp](https://github.com/waxlamp))
+- Generate publish_dandiset audit record [#1886](https://github.com/dandi/dandi-archive/pull/1886) ([@waxlamp](https://github.com/waxlamp))
+- Generate unembargo_dandiset audit record [#1886](https://github.com/dandi/dandi-archive/pull/1886) ([@waxlamp](https://github.com/waxlamp))
+- Generate [create|upload|finalize|delete]_zarr audit records [#1886](https://github.com/dandi/dandi-archive/pull/1886) ([@waxlamp](https://github.com/waxlamp))
+- Generate [add|update|remove]_asset audit records [#1886](https://github.com/dandi/dandi-archive/pull/1886) ([@waxlamp](https://github.com/waxlamp))
+- Generate update_metadata audit record [#1886](https://github.com/dandi/dandi-archive/pull/1886) ([@waxlamp](https://github.com/waxlamp))
+- Generate change_owners audit record [#1886](https://github.com/dandi/dandi-archive/pull/1886) ([@waxlamp](https://github.com/waxlamp))
+- Generate create_dandiset audit record [#1886](https://github.com/dandi/dandi-archive/pull/1886) ([@waxlamp](https://github.com/waxlamp))
+- Add admin model for AuditRecord [#1886](https://github.com/dandi/dandi-archive/pull/1886) ([@waxlamp](https://github.com/waxlamp))
+- Add AuditRecord model [#1886](https://github.com/dandi/dandi-archive/pull/1886) ([@waxlamp](https://github.com/waxlamp))
+
+#### Authors: 2
+
+- Mike VanDenburgh ([@mvandenburgh](https://github.com/mvandenburgh))
+- Roni Choudhury ([@waxlamp](https://github.com/waxlamp))
+
+---
+
+# v0.3.92 (Tue Jul 30 2024)
+
+#### 🐛 Bug Fix
+
+- Add retries to sha256 checksum calculation task [#1937](https://github.com/dandi/dandi-archive/pull/1937) ([@jjnesbitt](https://github.com/jjnesbitt))
+- Contact owner [#1840](https://github.com/dandi/dandi-archive/pull/1840) ([@marySalvi](https://github.com/marySalvi) [@mvandenburgh](https://github.com/mvandenburgh))
+
+#### Authors: 3
+
+- Jacob Nesbitt ([@jjnesbitt](https://github.com/jjnesbitt))
+- Mary Salvi ([@marySalvi](https://github.com/marySalvi))
+- Mike VanDenburgh ([@mvandenburgh](https://github.com/mvandenburgh))
+
+---
+
+# v0.3.91 (Wed Jul 24 2024)
+
+#### 🐛 Bug Fix
+
+- Fix N query problem with VersionStatusFilter [#1986](https://github.com/dandi/dandi-archive/pull/1986) ([@jjnesbitt](https://github.com/jjnesbitt))
+
+#### Authors: 1
+
+- Jacob Nesbitt ([@jjnesbitt](https://github.com/jjnesbitt))
+
+---
+
 # v0.3.90 (Mon Jul 22 2024)
 
 #### 🐛 Bug Fix

@@ -26,6 +26,8 @@ if TYPE_CHECKING:
 
 supported_digests = {'dandi:dandi-etag': 'etag', 'dandi:sha2-256': 'sha256'}
 
+logger = logging.getLogger(__name__)
+
 
 class DigestSerializer(serializers.Serializer):
     algorithm = serializers.CharField()
@@ -140,7 +142,7 @@ def upload_initialize_view(request: Request) -> HttpResponseBase:
     if dandiset.unembargo_in_progress:
         raise DandisetUnembargoInProgressError
 
-    logging.info(
+    logger.info(
         'Starting upload initialization of size %s, ETag %s to dandiset %s',
         content_size,
         etag,
@@ -155,15 +157,15 @@ def upload_initialize_view(request: Request) -> HttpResponseBase:
             headers={'Location': asset_blobs.first().blob_id},
         )
 
-    logging.info('Blob with ETag %s does not yet exist', etag)
+    logger.info('Blob with ETag %s does not yet exist', etag)
 
     upload, initialization = Upload.initialize_multipart_upload(etag, content_size, dandiset)
-    logging.info('Upload of ETag %s initialized', etag)
+    logger.info('Upload of ETag %s initialized', etag)
     upload.save()
-    logging.info('Upload of ETag %s saved', etag)
+    logger.info('Upload of ETag %s saved', etag)
 
     response_serializer = UploadInitializationResponseSerializer(initialization)
-    logging.info('Upload of ETag %s serialized', etag)
+    logger.info('Upload of ETag %s serialized', etag)
     return Response(response_serializer.data)
 
 
@@ -240,22 +242,25 @@ def upload_validate_view(request: Request, upload_id: str) -> HttpResponseBase:
             f'ETag {upload.etag} does not match actual ETag {upload.actual_etag()}.'
         )
 
-    # Use a transaction here so we can use select_for_update to lock the DB rows to avoid
-    # a race condition where two clients are uploading the same blob at the same time.
-    # This also ensures that the minting of the new AssetBlob and deletion of the Upload
-    # is an atomic operation.
     with transaction.atomic():
-        try:
-            # Perhaps another upload completed before this one and has already created an AssetBlob.
-            asset_blob = AssetBlob.objects.select_for_update(no_key=True).get(
-                etag=upload.etag, size=upload.size
-            )
-        except AssetBlob.DoesNotExist:
-            asset_blob = upload.to_asset_blob()
-            asset_blob.save()
+        # Avoid a race condition where two clients are uploading the same blob at the same time.
+        asset_blob, created = AssetBlob.objects.get_or_create(
+            etag=upload.etag,
+            size=upload.size,
+            defaults={
+                'embargoed': upload.embargoed,
+                'blob_id': upload.upload_id,
+                'blob': upload.blob,
+            },
+        )
 
         # Clean up the upload
         upload.delete()
+
+    if not created:
+        return Response(
+            'An identical blob has already been uploaded.', status=status.HTTP_409_CONFLICT
+        )
 
     # Start calculating the sha256 in the background
     calculate_sha256.delay(asset_blob.blob_id)

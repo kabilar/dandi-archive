@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING
 from urllib.parse import urlparse, urlunparse
 import uuid
 
+from dandischema.models import AccessType
 from django.conf import settings
 from django.contrib.postgres.indexes import HashIndex
 from django.core.exceptions import ValidationError
@@ -26,6 +27,7 @@ ASSET_CHARS_REGEX = r'[A-z0-9(),&\s#+~_=-]'
 ASSET_PATH_REGEX = rf'^({ASSET_CHARS_REGEX}?\/?\.?{ASSET_CHARS_REGEX})+$'
 ASSET_COMPUTED_FIELDS = [
     'id',
+    'access',
     'path',
     'identifier',
     'contentUrl',
@@ -139,13 +141,6 @@ class Asset(PublishableMetadataMixin, TimeStampedModel):
         choices=Status.choices,
     )
     validation_errors = models.JSONField(default=list, blank=True, null=True)
-    previous = models.ForeignKey(
-        'Asset',
-        blank=True,
-        null=True,
-        default=None,
-        on_delete=models.SET_NULL,
-    )
     published = models.BooleanField(default=False)
 
     class Meta:
@@ -184,6 +179,13 @@ class Asset(PublishableMetadataMixin, TimeStampedModel):
     @property
     def is_zarr(self):
         return self.zarr is not None
+
+    @property
+    def is_embargoed(self) -> bool:
+        if self.blob is not None:
+            return self.blob.embargoed
+
+        return self.zarr.embargoed  # type: ignore  # noqa: PGH003
 
     @property
     def size(self):
@@ -242,7 +244,7 @@ class Asset(PublishableMetadataMixin, TimeStampedModel):
         metadata: dict,
         path: str,
     ) -> bool:
-        from dandiapi.zarr.models import EmbargoedZarrArchive, ZarrArchive
+        from dandiapi.zarr.models import ZarrArchive
 
         if isinstance(asset_blob, AssetBlob) and self.blob is not None and self.blob != asset_blob:
             return True
@@ -253,9 +255,6 @@ class Asset(PublishableMetadataMixin, TimeStampedModel):
             and self.zarr != zarr_archive
         ):
             return True
-
-        if isinstance(zarr_archive, EmbargoedZarrArchive):
-            raise NotImplementedError
 
         if self.path != path:
             return True
@@ -282,6 +281,14 @@ class Asset(PublishableMetadataMixin, TimeStampedModel):
         metadata = {
             **self.metadata,
             'id': self.dandi_asset_id(self.asset_id),
+            'access': [
+                {
+                    'schemaKey': 'AccessRequirements',
+                    'status': AccessType.EmbargoedAccess.value
+                    if self.is_embargoed
+                    else AccessType.OpenAccess.value,
+                }
+            ],
             'path': self.path,
             'identifier': str(self.asset_id),
             'contentUrl': [download_url, self.s3_url],
@@ -327,7 +334,4 @@ class Asset(PublishableMetadataMixin, TimeStampedModel):
             .aggregate(size=models.Sum('size'))['size']
             or 0
             for cls in (AssetBlob, ZarrArchive)
-            # adding of Zarrs to embargoed dandisets is not supported
-            # so no point of adding EmbargoedZarr here since would also result in error
-            # TODO: add EmbagoedZarr whenever supported
         )
