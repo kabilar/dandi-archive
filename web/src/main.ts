@@ -47,7 +47,7 @@ Sentry.init({
 });
 
 Vue.use(VueGtag, {
-  config: { id: 'UA-146135810-2' },
+  config: { id: 'G-6DJVBYNZRW' },
 }, router);
 
 Vue.use(VueSocialSharing);
