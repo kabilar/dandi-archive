@@ -126,10 +126,10 @@ function formatDownloadCommand(identifier: string, version: string): string {
   }
 
   if (!version) {
-    return `dandi download ${baseUrl}:${identifier}`;
+    return `dandi download ${baseUrl}${identifier}`;
   }
 
-  return `dandi download ${baseUrl}:${identifier}/${version}`;
+  return `dandi download ${baseUrl}${identifier}/${version}`;
 }
 
 
