@@ -27,7 +27,7 @@ def construct_neuroglancer_url(source, layer_name):
     json_object = {
         "layers": [
             {
-                "type": "new",
+                "type": "image",
                 "source": source,
                 "tab": "source",
                 "name": layer_name
