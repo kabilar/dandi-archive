@@ -8,7 +8,7 @@ from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
 import djclick as click
 
-from dandiapi.api.models import AssetBlob, WebKnossosDataset, WebKnossosAnnotation
+from dandiapi.api.models import AssetBlob, WebKnossosDataset, WebKnossosAnnotation, WebKnossosDataLayer
 from dandiapi.api.services.asset import add_asset_to_version
 from dandiapi.api.services.dandiset import create_dandiset
 from dandiapi.api.services.metadata import validate_asset_metadata, validate_version_metadata
@@ -121,11 +121,25 @@ def create_dev_dandiset(name: str, email: str, first_name: str, last_name: str):
 
         # Create WebKnossosDataset for every other asset (e.g., even indices)
         if index % 2 == 0:
-            WebKnossosDataset.objects.create(
-                asset=asset,
+            webknossos_dataset = WebKnossosDataset.objects.create(
                 webknossos_dataset_name=file_name_and_etag["file_name"],
                 webknossos_organization_name="LINC"
             )
+            WebKnossosDataLayer.objects.create(
+                webknossos_dataset=webknossos_dataset,
+                asset=asset
+            )
+
+            for annotation_num in range(2):
+                WebKnossosAnnotation.objects.create(
+                    webknossos_annotation_id=f"Annotation ID: {annotation_num + 1}",
+                    webknossos_annotation_name=f"Annotation Name: {annotation_num + 1}",
+                    webknossos_organization="LINC",
+                    webknossos_annotation_owner_first_name="Randi",
+                    webknossos_annotation_owner_last_name="Dandi",
+                    webknossos_dataset=webknossos_dataset
+                )
+
 
         calculate_sha256(blob_id=asset_blob.blob_id)
         validate_asset_metadata(asset=asset)

@@ -12,6 +12,7 @@ import type {
   AssetPath,
   Zarr,
   DandisetSearchResult,
+  IncompleteUpload,
 } from '@/types';
 import type {
   Dandiset as DandisetMetadata,
@@ -68,6 +69,18 @@ const webknossosRest = {
     const response = await webKnossosClient.get('api/datasets', { params });
     return response;
   },
+  async logout(params?: any): Promise<any> {
+    if (!params) {
+      params = {};
+    }
+
+    const response = await webKnossosClient.get('api/auth/logout', {
+      params,
+      withCredentials: true, // This ensures cookies are sent with the request
+    });
+
+    return response;
+  }
 }
 
 const dandiRest = {
@@ -105,6 +118,26 @@ const dandiRest = {
       localStorage.clear();
     }
   },
+  async loginWebKnossos(): Promise<void> {
+    try {
+      const { data, headers } = await client.get('external-api/login/webknossos/', {
+        withCredentials: true,  // Ensure credentials (cookies) are sent and handled
+      });
+
+      console.log(headers)
+
+      // If the server sends a Set-Cookie header, it may not be automatically handled by the browser
+      if (headers['set-cookie']) {
+        console.log('Received Set-Cookie:', headers['set-cookie']);
+        // Handle the Set-Cookie here if needed, such as saving it to localStorage or manually setting cookies
+      }
+
+      console.log('Login successful:', data);
+      // You can proceed with any further actions after login, like redirecting the user
+    } catch (error) {
+      console.error('Login failed:', error);
+    }
+  },
   async me(): Promise<User> {
     const { data: user } = await client.get('users/me/');
     user.approved = user.status === 'APPROVED';
@@ -127,6 +160,27 @@ const dandiRest = {
       }
       throw e;
     }
+  },
+  async uploads(identifier: string): Promise<IncompleteUpload[]> {
+    const uploads = []
+    let page = 1;
+
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      const res = await client.get(`dandisets/${identifier}/uploads/`, {params: { page }});
+
+      uploads.push(...res.data.results);
+      if (res.data.next === null) {
+        break;
+      }
+
+      page += 1;
+    }
+
+    return uploads;
+  },
+  async clearUploads(identifier: string) {
+    await client.delete(`dandisets/${identifier}/uploads/`);
   },
   async assets(
     identifier: string,

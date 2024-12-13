@@ -119,6 +119,8 @@ class DandiMixin(ConfigMixin):
 
     # The CloudAMQP connection was dying, using the heartbeat should keep it alive
     CELERY_BROKER_HEARTBEAT = 20
+    # Retry connections in case rabbit isn't immediately running
+    CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 
     # Clearing out the stock `SWAGGER_SETTINGS` variable causes a Django login
     # button to appear in Swagger, along with a spurious "authorize" button that
@@ -134,6 +136,9 @@ class DandiMixin(ConfigMixin):
     # Some tasks working with lots of data need lots of memory, so we need to artificially lower
     # the number of concurrent tasks (default is 8) to keep memory usage down.
     CELERY_WORKER_CONCURRENCY = values.IntegerValue(environ=True, default=8)
+
+    CELERY_TIMEZONE = 'US/Eastern'
+    CELERY_ENABLE_UTC = True
 
     # Automatically approve new users by default
     AUTO_APPROVE_USERS = True

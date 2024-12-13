@@ -12,7 +12,7 @@
         but this is where they will appear once they're added.
       </div>
       <div class="my-7">
-        <span class="text-subtitle-1">Use the LINC Brain CLI on the command line:</span>
+        <span class="text-subtitle-1">Use the DANDI CLI on the command line:</span>
         <div
           class="d-flex justify-center"
           style="font-family: monospace;"
@@ -22,16 +22,16 @@
             width="60%"
             class="white--text pl-2 py-1 text-left"
           >
-            <div>{{ downloadCommand }}</div>
+            <div>> {{ downloadCommand }}</div>
             <div>> cd {{ dandisetIdentifier }}</div>
-            <div>> lincbrain organize &lt;source_folder&gt; -f dry</div>
-            <div>> lincbrain organize &lt;source_folder&gt;</div>
-            <div>> lincbrain upload</div>
+            <div>> dandi organize &lt;source_folder&gt; -f dry</div>
+            <div>> dandi organize &lt;source_folder&gt;</div>
+            <div>> dandi upload -i linc</div>
           </v-sheet>
         </div>
       </div>
       <div>
-        <span class="text-subtitle-1">Don't have LINC Brain CLI?</span>
+        <span class="text-subtitle-1">Don't have the DANDI CLI?</span>
         <div>
           <span class="text-body-2 grey--text text--darken-1">
             <span class="text-body-2 grey--text text--darken-1">
@@ -54,14 +54,12 @@ import { useDandisetStore } from '@/stores/dandiset';
 const store = useDandisetStore();
 const dandisetIdentifier = computed(() => store.dandiset?.dandiset.identifier);
 
-const downloadCommand = computed(() => {
-  const baseUrl = import.meta.env.VITE_APP_DANDI_API_ROOT === 'https://staging-api.lincbrain.org/api/'
-    ? 'https://staging.lincbrain.org/dandiset/'
-    : 'https://lincbrain.org/dandiset/';
+if (dandisetIdentifier.value === undefined) {
+  throw new Error('store.dandiset must be defined');
+}
 
-  return dandisetIdentifier.value
-    ? `> lincbrain download ${baseUrl}${dandisetIdentifier.value}/draft`
-    : ''; // Empty string just as a fallback in case store.dandiset? is undefined
+const downloadCommand = computed(() => {
+  return `dandi download ${window.location.origin}/dandiset/${dandisetIdentifier.value}/draft`
 });
 </script>
 

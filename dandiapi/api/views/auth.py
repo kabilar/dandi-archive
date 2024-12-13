@@ -4,6 +4,7 @@ import json
 from json.decoder import JSONDecodeError
 import os
 from typing import TYPE_CHECKING
+import traceback
 
 import requests
 
@@ -30,7 +31,7 @@ from dandiapi.api.mail import (
     send_registered_notice_email,
 )
 from dandiapi.api.permissions import IsApproved
-from dandiapi.api.views.serializers import UserDetailSerializer
+from dandiapi.api.views.serializers import UserDetailSerializer, AssetSerializer
 from dandiapi.api.views.users import social_account_to_dict, user_to_dict
 from dandiapi.api.models.user import UserMetadata
 from dandiapi.api.models.webknossos import WebKnossosAnnotation, WebKnossosDataset, WebKnossosDataLayer
@@ -62,6 +63,9 @@ def extract_cookie_from_set_cookie(set_cookie_header):
     :param set_cookie_header: The Set-Cookie header string.
     :return: A dictionary with the cookie name and value.
     """
+    if not set_cookie_header:
+        set_cookie_header = "bypass-type-check"
+
     # Split the Set-Cookie header string to get the name=value part
     name_value = set_cookie_header.split(';')[0]  # Take only the first part, which is name=value
 
@@ -70,6 +74,144 @@ def extract_cookie_from_set_cookie(set_cookie_header):
 
     # Return as a dictionary
     return {name: value}
+
+
+def stream_json(url, cookies):
+    response = requests.get(url, cookies=cookies, stream=True)
+    response.raise_for_status()
+
+    # Stream the JSON line by line
+    for line in response.iter_lines():
+        if line:  # filter out keep-alive new lines
+            yield json.loads(line.decode('utf-8'))
+
+
+def populate_webknossos_datasets_and_annotations(user_dict, service, return_response=False):
+    user_detail_serializer = UserDetailSerializer(user_dict)
+
+    if service == 'webknossos':
+        webknossos_api_url = os.getenv('WEBKNOSSOS_API_URL', "webknossos.lincbrain.org")
+        external_endpoint = f'https://{webknossos_api_url}/api/auth/login'
+        user = User.objects.get(email="akanzer@mit.edu")
+
+        payload = {
+            "email": "akanzer@mit.edu",
+            "password": user.metadata.webknossos_credential
+        }
+
+        headers = {'Content-Type': 'application/json'}
+        response = requests.post("https://webknossos.lincbrain.org/api/auth/login", json=payload,
+                                 headers=headers, timeout=10)
+        set_cookie_value = response.headers.get('Set-Cookie')
+        cookies = extract_cookie_from_set_cookie(set_cookie_value)
+
+        webknossos_datasets_url = f'https://webknossos.lincbrain.org/api/datasets'
+        # webknossos_datasets = requests.get("https://webknossos-r5.lincbrain.org/api/datasets", cookies=cookies)
+
+        # TODO: make the s3_uri a field in the Asset model
+        asset_dict = {}
+        for asset in Asset.objects.filter(zarr__isnull=False):
+            asset_dict[asset.s3_uri] = asset.asset_id
+
+        for webknossos_dataset_entry in stream_json(webknossos_datasets_url, cookies):
+            for webknossos_dataset in webknossos_dataset_entry:
+                try:
+                    webknossos_dataset_data = requests.get(
+                        f'http://webknossos.lincbrain.org:8080/binaryData/LINC/'
+                        f'{webknossos_dataset["name"]}/datasource-properties.json',
+                        stream=True
+                    ).json()
+
+                    webknossos_dataset, created = WebKnossosDataset.objects.get_or_create(
+                        webknossos_dataset_name=webknossos_dataset_data['id']['name'],
+                        webknossos_organization_name=webknossos_dataset_data['id']['team']
+                    )
+
+                    unique_paths = set()
+                    for data_layers in webknossos_dataset_data['dataLayers']:
+                        for mag in data_layers['mags']:
+                            path = mag['path'].rsplit('/', 1)[0]
+                            unique_paths.add(path)  # S3 URI
+
+                    for unique_path in unique_paths:
+                        try:
+                            print(f"Processing unique path: {unique_path}")
+                            # Print the entire asset_dict for context
+
+                            # Attempt to get the asset_id from the dictionary using the unique path
+                            unique_path = unique_path + '/'
+                            asset_id = asset_dict[unique_path]
+                            print(f"Asset ID for path '{unique_path}': {asset_id}")
+
+                            # Attempt to retrieve the asset from the database
+                            asset = Asset.objects.get(asset_id=asset_id)
+                            print(f"Found Asset: {asset}")
+
+                            # Get or create WebKnossosDataLayer entry
+                            webknossos_data_layer, created = WebKnossosDataLayer.objects.get_or_create(
+                                webknossos_dataset=webknossos_dataset,
+                                asset=asset
+                            )
+                            if created:
+                                print(f"Created new WebKnossosDataLayer for asset: {asset}")
+                            else:
+                                print(f"WebKnossosDataLayer already exists for asset: {asset}")
+
+                        except KeyError as ke:
+                            print(
+                                f"KeyError: Unique path '{unique_path}' not found in asset_dict")
+                            traceback.print_exc()
+
+                        except Asset.DoesNotExist as dne:
+                            print(f"Asset with ID '{asset_id}' does not exist in the database")
+                            traceback.print_exc()
+
+                        except Exception as e:
+                            print(
+                                f"An unexpected error occurred while processing path '{unique_path}': {e}")
+                            traceback.print_exc()
+
+                except JSONDecodeError as e:
+                    print(e)
+
+        webknossos_annotations_url = 'https://webknossos.lincbrain.org/api/annotations/readable'
+        for annotations_page in stream_json(webknossos_annotations_url, cookies):
+            for annotation in annotations_page:
+                try:
+                    webknossos_dataset_name = annotation['dataSetName']
+                    webknossos_dataset = WebKnossosDataset.objects.get(
+                        webknossos_dataset_name=webknossos_dataset_name
+                    )
+                    webknossos_annotation, created = WebKnossosAnnotation.objects.get_or_create(
+                        webknossos_annotation_id=annotation['id'],
+                        defaults={
+                            'webknossos_annotation_name': annotation.get('name', ''),
+                            'webknossos_organization': annotation.get('organization', ''),
+                            'webknossos_annotation_owner_first_name': annotation['owner'][
+                                'firstName'],
+                            'webknossos_annotation_owner_last_name': annotation['owner'][
+                                'lastName'],
+                            'webknossos_dataset': webknossos_dataset,
+                        }
+                    )
+                    if created:
+                        print(f"Created WebKnossosAnnotation: {webknossos_annotation}")
+                    else:
+                        print(f"WebKnossosAnnotation already exists: {webknossos_annotation}")
+
+                except WebKnossosDataset.DoesNotExist:
+                    print(f"WebKnossosDataset not found for name: {webknossos_dataset_name}")
+                except Exception as e:
+                    print(
+                        f"An error occurred while processing annotation '{annotation['id']}': {e}")
+                    traceback.print_exc()
+        if return_response:
+            return Response(asset_dict)
+        return
+    else:
+        if return_response:
+            return Response(status=400, data={"detail": "Unsupported service"})
+        return
 
 
 class ExternalAPIViewset(viewsets.ViewSet):
@@ -97,8 +239,8 @@ class ExternalAPIViewset(viewsets.ViewSet):
         if service == 'webknossos':
             user = User.objects.get(email=user_detail_serializer.data["email"])
             webknossos_credential = user.metadata.webknossos_credential
-            webknossos_api_url = os.getenv('WEBKNOSSOS_API_URL', "webknossos-r5.lincbrain.org")
-            external_endpoint = f'https://{webknossos_api_url}/api/auth/login'
+            webknossos_api_url = os.getenv('WEBKNOSSOS_API_URL', "webknossos.lincbrain.org")
+            external_endpoint = f'https://webknossos.lincbrain.org/api/auth/login'
 
             payload = {
                 "email": user.email,
@@ -134,70 +276,7 @@ class ExternalAPIViewset(viewsets.ViewSet):
         else:
             user_dict = user_to_dict(request.user)
 
-        user_detail_serializer = UserDetailSerializer(user_dict)
-
-        if service == 'webknossos':
-            user = User.objects.get(email=user_detail_serializer.data["email"])
-            webknossos_credential = user.metadata.webknossos_credential
-            webknossos_api_url = os.getenv('WEBKNOSSOS_API_URL', "webknossos-r5.lincbrain.org")
-            external_endpoint = f'https://{webknossos_api_url}/api/auth/login'
-
-            payload = {
-                "email": "akanzer@mit.edu",
-                "password": "LINC2024!"
-            }
-
-            headers = {'Content-Type': 'application/json'}
-            response = requests.post("https://webknossos-r5.lincbrain.org/api/auth/login", json=payload, headers=headers, timeout=10)
-            set_cookie_value = response.headers.get('Set-Cookie')
-            cookies = extract_cookie_from_set_cookie(set_cookie_value)
-
-            webknossos_datasets_url = f'https://{webknossos_api_url}/api/datasets'
-            webknossos_datasets = requests.get("https://webknossos-r5.lincbrain.org/api/datasets", cookies=cookies)
-
-            # TODO: make the s3_uri a field in the Asset model
-            asset_dict = {}
-            for asset in Asset.objects.all():
-                asset_dict[asset.s3_uri] = asset.asset_id
-
-            for webknossos_dataset in webknossos_datasets.json():
-                try:
-                    webknossos_dataset_data = requests.get(f'http://webknossos-r5.lincbrain.org:8080/binaryData/LINC/'
-                                     f'{webknossos_dataset["name"]}/datasource-properties.json'
-                                     ).json()
-                    webknossos_dataset = WebKnossosDataset.objects.get_or_create(
-                        webknossos_dataset_name=webknossos_dataset_data['id']['name'],
-                        webknossos_organization_name=webknossos_dataset_data['id']['team']
-                    )
-
-                    unique_paths = set()
-                    for data_layers in webknossos_dataset_data['dataLayers']:
-                        for mag in data_layers['mags']:
-                            path = mag['path'].rsplit('/', 1)[0]
-                            unique_paths.add(path)  # S3 URI
-
-                    for unique_path in unique_paths:
-                        print(asset_dict)
-                        # print(asset_dict[unique_path])
-                        try:
-                            print(asset_dict[unique_path])
-                            asset = Asset.objects.get(asset_id=asset_dict[unique_path])
-                            WebKnossosDataLayer.objects.get_or_create(
-                                webknossos_dataset=webknossos_dataset,
-                                asset=asset
-                            )
-                        except Exception as e:
-                            print("S3 Asset Not found")
-
-                except JSONDecodeError:
-                    continue
-
-            return Response(asset_dict)
-        else:
-            return Response(status=400, data={"detail": "Unsupported service"})
-
-
-
+        return populate_webknossos_datasets_and_annotations(user_dict, service, return_response=True)
 
 
 QUESTIONS = [
@@ -205,6 +284,12 @@ QUESTIONS = [
     {'question': 'Last Name', 'max_length': 100},
     {'question': 'What do you plan to use LINC Data Platform for?', 'max_length': 1000},
     {'question': 'Please list any affiliations you have.', 'max_length': 1000},
+    {'question': 'Affiliation(s)', 'max_length': 1000},
+    {'question': 'Lab/project website', 'max_length': 1000},
+    {
+        'question': 'Please describe how your research project will utilize DANDI resources.',
+        'max_length': 1000,
+    },
 ]
 
 # questions for new users
@@ -279,7 +364,9 @@ def user_questionnaire_form_view(request: HttpRequest) -> HttpResponse:
             and user_metadata.status == UserMetadata.Status.INCOMPLETE
         ):
             # Specific to DANDI Archive
-            # is_edu_email: bool = user.email.endswith('.edu')
+            # should_auto_approve: bool = user.email.endswith('.edu') or user.email.endswith(
+            #      '@alleninstitute.org'
+            # )
 
             # Require manual approval
             user.metadata.status = UserMetadata.Status.PENDING

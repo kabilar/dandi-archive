@@ -79,7 +79,7 @@ def serialize_user(user: User):
         'admin': user.is_superuser,
         'username': username,
         'name': name,
-        'status': _get_user_status(user),
+        'status': _get_user_status(user)
     }
 
 
@@ -110,6 +110,9 @@ def users_me_view(request: Request) -> HttpResponseBase:
 @parser_classes([JSONParser])
 @permission_classes([IsApproved])
 def users_search_view(request: Request) -> HttpResponseBase:
+    logger.info('Query params %s', request.query_params)
+    logger.info('Query headers %s', request.headers)
+
     """Search for a user."""
     request_serializer = UserSerializer(data=request.query_params)
 

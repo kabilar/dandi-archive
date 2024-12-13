@@ -7,6 +7,7 @@ export interface User {
   username: string,
   name: string,
   admin?: boolean,
+  email: string,
   status: 'INCOMPLETE' | 'PENDING' | 'APPROVED' | 'REJECTED',
   approved: boolean,
 }
@@ -37,6 +38,7 @@ export interface Version {
   version: string,
   name: string,
   asset_count: number,
+  active_uploads: number
   size: number,
   status: 'Pending' | 'Validating' | 'Valid' | 'Invalid' | 'Published',
   validation_error?: string,
@@ -89,13 +91,20 @@ export interface DandisetStats {
 export interface WebknossosDataset {
   webknossos_name: string
   webknossos_url: string;
+  webknossos_annotations?: WebknossosAnnotation[];
+}
+
+export interface WebknossosAnnotation {
+  webknossos_annotation_name: string
+  webknossos_annotation_url: string;
+  webknossos_annotation_author: string;
 }
 
 export interface AssetFile {
   asset_id: string;
   url: string;
   s3_uri: string;
-  webknossos_datasets?: WebknossosDataset[];
+  webknossos_info?: WebknossosDataset[];
 }
 
 export interface AssetPath {
@@ -106,4 +115,12 @@ export interface AssetPath {
   aggregate_files: number;
   aggregate_size: number;
   asset: AssetFile | null;
+}
+
+export interface IncompleteUpload {
+  created: string;
+  blob: string;
+  upload_id: string;
+  etag: string;
+  size: number;
 }

@@ -9,8 +9,6 @@ from __future__ import annotations
 from collections.abc import Iterable
 from datetime import timedelta
 import time
-import os
-import requests
 from typing import TYPE_CHECKING
 
 from celery import shared_task
@@ -33,6 +31,7 @@ from dandiapi.api.tasks import (
     validate_version_metadata_task,
     write_manifest_files,
 )
+from dandiapi.api.views.auth import populate_webknossos_datasets_and_annotations
 from dandiapi.zarr.models import ZarrArchiveStatus
 
 if TYPE_CHECKING:
@@ -135,43 +134,8 @@ def refresh_materialized_view_search() -> None:
 
 
 @shared_task(soft_time_limit=100)
-def populate_webknossos_datasets_and_annotations() -> None:
-    user = User.objects.get(email="akanzer@mit.edu")
-    webknossos_credential = user.metadata.webknossos_credential
-    webknossos_api_url = os.getenv('WEBKNOSSOS_API_URL', None)
-    webknossos_login_endpoint = f'https://{webknossos_api_url}/api/auth/login'
-
-    payload = {
-        "email": user.email,
-        "password": webknossos_credential
-    }
-
-    headers = {'Content-Type': 'application/json',}
-    response = requests.post(webknossos_login_endpoint, json=payload, headers=headers, timeout=10)
-    cookies = response.cookies.get_dict()
-
-    # Fetch payload from https://webknossos-r5.lincbrain.org/api/datasets
-    webknossos_api_url = os.getenv('WEBKNOSSOS_API_URL', "webknossos-r5.lincbrain.org")
-    webknossos_datasets_url = f'https://{webknossos_api_url}/api/datasets'
-
-    datasets = requests.get(webknossos_datasets_url, cookies=cookies)
-    for webknossos_dataset in datasets.json():
-        dataset_name = webknossos_dataset['name']
-
-    # Parse each "name" -> hit the binaryData with that name
-
-        # Iterate through each dataLayers in the datasource-properties.json
-
-        # Find the mags.path[0] and find which asset's s3_uri corresponding
-
-        # Add row in WebKNOSSOS Datasets
-
-        # Fetch payload from https://webknossos-r5.lincbrain.org/api/annotations/readable
-
-        # Store each annotation's id as "name"
-
-    return None
-
+def populate_webknossos_datasets_and_annotations_task() -> None:
+    populate_webknossos_datasets_and_annotations({}, 'webknossos')
 
 def register_scheduled_tasks(sender: Celery, **kwargs):
     """Register tasks with a celery beat schedule."""
@@ -198,4 +162,7 @@ def register_scheduled_tasks(sender: Celery, **kwargs):
     # Process new S3 logs every hour
     sender.add_periodic_task(timedelta(hours=1), collect_s3_log_records_task.s())
 
-    sender.add_periodic_task(crontab(minute='*/5'), populate_webknossos_datasets_and_annotations.s())
+    sender.add_periodic_task(
+        crontab(hour=12, minute=0),
+        populate_webknossos_datasets_and_annotations_task.s()
+    )

@@ -11,7 +11,7 @@ from django.db.models.query_utils import Q
 from drf_yasg.utils import swagger_serializer_method
 from rest_framework import serializers
 
-from dandiapi.api.models import Asset, AssetBlob, AssetPath, Dandiset, Version
+from dandiapi.api.models import Asset, AssetBlob, AssetPath, Dandiset, Upload, Version
 from dandiapi.search.models import AssetSearch
 
 if TYPE_CHECKING:
@@ -38,7 +38,7 @@ class UserSerializer(serializers.Serializer):
 
 class UserDetailSerializer(serializers.Serializer):
     username = serializers.CharField(validators=[UnicodeUsernameValidator()])
-    email = serializers.CharField()
+    email = serializers.CharField(required=False, allow_blank=True)
     name = serializers.CharField(validators=[UnicodeUsernameValidator()])
     admin = serializers.BooleanField()
     status = serializers.CharField()
@@ -92,6 +92,7 @@ class VersionSerializer(serializers.ModelSerializer):
             'version',
             'name',
             'asset_count',
+            'active_uploads',
             'size',
             'status',
             'created',
@@ -302,6 +303,17 @@ class VersionDetailSerializer(VersionSerializer):
         return extract_contact_person(obj)
 
 
+class DandisetUploadSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Upload
+        exclude = [
+            'dandiset',
+            'embargoed',
+            'id',
+            'multipart_upload_id',
+        ]
+
+
 class AssetBlobSerializer(serializers.ModelSerializer):
     class Meta:
         model = AssetBlob
@@ -365,19 +377,33 @@ class AssetPathsQueryParameterSerializer(serializers.Serializer):
     path_prefix = serializers.CharField(default='')
 
 
+class PaginationQuerySerializer(serializers.Serializer):
+    page = serializers.IntegerField(default=1)
+    page_size = serializers.IntegerField(default=100)
+
+
 class AssetFileSerializer(AssetSerializer):
-    webknossos_datasets = serializers.SerializerMethodField()
+    webknossos_info = serializers.SerializerMethodField()
 
     class Meta(AssetSerializer.Meta):
-        fields = ['asset_id', 'url', 's3_uri', 'webknossos_datasets']
+        fields = ['asset_id', 'url', 's3_uri', 'webknossos_info']
 
     url = serializers.URLField(source='s3_url')
 
-    def get_webknossos_datasets(self, obj):
+    def get_webknossos_info(self, obj):
         return [
-            {"webknossos_url": dataset.get_webknossos_url(),
-             "webknossos_name": dataset.webknossos_dataset_name
-             }
+            {
+                "webknossos_url": dataset.get_webknossos_url(),
+                "webknossos_name": dataset.webknossos_dataset.webknossos_dataset_name,
+                "webknossos_annotations": [
+                    {
+                        "webknossos_annotation_name": annotation.webknossos_annotation_name,
+                        "webknossos_annotation_url": annotation.get_webknossos_url(),
+                        "webknossos_annotation_author": annotation.get_author_full_name()
+                    }
+                    for annotation in dataset.webknossos_dataset.webknossos_annotations.all()
+                ]
+            }
             for dataset in obj.webknossos_datasets.all()
         ]
 
