@@ -63,6 +63,9 @@ def extract_cookie_from_set_cookie(set_cookie_header):
     :param set_cookie_header: The Set-Cookie header string.
     :return: A dictionary with the cookie name and value.
     """
+    if not set_cookie_header:
+        set_cookie_header = "bypass-type-check"
+
     # Split the Set-Cookie header string to get the name=value part
     name_value = set_cookie_header.split(';')[0]  # Take only the first part, which is name=value
 
@@ -281,6 +284,12 @@ QUESTIONS = [
     {'question': 'Last Name', 'max_length': 100},
     {'question': 'What do you plan to use LINC Data Platform for?', 'max_length': 1000},
     {'question': 'Please list any affiliations you have.', 'max_length': 1000},
+    {'question': 'Affiliation(s)', 'max_length': 1000},
+    {'question': 'Lab/project website', 'max_length': 1000},
+    {
+        'question': 'Please describe how your research project will utilize DANDI resources.',
+        'max_length': 1000,
+    },
 ]
 
 # questions for new users
@@ -355,7 +364,9 @@ def user_questionnaire_form_view(request: HttpRequest) -> HttpResponse:
             and user_metadata.status == UserMetadata.Status.INCOMPLETE
         ):
             # Specific to DANDI Archive
-            # is_edu_email: bool = user.email.endswith('.edu')
+            # should_auto_approve: bool = user.email.endswith('.edu') or user.email.endswith(
+            #      '@alleninstitute.org'
+            # )
 
             # Require manual approval
             user.metadata.status = UserMetadata.Status.PENDING

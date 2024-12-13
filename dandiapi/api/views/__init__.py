@@ -10,6 +10,7 @@ from .dandiset import DandisetViewSet
 from .dashboard import DashboardView, mailchimp_csv_view, user_approval_view
 from .info import info_view
 from .private_s3_permissions import presigned_cookie_s3_cloudfront_view
+from .robots import robots_txt_view
 from .root import root_content_view
 from .stats import stats_view
 from .upload import (
@@ -42,4 +43,5 @@ __all__ = [
     'info_view',
     'root_content_view',
     'presigned_cookie_s3_cloudfront_view',
+    'robots_txt_view',
 ]

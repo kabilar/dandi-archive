@@ -64,6 +64,10 @@
                       value="draft"
                     />
                     <v-radio
+                      label="Latest version"
+                      value="latest"
+                    />
+                    <v-radio
                       label="Other version"
                       value="other"
                     />
@@ -92,16 +96,16 @@
           </v-expansion-panel>
           <v-expansion-panel>
             <v-expansion-panel-header>
-              Don't have the DANDI CLI?
+              Don't have DANDI CLI?
             </v-expansion-panel-header>
             <v-expansion-panel-content>
               <v-list>
                 <v-list-item>
                   Install the Python client (DANDI CLI)
-                  in a Python 3.9+ environment using command:
+                  in a Python 3.8+ environment using command:
                 </v-list-item>
                 <v-list-item>
-                  <kbd>pip install dandi</kbd>
+                  <kbd>pip install "dandi>=0.60.0"</kbd>
                 </v-list-item>
               </v-list>
             </v-expansion-panel-content>
@@ -116,22 +120,17 @@ import { computed, ref } from 'vue';
 import { useDandisetStore } from '@/stores/dandiset';
 import CopyText from '@/components/CopyText.vue';
 
-function formatDownloadCommand(identifier: string, version: string): string {
-  const baseUrl = import.meta.env.VITE_APP_DANDI_API_ROOT === 'https://staging-api.lincbrain.org/api/'
-      ? 'https://staging.lincbrain.org/dandiset/'
-      : 'https://lincbrain.org/dandiset/';
+function downloadCommand(identifier: string, version: string): string {
+  // Use the special 'DANDI:' url prefix if appropriate.
+  const generalUrl = `${window.location.origin}/dandiset/${identifier}`;
+  const dandiUrl = `DANDI:${identifier}`;
+  const url = window.location.origin == 'https://dandiarchive.org' ? dandiUrl : generalUrl;
 
-  if (version === 'draft') {
-    return `dandi download ${baseUrl}${identifier}/draft`;
-  }
+  // Prepare a url suffix to specify a specific version (or not).
+  const versionPath = version ? `/${version}` : '';
 
-  if (!version) {
-    return `dandi download ${baseUrl}:${identifier}`;
-  }
-
-  return `dandi download ${baseUrl}:${identifier}/${version}`;
+  return `dandi download ${url}${versionPath}`;
 }
-
 
 const store = useDandisetStore();
 
@@ -150,7 +149,7 @@ const availableVersions = computed(
 );
 
 const defaultDownloadText = computed(
-  () => (identifier.value ? formatDownloadCommand(identifier.value, currentVersion.value) : ''),
+  () => (identifier.value ? downloadCommand(identifier.value, currentVersion.value) : ''),
 );
 
 const customDownloadText = computed(() => {
@@ -158,11 +157,11 @@ const customDownloadText = computed(() => {
     return '';
   }
   if (selectedDownloadOption.value === 'draft') {
-    return formatDownloadCommand(identifier.value, 'draft');
+    return downloadCommand(identifier.value, 'draft');
   } if (selectedDownloadOption.value === 'latest') {
-    return formatDownloadCommand(identifier.value, '');
+    return downloadCommand(identifier.value, '');
   } if (selectedDownloadOption.value === 'other') {
-    return formatDownloadCommand(
+    return downloadCommand(
       identifier.value,
       availableVersions.value[selectedVersion.value].version,
     );

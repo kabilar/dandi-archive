@@ -87,23 +87,30 @@ class AssetViewSet(DetailSerializerMixin, GenericViewSet):
         # We need to check the dandiset to see if it's embargoed, and if so whether or not the
         # user has ownership
         asset_id = self.kwargs.get('asset_id')
-        if asset_id is not None:
-            asset = get_object_or_404(Asset.objects.select_related('blob'), asset_id=asset_id)
-            # TODO: When EmbargoedZarrArchive is implemented, check that as well
-            if asset.blob and asset.blob.embargoed:
-                if not self.request.user.is_authenticated:
-                    # Clients must be authenticated to access it
-                    raise NotAuthenticated
+        if asset_id is None:
+            return
 
-                # User must be an owner on any of the dandisets this asset belongs to
-                asset_dandisets = Dandiset.objects.filter(versions__in=asset.versions.all())
-                asset_dandisets_owned_by_user = DandisetUserObjectPermission.objects.filter(
-                    content_object__in=asset_dandisets,
-                    user=self.request.user,
-                    permission__codename='owner',
-                )
-                if not asset_dandisets_owned_by_user.exists():
-                    raise PermissionDenied
+        asset = get_object_or_404(Asset.objects.select_related('blob', 'zarr'), asset_id=asset_id)
+        if not asset.is_embargoed:
+            return
+
+        # Clients must be authenticated to access it
+        if not self.request.user.is_authenticated:
+            raise NotAuthenticated
+
+        # Admins are allowed to access any embargoed asset blob
+        if self.request.user.is_superuser:
+            return
+
+        # User must be an owner on any of the dandisets this asset belongs to
+        asset_dandisets = Dandiset.objects.filter(versions__in=asset.versions.all())
+        asset_dandisets_owned_by_user = DandisetUserObjectPermission.objects.filter(
+            content_object__in=asset_dandisets,
+            user=self.request.user,
+            permission__codename='owner',
+        )
+        if not asset_dandisets_owned_by_user.exists():
+            raise PermissionDenied
 
     def get_queryset(self):
         self.raise_if_unauthorized()
@@ -349,15 +356,16 @@ class NestedAssetViewSet(NestedViewSetMixin, AssetViewSet, ReadOnlyModelViewSet)
         request_body=AssetRequestSerializer,
         responses={200: AssetDetailSerializer},
         manual_parameters=[VERSIONS_DANDISET_PK_PARAM, VERSIONS_VERSION_PARAM],
-        operation_summary='Update the metadata of an asset.',
+        operation_summary='Create an asset with updated metadata.',
         operation_description='User must be an owner of the associated dandiset.\
-                               Only draft versions can be modified.',
+                               Only draft versions can be modified.\
+                               Old asset is returned if no updates to metadata are made.',
     )
     @method_decorator(
         permission_required_or_403('owner', (Dandiset, 'pk', 'versions__dandiset__pk'))
     )
     def update(self, request, versions__dandiset__pk, versions__version, **kwargs):
-        """Update the metadata of an asset."""
+        """Create an asset with updated metadata."""
         version: Version = get_object_or_404(
             Version.objects.select_related('dandiset'),
             dandiset__pk=versions__dandiset__pk,

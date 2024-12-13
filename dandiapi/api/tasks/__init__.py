@@ -1,8 +1,12 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from celery import shared_task
+from celery.exceptions import SoftTimeLimitExceeded
 from celery.utils.log import get_task_logger
 import requests
+from django.contrib.auth.models import User
 
 from dandiapi.api.doi import delete_doi
 from dandiapi.api.mail import send_dandiset_unembargo_failed_message
@@ -16,6 +20,9 @@ from dandiapi.api.manifests import (
 from dandiapi.api.models import Asset, AssetBlob, Version
 from dandiapi.api.models.dandiset import Dandiset
 
+if TYPE_CHECKING:
+    from uuid import UUID
+
 logger = get_task_logger(__name__)
 
 
@@ -27,10 +34,16 @@ def remove_asset_blob_embargoed_tag_task(blob_id: str) -> None:
     remove_asset_blob_embargoed_tag(asset_blob)
 
 
-@shared_task(queue='calculate_sha256', soft_time_limit=86_400)
-def calculate_sha256(blob_id: str) -> None:
+@shared_task(
+    queue='calculate_sha256',
+    soft_time_limit=86_400,  # 24 hours
+    autoretry_for=(SoftTimeLimitExceeded,),
+    retry_backoff=True,
+    max_retries=3,
+)
+def calculate_sha256(blob_id: str | UUID) -> None:
     asset_blob = AssetBlob.objects.get(blob_id=blob_id)
-    logger.info('Found AssetBlob %s', blob_id)
+    logger.info('Calculating sha256 checksum for asset blob %s', blob_id)
     sha256 = asset_blob.blob.storage.sha256_checksum(asset_blob.blob.name)
 
     # TODO: Run dandi-cli validation
@@ -73,10 +86,10 @@ def delete_doi_task(doi: str) -> None:
 
 
 @shared_task
-def publish_dandiset_task(dandiset_id: int):
+def publish_dandiset_task(dandiset_id: int, user_id: int):
     from dandiapi.api.services.publish import _publish_dandiset
 
-    _publish_dandiset(dandiset_id=dandiset_id)
+    _publish_dandiset(dandiset_id=dandiset_id, user_id=user_id)
 
 
 @shared_task
@@ -109,14 +122,15 @@ def register_external_api_request_task(method: str, external_endpoint: str, payl
         logger.error(f"An unexpected error occurred: {err}")
 
 @shared_task(soft_time_limit=1200)
-def unembargo_dandiset_task(dandiset_id: int):
+def unembargo_dandiset_task(dandiset_id: int, user_id: int):
     from dandiapi.api.services.embargo import unembargo_dandiset
 
     ds = Dandiset.objects.get(pk=dandiset_id)
+    user = User.objects.get(id=user_id)
 
     # If the unembargo fails for any reason, send an email, but continue the error propagation
     try:
-        unembargo_dandiset(ds)
+        unembargo_dandiset(ds, user)
     except Exception:
         send_dandiset_unembargo_failed_message(ds)
         raise

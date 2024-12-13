@@ -3,7 +3,7 @@ Dear {{ greeting_name }},
 
 Your LINC account has been denied approval.
 {% if rejection_reason %}
-    Reason:
+    Detailed reason:
     {{ rejection_reason }}
 {% endif %}
 

@@ -742,11 +742,9 @@ async function handleWebKnossosClick(url: string) {
     method: 'GET', // or 'POST' if that's what the API requires
     credentials: 'include' // to ensure cookies are sent and received
   });
-  const data = await response.json();
-  console.log(data);
-  await sleep(1000);
+  await response.json();
+  await sleep(1000); // Wait for WebKNOSSOS login to finalize, since round trip is longer
   window.open(url, '_blank');
-
 }
 
 // Update URL if location changes
