@@ -487,7 +487,35 @@ const EXTERNAL_SERVICES = [
     name: 'Neuroglancer',
     regex: /\.(nwb|txt|nii(\.gz)?|ome\.zarr)$/,  // TODO: .txt for testing purposes
     maxsize: Infinity,
-    endpoint: 'value-defaults-to-endpoint-logic'
+    endpoint: 'https://kitware.github.io/itk-vtk-viewer/app/?gradientOpacity=0.3&image=$asset_url$',
+  },
+
+  {
+    name: 'OME Zarr validator',
+    regex: /\.ome\.zarr$/,
+    maxsize: Infinity,
+    endpoint: 'https://ome.github.io/ome-ngff-validator/?source=$asset_url$',
+  },
+
+  {
+    name: 'Neurosift',
+    regex: /\.nwb$/,
+    maxsize: Infinity,
+    endpoint: 'https://neurosift.app?p=/nwb&url=$asset_dandi_url$&dandisetId=$dandiset_id$&dandisetVersion=$dandiset_version$', // eslint-disable-line max-len
+  },
+
+  {
+    name: 'Neurosift',
+    regex: /\.nwb\.lindi\.(json|tar)$/,
+    maxsize: Infinity,
+    endpoint: 'https://neurosift.app?p=/nwb&url=$asset_dandi_url$&st=lindi&dandisetId=$dandiset_id$&dandisetVersion=$dandiset_version$', // eslint-disable-line max-len
+  },
+
+  {
+    name: 'Neurosift',
+    regex: /\.avi$/,
+    maxsize: Infinity,
+    endpoint: 'https://neurosift.app?p=/avi&url=$asset_dandi_url$&dandisetId=$dandiset_id$&dandisetVersion=$dandiset_version$', // eslint-disable-line max-len
   }
 ];
 type Service = typeof EXTERNAL_SERVICES[0];

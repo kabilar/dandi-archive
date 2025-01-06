@@ -37,32 +37,45 @@
           </template>
         </DownloadDialog>
       </v-row>
-<!--      <v-row no-gutters>-->
-<!--        <CiteAsDialog>-->
-<!--          <template-->
-<!--            #activator="{ on }"-->
-<!--          >-->
-<!--            <v-btn-->
-<!--              id="download"-->
-<!--              outlined-->
-<!--              block-->
-<!--              v-on="on"-->
-<!--            >-->
-<!--              <v-icon-->
-<!--                color="primary"-->
-<!--                left-->
-<!--              >-->
-<!--                mdi-format-quote-close-->
-<!--              </v-icon>-->
-<!--              <span>Cite As</span>-->
-<!--              <v-spacer />-->
-<!--              <v-icon right>-->
-<!--                mdi-chevron-down-->
-<!--              </v-icon>-->
-<!--            </v-btn>-->
-<!--          </template>-->
-<!--        </CiteAsDialog>-->
-<!--      </v-row>-->
+      <v-row
+        v-if="currentDandiset.dandiset.embargo_status === 'OPEN'"
+        no-gutters
+      >
+        <CiteAsDialog>
+          <template
+            #activator="{ on }"
+          >
+            <v-btn
+              id="cite_as"
+              outlined
+              block
+              v-on="on"
+            >
+              <v-icon
+                color="primary"
+                left
+              >
+                mdi-format-quote-close
+              </v-icon>
+              <span>Cite As</span>
+              <v-spacer />
+              <v-icon right>
+                mdi-chevron-down
+              </v-icon>
+            </v-btn>
+          </template>
+        </CiteAsDialog>
+      </v-row>
+      <v-row
+        no-gutters
+      >
+        <ContactDialog />
+      </v-row>
+      <v-row
+        no-gutters
+      >
+        <ExternalDandisetServicesDialog />
+      </v-row>
     </div>
 
     <!-- Files and Metadata buttons -->
@@ -151,6 +164,8 @@ import { open as openMeditor } from '@/components/Meditor/state';
 import DownloadDialog from './DownloadDialog.vue';
 import CiteAsDialog from './CiteAsDialog.vue';
 import ShareDialog from './ShareDialog.vue';
+import ContactDialog from './ContactDialog.vue';
+import ExternalDandisetServicesDialog from './ExternalDandisetServicesDialog.vue';
 
 const store = useDandisetStore();
 

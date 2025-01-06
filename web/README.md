@@ -3,13 +3,13 @@ The LINC Data Platform web application (i.e. the linc-archive frontend).
 
 ## Develop
 
-### Build and Run
+### Serve App in Development Server (requires [yarn](https://yarnpkg.com/))
 
 ```bash
-git clone https://github.com/lincbrain/linc-archive
-cd web
+git clone https://github.com/dandi/dandi-archive
+cd dandi-archive/web
 yarn install
-yarn run serve
+yarn run dev
 ```
 
 **Note**: On Debian systems, the `yarn` command is from the unrelated `cmdtest` package.

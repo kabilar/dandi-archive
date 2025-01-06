@@ -17,9 +17,25 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  deploy:
+  reset-release-branch:
+    name: Update release branch
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # fetch history for all branches and tags
+          token: ${{ secrets.GH_TOKEN }} # use PAT with permissions to push to master
+          ref: release
+
+      - name: Perform reset
+        run: |
+          git reset --hard ${{ github.ref }}
+          git push --force origin release
+
+  production-deploy:
     name: Deploy to Heroku
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
+    needs: reset-release-branch
     steps:
       - uses: actions/checkout@v4
         with:
@@ -31,6 +47,11 @@ jobs:
             echo "Error: User ${{ github.actor }} is not allowed to deploy."
             exit 1
           fi
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
 
       - name: Install Heroku CLI
         run: curl https://cli-assets.heroku.com/install.sh | sh

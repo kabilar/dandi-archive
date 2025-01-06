@@ -126,9 +126,7 @@ def validate_version_metadata(*, version: Version) -> None:
         metadata_for_validation['assetsSummary'] = {
             'schemaKey': 'AssetsSummary',
             'numberOfBytes': 1
-            if version.assets.filter(
-                Q(blob__size__gt=0) | Q(zarr__size__gt=0)
-            ).exists()
+            if version.assets.filter(Q(blob__size__gt=0) | Q(zarr__size__gt=0)).exists()
             else 0,
             'numberOfFiles': 1 if version.assets.exists() else 0,
         }
@@ -177,7 +175,7 @@ def validate_version_metadata(*, version: Version) -> None:
         # If the version has since been modified, return early
         if current_version.status != Version.Status.PENDING:
             logger.info(
-                'Skipping validation for version %s due to concurrent modification', version_id
+                'Skipping validation for version with a status of %s', current_version.status
             )
             return
 

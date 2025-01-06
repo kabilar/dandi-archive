@@ -95,6 +95,7 @@ class DandiMixin(ConfigMixin):
     DANDI_DANDISETS_BUCKET_PREFIX = values.Value(default='', environ=True)
     DANDI_DANDISETS_LOG_BUCKET_NAME = values.Value(environ_required=True)
     DANDI_DANDISETS_EMBARGO_LOG_BUCKET_NAME = values.Value(environ_required=True)
+    DANDI_LOG_LEVEL = values.Value(default='INFO', environ=True)
     DANDI_ZARR_PREFIX_NAME = values.Value(default='zarr', environ=True)
 
     # Mainly applies to unembargo
@@ -119,6 +120,8 @@ class DandiMixin(ConfigMixin):
 
     # The CloudAMQP connection was dying, using the heartbeat should keep it alive
     CELERY_BROKER_HEARTBEAT = 20
+    # Retry connections in case rabbit isn't immediately running
+    CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 
     # Clearing out the stock `SWAGGER_SETTINGS` variable causes a Django login
     # button to appear in Swagger, along with a spurious "authorize" button that
