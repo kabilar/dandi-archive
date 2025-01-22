@@ -25,12 +25,21 @@
           >{{ version }}</a>
         </v-col>
         <v-col>
-          Funding:<br>
+          Funding / In-Kind Support:<br>
           - <a
             target="_blank"
             rel="noopener"
             href="https://braininitiative.nih.gov/"
           >BRAIN Initiative CONNECTS Program</a>
+          <v-icon x-small>
+            mdi-open-in-new
+          </v-icon>
+          <br>
+          - <a
+            target="_blank"
+            rel="noopener"
+            href="https://netlify.com"
+          >This site is powered by Netlify</a>
           <v-icon x-small>
             mdi-open-in-new
           </v-icon>
