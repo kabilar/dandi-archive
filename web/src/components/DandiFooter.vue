@@ -38,6 +38,15 @@
           - <a
             target="_blank"
             rel="noopener"
+            href="https://netlify.com"
+          >This site is powered by Netlify</a>
+          <v-icon x-small>
+            mdi-open-in-new
+          </v-icon>
+          <br>
+          - <a
+            target="_blank"
+            rel="noopener"
             :href="sentryLandingPageUrl"
           >Sentry</a>
           <v-icon x-small>
