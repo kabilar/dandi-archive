@@ -12,6 +12,7 @@
       <CopyText
         :text="apiKey"
         label="API Key"
+        secret
         icon-hover-text="Copy API key to clipboard"
       />
     </v-list-item-action>
