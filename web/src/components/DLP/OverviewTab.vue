@@ -92,7 +92,7 @@
         <span v-if="resourceTitle(slotProps.item)">
           <a
             v-if="slotProps.item.url"
-            class="related-resource-link text-break"
+            class="text-break"
             :href="slotProps.item.url"
             target="_blank"
             rel="noopener"
@@ -373,16 +373,3 @@ onUnmounted(() => {
 });
 
 </script>
-
-<style scoped>
-.related-resource-link {
-  color: #4051b5;
-  text-decoration: none;
-  transition: color 125ms;
-}
-
-.related-resource-link:hover,
-.related-resource-link:focus {
-  color: #0091eb;
-}
-</style>
